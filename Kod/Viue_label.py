@@ -79,8 +79,8 @@ class Obraz(QLabel):
         # Domyślnie ustawione na False - gdy False mouseMoveEvent wywoływany jest tylko gdy któryś z przycisków myszki jest wciśnięty
 
         # wgrywanie obrazu z pliku
-        self.image = cv2.imread("2.jpg")# cv2.imread(path, flag)
-
+        self.image = cv2.imread("5.jpg")# cv2.imread(path, flag)
+        print(self.image.shape)
         #wczytanie podgladu z kamery
         self.loadImage()
 
@@ -365,6 +365,9 @@ class Obraz(QLabel):
             self.direction_change = 'up'
             self.update()
 
+###########################map extetion##############################
+
+    #save first viue to the map
     def Save_curent_viue(self):
 
         self.map = self.frame
@@ -373,10 +376,11 @@ class Obraz(QLabel):
         temp = squer(0, 0, 540, 960)
         self.map_shape.add_squer(temp)
 
-
-    def check_if_extend_map(self):
+    #not finieshed
+    def reset_map(self):
         pass
 
+    #technicli ok
     def extend_map_right(self):
 
         dx = 10
@@ -414,7 +418,7 @@ class Obraz(QLabel):
 
         self.map = tab
 
-    # work in progres
+    #technicli ok
     def extend_map_dwn(self):
 
         dx = 10
@@ -436,7 +440,7 @@ class Obraz(QLabel):
 
         self.map = tab
 
-
+    # technicli ok
     def extend_map_left(self):
         dx = 10
 
@@ -464,6 +468,7 @@ class Obraz(QLabel):
 
         self.map = tab
 
+    # technicli notok
     def exrend_map_up(self):
         dx = 10
 
