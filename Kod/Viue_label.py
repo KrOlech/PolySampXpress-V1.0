@@ -394,14 +394,14 @@ class Obraz(QLabel):
         #new = squer(x - xm + self.ofsetx, ym, xm + self.ofsetx, ym+10)
         #self.map_shape.add_squer(new)
         #tablica do któej wkopiujemy poszerzona mape
-        tab = np.ones((xm, ym+dx, zm), dtype=np.uint8)
+        tab = np.ones((xm, ym+dx, zm), dtype=np.uint16)
 
         #wkopiowanie nowego odkrytewgo fragmentu
         #print(np.shape(self.frame), np.shape(self.frame))
         #print(self.ofsetx, xm+self.ofsetx, ym, ym+dx)
 
         if self.ofsety+dx > self.ofsetymax:
-            tab = np.ones((xm, ym + dx, zm), dtype=np.uint8)
+            tab = np.ones((xm, ym + dx, zm), dtype=np.uint16)
             self.ofsetymax = self.ofsety
         else:
             tab = np.ones((xm, ym, zm), dtype=np.uint8)
@@ -430,7 +430,7 @@ class Obraz(QLabel):
         xm, ym, zm = self.map.shape #wymiary aktualnej mapy
 
         #tablica do któej wkopiujemy poszerzona mape
-        tab = np.ones((xm+dx, ym, zm), dtype=np.uint8)
+        tab = np.ones((xm+dx, ym, zm), dtype=np.uint16)
 
         #Wkopoiowanie istniejocej mapy
         tab[0:xm, 0:ym] = self.map
@@ -454,9 +454,9 @@ class Obraz(QLabel):
         # self.map_shape.add_squer(new)
         # tablica do któej wkopiujemy poszerzona mape
         if self.ofsety < 0:
-            tab = np.ones((xm, ym + dx, zm), dtype=np.uint8)
+            tab = np.ones((xm, ym + dx, zm), dtype=np.uint16)
         else:
-            tab = np.ones((xm, ym, zm), dtype=np.uint8)
+            tab = np.ones((xm, ym, zm), dtype=np.uint16)
 
         # Wkopoiowanie istniejocej mapy
         tab[0:xm, 0:ym + dx] = self.map
@@ -479,10 +479,10 @@ class Obraz(QLabel):
         xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
 
         if self.ofsetx + dx > self.ofsetxmax:
-            tab = np.ones((xm + dx, ym, zm), dtype=np.uint8)
+            tab = np.ones((xm + dx, ym, zm), dtype=np.uint16)
             self.ofsetxmax = self.ofsetx
         else:
-            tab = np.ones((xm, ym, zm), dtype=np.uint8)
+            tab = np.ones((xm, ym, zm), dtype=np.uint16)
 	
 
 	# Wkopoiowanie istniejocej mapy
