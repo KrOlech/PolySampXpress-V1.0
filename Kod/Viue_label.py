@@ -432,11 +432,11 @@ class Obraz(QLabel):
         #tablica do któej wkopiujemy poszerzona mape
         tab = np.ones((xm+dx, ym, zm), dtype=np.uint8)
 
-        #wkopiowanie nowego odkrytewgo fragmentu
-        tab[xm:xm+dx, self.ofsety: y+self.ofsety] = self.frame[x-dx:, :]
-
         #Wkopoiowanie istniejocej mapy
         tab[0:xm, 0:ym] = self.map
+        
+        #wkopiowanie nowego odkrytewgo fragmentu
+        tab[xm:xm+dx, self.ofsety: y+self.ofsety] = self.frame[x-dx:, :]
 
         self.map = tab
 
@@ -470,7 +470,7 @@ class Obraz(QLabel):
 
     # technicli notok
     def exrend_map_up(self):
-        dx = 10
+                dx = 10
 
         s = self._img.size()  # wymiary podglondu
         x = s.height()
@@ -483,14 +483,16 @@ class Obraz(QLabel):
             self.ofsetxmax = self.ofsetx
         else:
             tab = np.ones((xm, ym, zm), dtype=np.uint8)
+	
 
-
-        tab[self.ofsetx-dx:self.ofsetx, self.ofsety: y + self.ofsety] = self.frame[0:dx, :]
-
-
-        # Wkopoiowanie istniejocej mapy
+	# Wkopoiowanie istniejocej mapy
         tab[0:xm, 0:ym] = self.map
 
+        try:
+	        tab[self.ofsetx-dx:self.ofsetx, self.ofsety: y + self.ofsety] = self.frame[0:dx, :]
+        except ValueError:
+                pass
+            
         self.map = tab
 
 
