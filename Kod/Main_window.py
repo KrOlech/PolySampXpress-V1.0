@@ -1,7 +1,7 @@
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import *  # QFileDialog ,QMainWindow,QToolBar ,QAction
-
+from PyQt5.QtGui import QKeySequence
 import Viue_label as obs
 import Map as M
 
@@ -69,17 +69,32 @@ class MainWindow(QMainWindow):
         [button.setMaximumWidth(50) for button in self.kierunkowe]
 
         #nadanie nazw przyciska
-        nazwy = ['/\\',"<",">",'\/']
+        nazwy = ['/\\', "<", ">", '\/']
         [swich.setText(name) for name, swich in zip(nazwy, self.kierunkowe)]
 
         #przypiecie fukcji do przycisków
         fun = [self.obraz.up, self.obraz.left, self.obraz.right, self.obraz.dawn]
-        [swich.clicked.connect(name) for name, swich in zip(fun, self.kierunkowe)]
+
+        self.actions = [QAction("&up", self), QAction("&lf", self), QAction("&ri", self), QAction("&dw", self)]
+
+        [a.triggered.connect(f) for a, f in zip(self.actions, fun)]
+
+        keyband = [Qt.Key_Up, Qt.Key_Left, Qt.Key_Right, Qt.Key_Down]
+        #keyband = [QKeySequence("w"), QKeySequence('a'), QKeySequence("d"), QKeySequence("s")]
+
+        [a.setShortcut(k) for a, k in zip(self.actions, keyband)]
+
+        [swich.clicked.connect(f) for f, swich in zip(fun, self.kierunkowe)]
 
         #dodanie do leyatów przyciskó kierunkowych
         it = [3, 2, 4, 3]
         jt = [2, 3, 3, 4]
         [self.kierunkowelayout.addWidget(value, j, i) for j, i, value in zip(jt, it, self.kierunkowe)]
+
+        menu = self.menuBar()
+        test = menu.addMenu("directions")
+        [test.addAction(f) for f in self.actions]
+
  
     def _Multipurpos_butons(self):
 

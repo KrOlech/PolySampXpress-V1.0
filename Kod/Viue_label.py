@@ -80,7 +80,7 @@ class Obraz(QLabel):
 
         # wgrywanie obrazu z pliku
         self.image = cv2.imread("5.jpg")# cv2.imread(path, flag)
-        print(self.image.shape)
+        print(type(self.image[0][0][0]))
         #wczytanie podgladu z kamery
         self.loadImage()
 
