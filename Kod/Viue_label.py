@@ -80,7 +80,7 @@ class Obraz(QLabel):
 
         # wgrywanie obrazu z pliku
         self.image = cv2.imread("5.jpg")# cv2.imread(path, flag)
-        print(type(self.image[0][0][0]))
+
         #wczytanie podgladu z kamery
         self.loadImage()
 
@@ -143,7 +143,7 @@ class Obraz(QLabel):
 ####################################wgrywanie obrazu##################################
 
     #wagranie obrazu z pliku    
-    def loadImage(self,drow_deskription = False,drow_single_rectagle = False):#przestac to wyoływac co update
+    def loadImage(self, drow_deskription = False, drow_single_rectagle = False):#przestac to wyoływac co update
 
         #wybranie interesujacego nas fragmetu obrazu
         xHigh = int(self.Rozmiar[1]/2) + int(self.ofsetx/2)
@@ -151,7 +151,7 @@ class Obraz(QLabel):
         self.C_image = self.image[int(self.ofsetx/2): xHigh, int(self.ofsety/2): yHigh]
 
         #wgranie obrazu do labela
-        self.setPhoto(self.C_image,drow_deskription,drow_single_rectagle)
+        self.setPhoto(self.C_image,drow_deskription, drow_single_rectagle)
     
     #wstawienie obrazu do labela       
     def setPhoto(self, image, drow_deskription, drow_single_rectagle):
@@ -160,7 +160,7 @@ class Obraz(QLabel):
         frame = cv2.resize(image, self.Rozmiar)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        self.frame = cv2.resize(image,self.Rozmiar)
+        self.frame = cv2.resize(image, self.Rozmiar)
         self.frame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
 
 

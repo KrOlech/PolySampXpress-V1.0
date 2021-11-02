@@ -4,12 +4,12 @@ from PyQt5.QtCore import *
 
 class simple_obraz(QLabel):
 
-    def __init__(self,img,*args, **kwargs):
+    def __init__(self, img, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
         
         self.wgraj(img)
 
-    def wgraj(self,img):
+    def wgraj(self, img):
     
         #wgranie obrazu
         self._img = img[0]
@@ -65,7 +65,7 @@ class simple_obraz(QLabel):
 
 class podglond_roi(QWidget):
 
-    def __init__(self,text,img,obiekt_oznaczony,*args, **kwargs):
+    def __init__(self, text, img, obiekt_oznaczony, *args, **kwargs):
 
         super(QWidget, self).__init__(*args, **kwargs)
 
@@ -108,9 +108,9 @@ class podglond_roi(QWidget):
         ######################################################################################
         ##################################conected############################################
         ######################################################################################
-        
-        
-        nazwy = ['',"","",'dell']
-        [swich.setText(name) for name,swich in zip(nazwy,self.butons)]
+
+        nazwy = ['', "", "", 'dell']
+
+        [swich.setText(name) for name, swich in zip(nazwy, self.butons)]
          
         self.butons[3].clicked.connect(obiekt_oznaczony.kill)

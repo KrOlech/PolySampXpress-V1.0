@@ -28,7 +28,7 @@ class Map(QLabel):
         super(Map, self).__init__(*args, **kwargs)
 
         #img = cv2.resize(img, self.Rozmiar)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         self.img = QImage(img, img.shape[1],img.shape[0],img.strides[0],QImage.Format_RGB888)
         #QImage(cvImg.data, width, height, bytesPerLine, QImage.Format_RGB888)

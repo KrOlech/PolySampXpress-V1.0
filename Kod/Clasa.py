@@ -27,7 +27,7 @@ class obszarzaznaczony():
     s00 = 1
 
     # konstruktor tworzocy obiekt ze wzglednych wspułrednych prubki w pixelach
-    def __init__(self,Obraz_obcet ,xp0, yp0, xp1, yp1, image, py00=0, px00=0, s00=1, Name="defalaut"):
+    def __init__(self, Obraz_obcet ,xp0, yp0, xp1, yp1, image, py00=0, px00=0, s00=1, Name="defalaut"):
 
         self.Obraz_obcet = Obraz_obcet
         
@@ -146,8 +146,8 @@ class obszarzaznaczony():
         yHigh = dy+20
         # image = image[xHigh,yHigh]
 
-        img = cv2.resize(image, (xHigh, yHigh))
-        frame = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        frame = cv2.resize(image, (xHigh, yHigh))
+        #frame = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         # conwersja z open Cv image na Qimage
         img = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0],QImage.Format_RGB888)  
