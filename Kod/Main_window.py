@@ -47,6 +47,21 @@ class MainWindow(QMainWindow):
     def __del__(self):
 
         del self.manipulaor
+        
+        
+    def closeEvent(self, event):
+        
+        reply = QMessageBox.question(self,"mesage","Czy napewno chcesz zamknac program?",
+                                     QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
+        
+        if reply == QMessageBox.Yes:
+            self.manipulaor.close_connection()
+            del self.manipulaor
+            event.accept()
+            
+        else:
+            event.ignore()
+        
 ######################################################################################
 ##################################Fukcje##############################################
 ######################################################################################
