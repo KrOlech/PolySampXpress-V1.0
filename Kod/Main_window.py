@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import *  # QFileDialog ,QMainWindow,QToolBar ,QAction
 from PyQt5.QtGui import QKeySequence
 import Viue_label as obs
 import Map as M
+from engineclass import manipulator
 
 class MainWindow(QMainWindow):
 
@@ -12,6 +13,8 @@ class MainWindow(QMainWindow):
     def __init__(self, *args, **kwargs):
         
         super(MainWindow, self).__init__(*args, **kwargs)
+
+        self.manipulaor = manipulator()
 
         self.setWindowIcon(QtGui.QIcon('icon.png'))
                 
@@ -41,6 +44,9 @@ class MainWindow(QMainWindow):
         self._set_central_widget()
 
 
+    def __del__(self):
+
+        del self.manipulaor
 ######################################################################################
 ##################################Fukcje##############################################
 ######################################################################################
@@ -62,6 +68,27 @@ class MainWindow(QMainWindow):
         self.kierunkowelayout = QGridLayout()
         self.przyciskilayout = QGridLayout()           
 
+
+    def key_up(self):
+        self.obraz.up()
+        self.manipulaor.move_up()
+        self.manipulaor.print_curent_position()
+
+    def key_left(self):
+        self.obraz.left()
+        self.manipulaor.move_left()
+        self.manipulaor.print_curent_position()
+
+    def key_right(self):
+        self.obraz.right()
+        self.manipulaor.move_right()
+        self.manipulaor.print_curent_position()
+
+    def key_dwn(self):
+        self.obraz.dawn()
+        self.manipulaor.move_dwn()
+        self.manipulaor.print_curent_position()
+
     def _Direction_buttons(self):#Przyciski kierunkowe
 
         self.kierunkowe = [QPushButton() for _ in range(4)]
@@ -73,7 +100,7 @@ class MainWindow(QMainWindow):
         [swich.setText(name) for name, swich in zip(nazwy, self.kierunkowe)]
 
         #przypiecie fukcji do przycisków
-        fun = [self.obraz.up, self.obraz.left, self.obraz.right, self.obraz.dawn]
+        fun = [self.key_up, self.key_left, self.key_left,self.key_dwn ]
 
         self.actions = [QAction("&up", self), QAction("&lf", self), QAction("&ri", self), QAction("&dw", self)]
 

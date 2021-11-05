@@ -1,5 +1,5 @@
 import ctypes
-
+import engineclass as m
 
 def load_drivers(filename='C848_DLL.dll'):
     return ctypes.CDLL(r'C:\Users\external\PycharmProjects\Inzynierka\silniki_sterowanie\C848_DLL.dll')
@@ -252,9 +252,7 @@ def set_abs_positions(controller_id, axes='xyz', positions=None):
 
     return bool(success)
 
-
-
-if __name__ == '__main__':
+def main():
     c848 = load_drivers()
     print(c848)
 
@@ -265,3 +263,16 @@ if __name__ == '__main__':
     close_connection(controller_id)
 
     print('is connected:', is_connected(controller_id))
+
+if __name__ == '__main__':
+
+    t = m.manipulator()
+
+    t.move_up()
+
+    t.print_curent_position()
+
+    del t
+
+
+

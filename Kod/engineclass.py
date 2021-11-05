@@ -2,6 +2,7 @@ import ctypes
 
 
 
+
 class manipulator:
 
 
@@ -10,9 +11,11 @@ class manipulator:
         self.c848 = self.load_drivers()
         print(self.c848)
 
-        self.controller_id = self.conncect_to_controller(self.c848)
+        self.controller_id = self.conncect_to_controller()
 
         self.conectioncheck()
+
+        self.print_curent_position()
 
 
     def __del__(self):
@@ -37,7 +40,7 @@ class manipulator:
         #conect_fun comport bitspeed
         controller_id = connect_fun(4, 57600)
 
-        if self.controller_id != -1:
+        if controller_id != -1:
             print('controller_id:', controller_id)
             return controller_id
 
@@ -121,6 +124,7 @@ class manipulator:
     def move_axes_to_abs_woe(self,axes='xyz', positions=[25.0, 25.0, 25.0]):
 
         if not self._move_axes_to_abs(axes, positions):
+            print("erore in move")
             pass
             #eroremesage
 
@@ -140,3 +144,35 @@ class manipulator:
         success = self.c848.C848_MOV(c_id, sz_axes, c_double_array)
 
         return bool(success)
+
+    def get_axes_positions(self, axes='xyz'):
+        '''
+        function gives positions of given axes
+
+        returns list of positions in order of given axes
+        '''
+        c_id = self._convert_id(self.controller_id)
+        sz_axes = self._get_szAxes(axes)
+        c_double_array = self._create_double_array(size=len(axes))
+        if self.c848.C848_qPOS(c_id, sz_axes, c_double_array):
+            return c_double_array[:len(axes)]
+        else:
+            print('something went terribly wrong')
+
+    def print_curent_position(self):
+        self.x, self.y, self.z = self.get_axes_positions('xyz')
+        print(self.x, self.y, self.z)
+    #
+
+    def move_up(self):
+        t = self.move_axes_to_abs_woe('y',[self.y+1])
+
+    def move_dwn(self):
+        t = self.move_axes_to_abs_woe('y',[self.y-1])
+
+    def move_right(self):
+        t = self.move_axes_to_abs_woe('z',[self.z+1])
+
+    def move_left(self):
+        t = self.move_axes_to_abs_woe('z',[self.z-1])
+
