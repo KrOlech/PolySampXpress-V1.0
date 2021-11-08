@@ -5,11 +5,13 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *  # QFileDialog ,QMainWindow,QToolBar ,QAction
 from Map import shape, squer
+from camera import camera
+
 
 import Clasa as oC
 
 
-class Obraz(QLabel):
+class Obraz(camera):
     # Klaza Obraz dziedziczy z QLabel, pozwala na lepszą obsługę eventu mouseMoveEvent
 
     # obiekt Klasy MainWindow podany jako argument przy tworzeniu obiektu klasy Obraz - pozwala na komunikację z oknem głównym
@@ -58,10 +60,10 @@ class Obraz(QLabel):
     scall = 1
 
     # rozmiar obszaru
-    Rozmiar = (960, 540)
+    Rozmiar = (1024,768)
 
     #construvtor
-    def __init__(self, main_window, *args, **kwargs):
+    def __init__(self, main_window, cam, *args, **kwargs):
         super(Obraz, self).__init__(*args, **kwargs)
 
         self.main_window = main_window
@@ -78,9 +80,13 @@ class Obraz(QLabel):
         self.setMouseTracking(True)  
         # Domyślnie ustawione na False - gdy False mouseMoveEvent wywoływany jest tylko gdy któryś z przycisków myszki jest wciśnięty
 
-        # wgrywanie obrazu z pliku
-        self.image = cv2.imread("5.jpg")# cv2.imread(path, flag)
+        self.cam = cam
 
+        # wgrywanie obrazu z pliku
+        self.image = cam.get_opencvimage()
+        #print(self.image.shape)
+        #cv2.imread("5.jpg")# cv2.imread(path, flag)
+        
         #wczytanie podgladu z kamery
         self.loadImage()
 
@@ -144,11 +150,10 @@ class Obraz(QLabel):
 
     #wagranie obrazu z pliku    
     def loadImage(self, drow_deskription = False, drow_single_rectagle = False):#przestac to wyoływac co update
-
-        #wybranie interesujacego nas fragmetu obrazu
-        xHigh = int(self.Rozmiar[1]/2) + int(self.ofsetx/2)
-        yHigh = int(self.Rozmiar[0]/2) + int(self.ofsety/2)
-        self.C_image = self.image[int(self.ofsetx/2): xHigh, int(self.ofsety/2): yHigh]
+        
+        self.image = self.cam.get_opencvimage()
+        
+        self.C_image = self.image 
 
         #wgranie obrazu do labela
         self.setPhoto(self.C_image,drow_deskription, drow_single_rectagle)
