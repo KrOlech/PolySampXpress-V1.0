@@ -1,7 +1,5 @@
 import ctypes
-
-
-
+from time import sleep
 
 class manipulator:
 
@@ -15,15 +13,20 @@ class manipulator:
 
         self.conectioncheck()
 
-        self.print_curent_position()
+        self.reference_axes()
 
+        self.print_curent_position()
+        
+    
 
     def __del__(self):
+        
+        print('is connected:', self.is_connected())
+         
+        
+        self.close_connection()
 
-        while self.is_connected():
-            self.close_connection()
-
-        print('is connected:', self.is_connected())\
+        print('is connected:', self.is_connected())
 
     def load_drivers(self,filename='C848_DLL.dll'):
         return ctypes.CDLL(r'C:\Users\external\PycharmProjects\Inzynierka\silniki_sterowanie\C848_DLL.dll')
@@ -69,6 +72,15 @@ class manipulator:
         closes connection to C848 controler with given controller_id
         '''
         self.c848.C848_CloseConnection(ctypes.c_int(self.controller_id))
+
+    def reference_axes(self, axes='xyz'):  
+        '''
+        moves given axes to reference points and sets references
+        '''
+        c_id = self._convert_id(self.controller_id)
+        sz_axes = self._get_szAxes(axes)
+        success = self.c848.C848_REF(c_id, sz_axes)
+        return bool(success)
 
     @staticmethod
     def _get_axes(axes='XYZ'):
@@ -157,22 +169,53 @@ class manipulator:
         if self.c848.C848_qPOS(c_id, sz_axes, c_double_array):
             return c_double_array[:len(axes)]
         else:
-            print('something went terribly wrong')
+            #print('something went terribly wrong')
+            return False
 
-    def print_curent_position(self):
+    def print_curent_position(self):   
+        while not self.get_axes_positions('xyz'):
+            sleep(1)
+            
         self.x, self.y, self.z = self.get_axes_positions('xyz')
         print(self.x, self.y, self.z)
     #
 
+    def check_on_target(self, axes='xyz'):
+        '''
+        function check if given axes is on target
+        returns dictionary with axes as keys and boolean values
+        '''
+        c_id = self._convert_id(self.controller_id)
+        status = {}
+        for c in axes:
+            axis = self._get_szAxes(c)
+            bool_array = self._create_bool_array(size=1)
+            check = self.c848.C848_qONT(c_id, axis, bool_array)
+            
+            if check != 1:
+                print('something went terribly wrong')
+                return
+            
+            status[c] = bool_array[0]
+        return status
+
+    def weaith_for_target(self):
+        while not all(self.check_on_target().values()):
+            sleep(1)
+
     def move_up(self):
         t = self.move_axes_to_abs_woe('y',[self.y+1])
+        self.weaith_for_target()
 
     def move_dwn(self):
         t = self.move_axes_to_abs_woe('y',[self.y-1])
+        self.weaith_for_target()
 
     def move_right(self):
         t = self.move_axes_to_abs_woe('z',[self.z+1])
+        self.weaith_for_target()
 
     def move_left(self):
         t = self.move_axes_to_abs_woe('z',[self.z-1])
+        self.weaith_for_target()
 
