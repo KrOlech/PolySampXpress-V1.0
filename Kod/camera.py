@@ -8,8 +8,9 @@ from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtWidgets import QLabel, QApplication, QWidget, QDesktopWidget, QCheckBox, QMessageBox
 import numpy as np
 import matplotlib.pyplot as plt
-
+import copy as copy
 import cv2 as cv2
+#import opencv.contrib
 
 
 class camera(QLabel):
@@ -29,13 +30,13 @@ class camera(QLabel):
         self.y = 152
         self.total = 0
         
-      #  self.setFixedSize(800, 600)
-      #  qtRectangle = self.frameGeometry()
-      #  centerPoint = QDesktopWidget().availableGeometry().center()
-      # qtRectangle.moveCenter(centerPoint)
-      #  self.move(qtRectangle.topLeft())
-        self.initUI()
-        self.initCamera()
+        self.initUI() #inicializacja wymiarów obiektu pyqt
+        
+        self.initCamera() #inicializacja camery
+        
+        self.opencvimage = cv2.imread("5.jpg")
+        
+        #self.eventImageSignal()
         
       #  self.hcam.put_AutoExpoEnable(True)
 
@@ -57,6 +58,20 @@ class camera(QLabel):
             ctx.snap_image_event.emit()        
             
 
+    @staticmethod
+    def  convertQImageToMat(incomingImage):
+        '''  Converts a QImage into an opencv MAT format  '''
+    
+        incomingImage = incomingImage.convertToFormat(4)
+    
+        width = incomingImage.width()
+        height = incomingImage.height()
+    
+        ptr = incomingImage.bits()
+        ptr.setsize(incomingImage.byteCount())
+        arr = np.array(ptr).reshape(height, width, 4)  #  Copies the data
+        return arr  
+
                      
 # run in the UI thread
     @pyqtSlot()
@@ -69,18 +84,16 @@ class camera(QLabel):
                 print('pull image failed')
                 QMessageBox.warning(self, '', 'pull image failed', QMessageBox.Ok)
             else:
-             #   self.setWindowTitle('{}: {}'.format(self.camname, self.total))
-                nparr = np.fromstring(self.buf, np.uint8)
-                #print(nparr)
-                #nparr.shape = (self.w, self.h,3)
-                #img_np = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
-                print(self.buf)
+                   
                 img = QImage(self.buf, self.w, self.h, (self.w * 24 + 31) // 32 * 4, QImage.Format_RGB888)
+                self.opencvimage =  self.convertQImageToMat(img)
                 self.setPixmap(QPixmap.fromImage(img))
-                
+   
+          
+   
  #   @pyqtSlot()                
     def snap_image_event_signal(self):
+        
         if self.hcam is not None:
             w, h = self.hcam.get_Size()
            # w= 2048
@@ -102,29 +115,39 @@ class camera(QLabel):
         #return arr_1d.reshape(1536, 2048, 3)
 
     def initCamera(self):
+        
         a = toupcam.Toupcam.EnumV2()
+        
         if len(a) <= 0:
-            pass
-   #        self.setWindowTitle('No camera found')
-    #        self.cb.setEnabled(False)
+            print("erore during camera inicialisation")
         else:
+            
             self.camname = a[0].displayname
-       #     self.setWindowTitle(self.camname)
+                
+            #create and conect custom pyqt5 signa
             self.eventImage.connect(self.eventImageSignal)
+            
             self.snap_image_event.connect(self.snap_image_event_signal)
-
+            
+            #trying opening camera
             try:
                 self.hcam = toupcam.Toupcam.Open(a[0].id)
+                
             except toupcam.HRESULTException:
                 QMessageBox.warning(self, '', 'failed to open camera', QMessageBox.Ok)
+                
             else:
+                #creating bufer for image hold
                 self.w, self.h = self.hcam.get_Size()
                 bufsize = ((self.w * 24 + 31) // 32 * 4) * self.h
                 self.buf = bytes(bufsize)
-         #       self.cb.setChecked(self.hcam.get_AutoExpoEnable())            
+                
+         #       self.cb.setChecked(self.hcam.get_AutoExpoEnable())  
+          
                 try:
                     if sys.platform == 'win32':
                         self.hcam.put_Option(toupcam.TOUPCAM_OPTION_BYTEORDER, 0) # QImage.Format_RGB888
+                        
                     self.hcam.StartPullModeWithCallback(self.cameraCallback, self)
                 except toupcam.HRESULTException:
                     QMessageBox.warning(self, '', 'failed to start camera', QMessageBox.Ok)
@@ -150,3 +173,15 @@ class camera(QLabel):
             self.hcam.Close()
             self.hcam = None
 
+    def get_opencvimage(self):
+        return self.opencvimage
+        
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    t = QMainWindow()
+    
+    t.setCentralWidget(camera())
+    
+    t.show()
+    app.exec_()
