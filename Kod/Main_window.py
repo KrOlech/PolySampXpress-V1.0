@@ -5,6 +5,9 @@ from PyQt5.QtGui import QKeySequence
 import Viue_label as obs
 import Map as M
 from engineclass import manipulator
+from time import sleep
+
+import camera as cam
 
 class MainWindow(QMainWindow):
 
@@ -14,8 +17,12 @@ class MainWindow(QMainWindow):
         
         super(MainWindow, self).__init__(*args, **kwargs)
 
-        self.manipulaor = manipulator()
-
+        #self.manipulaor = manipulator()
+        
+        self.camO = cam.camera()
+        
+        self.camO.show()
+        
         self.setWindowIcon(QtGui.QIcon('icon.png'))
                 
         self.setWindowTitle("Mapowanie prubek") #nazwa
@@ -27,7 +34,7 @@ class MainWindow(QMainWindow):
         self._createleyouts()
 
         #stworzenie podglondu prubki i umiescenie go w leyaucie
-        self.obraz = obs.Obraz(self)
+        self.obraz = obs.Obraz(self,self.camO)
 
         #stworzenie przycisków do przemiesczania podglondu
         self._Direction_buttons()
@@ -44,11 +51,6 @@ class MainWindow(QMainWindow):
         self._set_central_widget()
 
 
-    def __del__(self):
-
-        del self.manipulaor
-        
-        
     def closeEvent(self, event):
         
         reply = QMessageBox.question(self,"mesage","Czy napewno chcesz zamknac program?",
