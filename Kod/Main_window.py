@@ -17,16 +17,12 @@ class MainWindow(QMainWindow):
         
         super(MainWindow, self).__init__(*args, **kwargs)
 
-        #self.manipulaor = manipulator()
-        
-        self.camO = cam.camera()
-        
-        self.camO.show()
+        self.manipulaor = manipulator()
         
         self.setWindowIcon(QtGui.QIcon('icon.png'))
                 
         self.setWindowTitle("Mapowanie prubek") #nazwa
-        self.setGeometry(5, 30, 1920, 1080)
+        self.setGeometry(5, 30, 1280, 1024)
         
         self.setMouseTracking(False)
 
@@ -34,7 +30,7 @@ class MainWindow(QMainWindow):
         self._createleyouts()
 
         #stworzenie podglondu prubki i umiescenie go w leyaucie
-        self.obraz = obs.Obraz(self,self.camO)
+        self.obraz = obs.Obraz(self)
 
         #stworzenie przycisków do przemiesczania podglondu
         self._Direction_buttons()
@@ -117,7 +113,7 @@ class MainWindow(QMainWindow):
         [swich.setText(name) for name, swich in zip(nazwy, self.kierunkowe)]
 
         #przypiecie fukcji do przycisków
-        fun = [self.key_up, self.key_left, self.key_left,self.key_dwn ]
+        fun = [self.key_up, self.key_left, self.key_right,self.key_dwn ]
 
         self.actions = [QAction("&up", self), QAction("&lf", self), QAction("&ri", self), QAction("&dw", self)]
 
