@@ -5,15 +5,31 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *  # QFileDialog ,QMainWindow,QToolBar ,QAction
 from Map import shape, squer
-from camera import camera
-
-
+import numpy as np
+import sys, toupcam
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
+from PyQt5.QtGui import QPixmap, QImage
 import Clasa as oC
 
 
-class Obraz(camera):
+class Obraz(Qlabel):
     # Klaza Obraz dziedziczy z QLabel, pozwala na lepszą obsługę eventu mouseMoveEvent
+	
+	#signals for camera action
+	eventImage = pyqtSignal()
+    snap_image_event = pyqtSignal()	
 
+	        
+	hcam = None
+	buf = None      # video buffer
+	w = 0           # video width
+	h = 0           # video height
+
+	x = 10
+	y = 152
+	total = 0
+	
+	
     # obiekt Klasy MainWindow podany jako argument przy tworzeniu obiektu klasy Obraz - pozwala na komunikację z oknem głównym
     main_window = ' '
 
@@ -63,9 +79,13 @@ class Obraz(camera):
     Rozmiar = (1024,768)
 
     #construvtor
-    def __init__(self, main_window, cam, *args, **kwargs):
+    def __init__(self, main_window, *args, **kwargs):
         super(Obraz, self).__init__(*args, **kwargs)
-
+		
+		self.initUI() #inicializacja wymiarów obiektu pyqt
+        
+        self.initCamera() #inicializacja camery
+		
         self.main_window = main_window
         
         #Tworzy białe tło
@@ -79,8 +99,6 @@ class Obraz(camera):
 
         self.setMouseTracking(True)  
         # Domyślnie ustawione na False - gdy False mouseMoveEvent wywoływany jest tylko gdy któryś z przycisków myszki jest wciśnięty
-
-        self.cam = cam
 
         # wgrywanie obrazu z pliku
         self.image = cam.get_opencvimage()
@@ -145,7 +163,118 @@ class Obraz(camera):
             self.whot_to_drow = 'previu_rectagle'
 
             self.update()
+			
+		@staticmethod
+		def cameraCallback(nEvent, ctx):
+			if nEvent == toupcam.TOUPCAM_EVENT_IMAGE:
+				ctx.eventImage.emit()
+			elif nEvent == toupcam.TOUPCAM_EVENT_STILLIMAGE:
+				ctx.snap_image_event.emit()     
+		
+		
+		@staticmethod
+		def  convertQImageToMat(incomingImage):
+			'''  Converts a QImage into an opencv MAT format  '''
 
+			incomingImage = incomingImage.convertToFormat(4)
+
+			width = incomingImage.width()
+			height = incomingImage.height()
+
+			ptr = incomingImage.bits()
+			ptr.setsize(incomingImage.byteCount())
+			arr = np.array(ptr).reshape(height, width, 4)  #  Copies the data
+			return arr 
+				
+
+		@pyqtSlot()
+		def eventImageSignal(self):
+			if self.hcam is not None:
+				try:
+					self.hcam.PullImageV2(self.buf, 24, None)
+					self.total += 1
+				except toupcam.HRESULTException:
+					print('pull image failed')
+					QMessageBox.warning(self, '', 'pull image failed', QMessageBox.Ok)
+				else:
+
+					img = QImage(self.buf, self.w, self.h, (self.w * 24 + 31) // 32 * 4, QImage.Format_RGB888)
+					self.opencvimage =  self.convertQImageToMat(img)
+					self.setPixmap(QPixmap.fromImage(img))
+					
+		@pyqtSlot()                
+		def snap_image_event_signal(self):
+
+			if self.hcam is not None:
+				w, h = self.hcam.get_Size()
+			   # w= 2048
+			   # h= 1536 
+				bufsize = ((w * 24 + 31) // 32 * 4) * h
+				still_img_buf = bytes(bufsize)
+				self.hcam.PullStillImageV2(still_img_buf, 24, None)
+				print('saving image')
+			#    print(self.hcam.get_ExpoTime())
+				print(w, h)
+				print()
+				img = self.bytes_to_array(still_img_buf)
+				plt.imsave('img_frame_{}.png'.format(self.total), img)
+
+
+		def bytes_to_array(self, still_img_buf, dtype=np.uint8):
+			arr_1d = np.frombuffer(still_img_buf, dtype=dtype)
+			return arr_1d.reshape(self.h, self.w, 3)
+			#return arr_1d.reshape(1536, 2048, 3)
+
+		def initCamera(self):
+
+			a = toupcam.Toupcam.EnumV2()
+
+			if len(a) <= 0:
+				print("erore during camera inicialisation")
+			else:
+
+				self.camname = a[0].displayname
+
+				#create and conect custom pyqt5 signa
+				self.eventImage.connect(self.eventImageSignal)
+
+				self.snap_image_event.connect(self.snap_image_event_signal)
+
+				#trying opening camera
+				try:
+					self.hcam = toupcam.Toupcam.Open(a[0].id)
+
+				except toupcam.HRESULTException:
+					QMessageBox.warning(self, '', 'failed to open camera', QMessageBox.Ok)
+
+				else:
+					#creating bufer for image hold
+					self.w, self.h = self.hcam.get_Size()
+					bufsize = ((self.w * 24 + 31) // 32 * 4) * self.h
+					self.buf = bytes(bufsize)
+
+			 #       self.cb.setChecked(self.hcam.get_AutoExpoEnable())  
+
+					try:
+						if sys.platform == 'win32':
+							self.hcam.put_Option(toupcam.TOUPCAM_OPTION_BYTEORDER, 0) # QImage.Format_RGB888
+
+						self.hcam.StartPullModeWithCallback(self.cameraCallback, self)
+					except toupcam.HRESULTException:
+						QMessageBox.warning(self, '', 'failed to start camera', QMessageBox.Ok)		
+			
+######################################camera########################################	
+
+			def initUI(self):
+     #   self.cb = QCheckBox('Auto Exposure', self)
+     #   self.cb.stateChanged.connect(self.changeAutoExposure)
+     #   self.label = QLabel(self)
+        self.setScaledContents(True)
+     #   self.label.move(0, 30)
+        self.resize(self.geometry().width(), self.geometry().height())
+
+			
+			
 ####################################wgrywanie obrazu##################################
 
     #wagranie obrazu z pliku    
