@@ -10,3 +10,5 @@ To do:
 5. camera doc for refreshratio
 6. x axis for img ajustments
 7. movment speed
+8. eror handling if inicialisation sequence failed
+9. start window teling user to wayt for calibracion of the manipulator
