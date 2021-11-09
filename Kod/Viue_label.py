@@ -12,24 +12,24 @@ from PyQt5.QtGui import QPixmap, QImage
 import Clasa as oC
 
 
-class Obraz(Qlabel):
+class Obraz(QLabel):
     # Klaza Obraz dziedziczy z QLabel, pozwala na lepszą obsługę eventu mouseMoveEvent
-	
-	#signals for camera action
-	eventImage = pyqtSignal()
+
+#signals for camera action
+    eventImage = pyqtSignal()
     snap_image_event = pyqtSignal()	
 
-	        
-	hcam = None
-	buf = None      # video buffer
-	w = 0           # video width
-	h = 0           # video height
+        
+    hcam = None
+    buf = None      # video buffer
+    w = 0           # video width
+    h = 0           # video height
 
-	x = 10
-	y = 152
-	total = 0
-	
-	
+    x = 10
+    y = 152
+    total = 0
+
+
     # obiekt Klasy MainWindow podany jako argument przy tworzeniu obiektu klasy Obraz - pozwala na komunikację z oknem głównym
     main_window = ' '
 
@@ -77,15 +77,17 @@ class Obraz(Qlabel):
 
     # rozmiar obszaru
     Rozmiar = (1024,768)
+    
+    first = True
 
     #construvtor
     def __init__(self, main_window, *args, **kwargs):
         super(Obraz, self).__init__(*args, **kwargs)
-		
-		self.initUI() #inicializacja wymiarów obiektu pyqt
+
+        self.initUI() #inicializacja wymiarów obiektu pyqt
         
         self.initCamera() #inicializacja camery
-		
+
         self.main_window = main_window
         
         #Tworzy białe tło
@@ -101,14 +103,14 @@ class Obraz(Qlabel):
         # Domyślnie ustawione na False - gdy False mouseMoveEvent wywoływany jest tylko gdy któryś z przycisków myszki jest wciśnięty
 
         # wgrywanie obrazu z pliku
-        self.image = cam.get_opencvimage()
+        #self.image = cam.get_opencvimage()
         #print(self.image.shape)
         #cv2.imread("5.jpg")# cv2.imread(path, flag)
         
         #wczytanie podgladu z kamery
-        self.loadImage()
+        #self.loadImage()
 
-        self.Save_curent_viue()
+        #self.Save_curent_viue()
                
 ###############################mous tracking##########################################
    
@@ -163,109 +165,116 @@ class Obraz(Qlabel):
             self.whot_to_drow = 'previu_rectagle'
 
             self.update()
-			
-		@staticmethod
-		def cameraCallback(nEvent, ctx):
-			if nEvent == toupcam.TOUPCAM_EVENT_IMAGE:
-				ctx.eventImage.emit()
-			elif nEvent == toupcam.TOUPCAM_EVENT_STILLIMAGE:
-				ctx.snap_image_event.emit()     
-		
-		
-		@staticmethod
-		def  convertQImageToMat(incomingImage):
-			'''  Converts a QImage into an opencv MAT format  '''
 
-			incomingImage = incomingImage.convertToFormat(4)
-
-			width = incomingImage.width()
-			height = incomingImage.height()
-
-			ptr = incomingImage.bits()
-			ptr.setsize(incomingImage.byteCount())
-			arr = np.array(ptr).reshape(height, width, 4)  #  Copies the data
-			return arr 
-				
-
-		@pyqtSlot()
-		def eventImageSignal(self):
-			if self.hcam is not None:
-				try:
-					self.hcam.PullImageV2(self.buf, 24, None)
-					self.total += 1
-				except toupcam.HRESULTException:
-					print('pull image failed')
-					QMessageBox.warning(self, '', 'pull image failed', QMessageBox.Ok)
-				else:
-
-					img = QImage(self.buf, self.w, self.h, (self.w * 24 + 31) // 32 * 4, QImage.Format_RGB888)
-					self.opencvimage =  self.convertQImageToMat(img)
-					self.setPixmap(QPixmap.fromImage(img))
-					
-		@pyqtSlot()                
-		def snap_image_event_signal(self):
-
-			if self.hcam is not None:
-				w, h = self.hcam.get_Size()
-			   # w= 2048
-			   # h= 1536 
-				bufsize = ((w * 24 + 31) // 32 * 4) * h
-				still_img_buf = bytes(bufsize)
-				self.hcam.PullStillImageV2(still_img_buf, 24, None)
-				print('saving image')
-			#    print(self.hcam.get_ExpoTime())
-				print(w, h)
-				print()
-				img = self.bytes_to_array(still_img_buf)
-				plt.imsave('img_frame_{}.png'.format(self.total), img)
+    @staticmethod
+    def cameraCallback(nEvent, ctx):
+        if nEvent == toupcam.TOUPCAM_EVENT_IMAGE:
+            ctx.eventImage.emit()
+        elif nEvent == toupcam.TOUPCAM_EVENT_STILLIMAGE:
+            ctx.snap_image_event.emit()     
 
 
-		def bytes_to_array(self, still_img_buf, dtype=np.uint8):
-			arr_1d = np.frombuffer(still_img_buf, dtype=dtype)
-			return arr_1d.reshape(self.h, self.w, 3)
-			#return arr_1d.reshape(1536, 2048, 3)
+    @staticmethod
+    def  convertQImageToMat(incomingImage):
+        '''  Converts a QImage into an opencv MAT format  '''
 
-		def initCamera(self):
+        incomingImage = incomingImage.convertToFormat(4)
 
-			a = toupcam.Toupcam.EnumV2()
+        width = incomingImage.width()
+        height = incomingImage.height()
 
-			if len(a) <= 0:
-				print("erore during camera inicialisation")
-			else:
+        ptr = incomingImage.bits()
+        ptr.setsize(incomingImage.byteCount())
+        arr = np.array(ptr).reshape(height, width, 4)  #  Copies the data
+        return arr 
 
-				self.camname = a[0].displayname
 
-				#create and conect custom pyqt5 signa
-				self.eventImage.connect(self.eventImageSignal)
+    @pyqtSlot()
+    def eventImageSignal(self):
+        if self.hcam is not None:
+            try:
+                self.hcam.PullImageV2(self.buf, 24, None)
+                self.total += 1
+            except toupcam.HRESULTException:
+                print('pull image failed')
+                QMessageBox.warning(self, '', 'pull image failed', QMessageBox.Ok)
+            else:
 
-				self.snap_image_event.connect(self.snap_image_event_signal)
+                self._img = QImage(self.buf, self.w, self.h, (self.w * 24 + 31) // 32 * 4, QImage.Format_RGB888)
+                
+                self.image =  self.convertQImageToMat(self._img)
+                
+                self.setPixmap(QPixmap.fromImage(self._img))
+                
+                self.loadImage()
+                
+                if self.first:
+                    self.Save_curent_viue()
 
-				#trying opening camera
-				try:
-					self.hcam = toupcam.Toupcam.Open(a[0].id)
+    @pyqtSlot()                
+    def snap_image_event_signal(self):
 
-				except toupcam.HRESULTException:
-					QMessageBox.warning(self, '', 'failed to open camera', QMessageBox.Ok)
+        if self.hcam is not None:
+            w, h = self.hcam.get_Size()
+           # w= 2048
+           # h= 1536 
+            bufsize = ((w * 24 + 31) // 32 * 4) * h
+            still_img_buf = bytes(bufsize)
+            self.hcam.PullStillImageV2(still_img_buf, 24, None)
+            print('saving image')
+        #    print(self.hcam.get_ExpoTime())
+            print(w, h)
+            print()
+            img = self.bytes_to_array(still_img_buf)
+            plt.imsave('img_frame_{}.png'.format(self.total), img)
 
-				else:
-					#creating bufer for image hold
-					self.w, self.h = self.hcam.get_Size()
-					bufsize = ((self.w * 24 + 31) // 32 * 4) * self.h
-					self.buf = bytes(bufsize)
 
-			 #       self.cb.setChecked(self.hcam.get_AutoExpoEnable())  
+    def bytes_to_array(self, still_img_buf, dtype=np.uint8):
+        arr_1d = np.frombuffer(still_img_buf, dtype=dtype)
+        return arr_1d.reshape(self.h, self.w, 3)
+        #return arr_1d.reshape(1536, 2048, 3)
 
-					try:
-						if sys.platform == 'win32':
-							self.hcam.put_Option(toupcam.TOUPCAM_OPTION_BYTEORDER, 0) # QImage.Format_RGB888
+    def initCamera(self):
 
-						self.hcam.StartPullModeWithCallback(self.cameraCallback, self)
-					except toupcam.HRESULTException:
-						QMessageBox.warning(self, '', 'failed to start camera', QMessageBox.Ok)		
-			
+        a = toupcam.Toupcam.EnumV2()
+
+        if len(a) <= 0:
+            print("erore during camera inicialisation")
+        else:
+
+            self.camname = a[0].displayname
+
+            #create and conect custom pyqt5 signa
+            self.eventImage.connect(self.eventImageSignal)
+
+            self.snap_image_event.connect(self.snap_image_event_signal)
+
+            #trying opening camera
+            try:
+                self.hcam = toupcam.Toupcam.Open(a[0].id)
+
+            except toupcam.HRESULTException:
+                QMessageBox.warning(self, '', 'failed to open camera', QMessageBox.Ok)
+
+            else:
+                #creating bufer for image hold
+                self.w, self.h = self.hcam.get_Size()
+                bufsize = ((self.w * 24 + 31) // 32 * 4) * self.h
+                self.buf = bytes(bufsize)
+
+         #       self.cb.setChecked(self.hcam.get_AutoExpoEnable())  
+
+                try:
+                    if sys.platform == 'win32':
+                        self.hcam.put_Option(toupcam.TOUPCAM_OPTION_BYTEORDER, 0) # QImage.Format_RGB888
+
+                    self.hcam.StartPullModeWithCallback(self.cameraCallback, self)
+                except toupcam.HRESULTException:
+                    QMessageBox.warning(self, '', 'failed to start camera', QMessageBox.Ok)		
+
 ######################################camera########################################	
 
-			def initUI(self):
+    def initUI(self):
      #   self.cb = QCheckBox('Auto Exposure', self)
      #   self.cb.stateChanged.connect(self.changeAutoExposure)
      #   self.label = QLabel(self)
@@ -273,14 +282,11 @@ class Obraz(Qlabel):
      #   self.label.move(0, 30)
         self.resize(self.geometry().width(), self.geometry().height())
 
-			
-			
+
 ####################################wgrywanie obrazu##################################
 
     #wagranie obrazu z pliku    
     def loadImage(self, drow_deskription = False, drow_single_rectagle = False):#przestac to wyoływac co update
-        
-        self.image = self.cam.get_opencvimage()
         
         self.C_image = self.image 
 
@@ -507,8 +513,10 @@ class Obraz(Qlabel):
         self.map = self.frame
 
         self.map_shape = shape()
-        temp = squer(0, 0, 540, 960)
+        temp = squer(0, 0, 1024,768)
         self.map_shape.add_squer(temp)
+        
+        self.first = False
 
     #not finieshed
     def reset_map(self):
@@ -517,7 +525,7 @@ class Obraz(Qlabel):
     #technicli ok
     def extend_map_right(self):
 
-        dx = 10
+        dx = 100
 
         s = self._img.size() #wymiary podglondu
         x = s.height()
@@ -555,7 +563,7 @@ class Obraz(Qlabel):
     #technicli ok
     def extend_map_dwn(self):
 
-        dx = 10
+        dx = 100
 
         s = self._img.size() #wymiary podglondu
         x = s.height()
@@ -576,7 +584,7 @@ class Obraz(Qlabel):
 
     # technicli ok
     def extend_map_left(self):
-        dx = 10
+        dx = 100
 
         s = self._img.size()  # wymiary podglondu
         x = s.height()
@@ -605,7 +613,7 @@ class Obraz(Qlabel):
     # technicli notok
     def exrend_map_up(self):
 
-        dx = 10
+        dx = 100
 
         s = self._img.size()  # wymiary podglondu
         x = s.height()
@@ -632,4 +640,3 @@ class Obraz(Qlabel):
 
     def get_map(self):
         return self.map
-
