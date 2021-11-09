@@ -133,10 +133,10 @@ class obszarzaznaczony():
             xpo = 0
         if ypo < 0:
             ypo = 0
-        if dx > 960:
-            dx = 960
-        if dy > 540:
-            dy = 540
+        if dx > 1024:
+            dx = 1024
+        if dy > 768:
+            dy = 768
 
 
         image = image[ypo:dy,xpo:dx]
@@ -145,7 +145,7 @@ class obszarzaznaczony():
         xHigh = dx+20
         yHigh = dy+20
         # image = image[xHigh,yHigh]
-
+        
         frame = cv2.resize(image, (xHigh, yHigh))
         #frame = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
