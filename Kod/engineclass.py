@@ -204,18 +204,19 @@ class manipulator:
             sleep(1)
 
     def move_up(self):
+        t = self.move_axes_to_abs_woe('z',[self.z+1])
+        self.weaith_for_target()
+       
+    def move_dwn(self):
+        t = self.move_axes_to_abs_woe('z',[self.z-1])
+        self.weaith_for_target()
+        
+    def move_right(self):
         t = self.move_axes_to_abs_woe('y',[self.y+1])
         self.weaith_for_target()
 
-    def move_dwn(self):
+    def move_left(self):
         t = self.move_axes_to_abs_woe('y',[self.y-1])
         self.weaith_for_target()
-
-    def move_right(self):
-        t = self.move_axes_to_abs_woe('z',[self.z+1])
-        self.weaith_for_target()
-
-    def move_left(self):
-        t = self.move_axes_to_abs_woe('z',[self.z-1])
-        self.weaith_for_target()
+        
 
