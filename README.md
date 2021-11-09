@@ -12,3 +12,4 @@ To do:
 7. movment speed
 8. eror handling if inicialisation sequence failed
 9. start window teling user to wayt for calibracion of the manipulator
+10. color control
