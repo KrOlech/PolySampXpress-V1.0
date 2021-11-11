@@ -1,11 +1,10 @@
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import *  # QFileDialog ,QMainWindow,QToolBar ,QAction
-from PyQt5.QtGui import QKeySequence
+from PyQt5.QtWidgets import *
 import Viue_label as obs
 import Map as M
 from engineclass import manipulator
-from time import sleep
+
 
 import camera as cam
 

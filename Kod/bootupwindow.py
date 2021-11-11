@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QWidget
-import PyQt5.QtGui as QtGui
-
+from PyQt5.QtWidgets import *
+from PyQt5 import QtGui
+from PyQt5.QtCore import Qt
 
 class Loading_window(QWidget):
 
@@ -11,6 +11,12 @@ class Loading_window(QWidget):
 
         self.setWindowTitle("Mapowanie prubek")  # nazwa
         self.setWindowIcon(QtGui.QIcon('icon.png'))
+
+        self.leyaout = QHBoxLayout()
+
+        label = QLabel("inicialising Camera")
+
+        label2 = QLabel("inicialising Manipulator")
 
 
 
