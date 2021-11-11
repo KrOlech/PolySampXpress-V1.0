@@ -16,14 +16,15 @@ class MainWindow(QMainWindow):
         
         super(MainWindow, self).__init__(*args, **kwargs)
 
-        self.manipulaor = manipulator()
-        
         self.setWindowIcon(QtGui.QIcon('icon.png'))
                 
         self.setWindowTitle("Mapowanie prubek") #nazwa
         self.setGeometry(5, 30, 1280, 1024)
         
         self.setMouseTracking(False)
+
+        #linking to manipulator for movment
+        self.manipulaor = manipulator()
 
         #creating leyaut conteeiners for Gui formation
         self._createleyouts()
@@ -80,7 +81,6 @@ class MainWindow(QMainWindow):
         self.kierunkowelayout = QGridLayout()
         self.przyciskilayout = QGridLayout()           
 
-
     def key_up(self):
         self.obraz.up()
         self.manipulaor.move_up()
@@ -134,7 +134,6 @@ class MainWindow(QMainWindow):
         test = menu.addMenu("directions")
         [test.addAction(f) for f in self.actions]
 
- 
     def _Multipurpos_butons(self):
 
         #przyciski multipurpus
