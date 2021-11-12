@@ -82,24 +82,20 @@ class MainWindow(QMainWindow):
         self.przyciskilayout = QGridLayout()           
 
     def key_up(self):
-        self.obraz.up()
-        self.manipulaor.move_up()
-        self.manipulaor.print_curent_position()
+        if self.manipulaor.move_up():
+            self.obraz.up()
 
     def key_left(self):
-        self.obraz.left()
-        self.manipulaor.move_left()
-        self.manipulaor.print_curent_position()
+        if self.manipulaor.move_left():
+            self.obraz.left()
 
     def key_right(self):
-        self.obraz.right()
-        self.manipulaor.move_right()
-        self.manipulaor.print_curent_position()
+        if self.manipulaor.move_right():
+            self.obraz.right()
 
     def key_dwn(self):
-        self.obraz.dawn()
-        self.manipulaor.move_dwn()
-        self.manipulaor.print_curent_position()
+        if self.manipulaor.move_dwn():
+            self.obraz.dawn()
 
     def _Direction_buttons(self):#Przyciski kierunkowe
 
@@ -140,7 +136,7 @@ class MainWindow(QMainWindow):
         self.przyciski = [QPushButton() for _ in range(6)]
         [button.setMaximumWidth(100) for button in self.przyciski] 
         
-        nazwy = ["schow next", "dell all", "schow all", "schow privius", "", "hide all"]
+        nazwy = ["schow next", "dell all", "schow all", "schow privius", "map", "hide all"]
         
         [swich.setText(name) for name, swich in zip(nazwy, self.przyciski)]
         
@@ -160,7 +156,6 @@ class MainWindow(QMainWindow):
         [self.przyciskilayout.addWidget(w, j, i) for w, i, j in zip(self.przyciski, it, jt)]
 
     def schow_map(self):
-
         self.map = M.Map_window(self.obraz.get_map())
         self.map.show()
 

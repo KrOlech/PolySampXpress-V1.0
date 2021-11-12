@@ -201,17 +201,19 @@ class manipulator:
     def move_up(self):
         t = self.move_axes_to_abs_woe('z',[self.z+1])
         self.weaith_for_target()
+        return t
        
     def move_dwn(self):
         t = self.move_axes_to_abs_woe('z',[self.z-1])
         self.weaith_for_target()
+        return t
         
     def move_right(self):
         t = self.move_axes_to_abs_woe('y',[self.y+1])
         self.weaith_for_target()
+        return t
 
     def move_left(self):
         t = self.move_axes_to_abs_woe('y',[self.y-1])
         self.weaith_for_target()
-        
-
+        return t
