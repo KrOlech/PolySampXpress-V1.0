@@ -81,21 +81,40 @@ class MainWindow(QMainWindow):
         self.kierunkowelayout = QGridLayout()
         self.przyciskilayout = QGridLayout()           
 
+    def upadet_position_read(self):
+        pass
+
     def key_up(self):
         if self.manipulaor.move_up():
+            self.upadet_position_read()
             self.obraz.up()
+            self.self.kierunkowe[4].setEnabled(True)
+        else:
+            self.self.kierunkowe[1].setEnabled(False)
 
     def key_left(self):
         if self.manipulaor.move_left():
+            self.upadet_position_read()
             self.obraz.left()
+            self.self.kierunkowe[3].setEnabled(True)
+        else:
+            self.self.kierunkowe[2].setEnabled(False)
 
     def key_right(self):
         if self.manipulaor.move_right():
+            self.upadet_position_read()
             self.obraz.right()
+            self.self.kierunkowe[3].setEnabled(True)
+        else:
+            self.self.kierunkowe[3].setEnabled(False)
 
     def key_dwn(self):
         if self.manipulaor.move_dwn():
+            self.upadet_position_read()
             self.obraz.dawn()
+            self.self.kierunkowe[1].setEnabled(True)
+        else:
+            self.self.kierunkowe[4].setEnabled(False)
 
     def _Direction_buttons(self):#Przyciski kierunkowe
 
@@ -108,7 +127,7 @@ class MainWindow(QMainWindow):
         [swich.setText(name) for name, swich in zip(nazwy, self.kierunkowe)]
 
         #przypiecie fukcji do przycisków
-        fun = [self.key_up, self.key_left, self.key_right,self.key_dwn ]
+        fun = [self.key_up, self.key_left, self.key_right,self.key_dwn]
 
         self.actions = [QAction("&up", self), QAction("&lf", self), QAction("&ri", self), QAction("&dw", self)]
 
