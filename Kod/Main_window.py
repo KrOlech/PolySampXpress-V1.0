@@ -23,9 +23,6 @@ class MainWindow(QMainWindow):
         
         self.setMouseTracking(False)
 
-        #linking to manipulator for movment
-        self.manipulaor = manipulator()
-
         #creating leyaut conteeiners for Gui formation
         self._createleyouts()
 
@@ -45,6 +42,9 @@ class MainWindow(QMainWindow):
         self._layout_marging()
 
         self._set_central_widget()
+
+        # linking to manipulator for movment
+        self.manipulaor = manipulator(self)
 
 
     def closeEvent(self, event):
@@ -82,7 +82,7 @@ class MainWindow(QMainWindow):
         self.przyciskilayout = QGridLayout()           
 
     def upadet_position_read(self):
-        pass
+        [label.setText(position) for label, position in zip(self.position_labele,self.manipulaor.get_axes_positions())]
 
     def key_up(self):
         if self.manipulaor.move_up():
@@ -148,6 +148,12 @@ class MainWindow(QMainWindow):
         menu = self.menuBar()
         test = menu.addMenu("directions")
         [test.addAction(f) for f in self.actions]
+
+        labelexyz = [QLabel("X"), QLabel("Y"), QLabel("Z")]
+        [self.kierunkowelayout.addWidget(value, i, 6) for i, value in zip(range(3), self.position_labele)]
+
+        self.position_labele =[QLabel(str(25.0)), QLabel(str(25.0)), QLabel(str(25.0))]
+        [self.kierunkowelayout.addWidget(value, i, 6) for i, value in zip(range(3), self.position_labele)]
 
     def _Multipurpos_butons(self):
 

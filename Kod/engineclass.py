@@ -4,7 +4,9 @@ from PyQt5.QtWidgets import QMessageBox
 class manipulator:
 
 
-    def __init__(self):
+    def __init__(self,main):
+
+        self.main = main
 
         self.c848 = self.load_drivers()
         print(self.c848)
@@ -14,7 +16,6 @@ class manipulator:
         self.reference_axes()
 
         self.print_curent_position()
-        
 
     def conect(self):
         self.controller_id = self.conncect_to_controller()
@@ -196,7 +197,7 @@ class manipulator:
 
     def weaith_for_target(self):
         while not all(self.check_on_target().values()):
-            sleep(1)
+            self.main.upadet_position_read()
 
     def move_up(self):
         t = self.move_axes_to_abs_woe('z',[self.z+1])
