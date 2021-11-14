@@ -12,3 +12,4 @@ To do:
 8. eror handling if inicialisation sequence failed
 10. color control
 11. manipulator position info on the main window
+12. COM port chose for manipulator
