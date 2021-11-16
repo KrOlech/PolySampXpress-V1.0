@@ -1,34 +1,37 @@
 import ctypes
 from time import sleep
-
+from PyQt5.QtWidgets import QMessageBox
 class manipulator:
 
 
-    def __init__(self):
+    def __init__(self,main):
+
+        self.main = main
 
         self.c848 = self.load_drivers()
         print(self.c848)
 
-        self.controller_id = self.conncect_to_controller()
-
+        self.conect()
+        
         self.conectioncheck()
 
         self.reference_axes()
 
         self.print_curent_position()
-        
-    
+
+    def conect(self):
+        self.controller_id = self.conncect_to_controller()
+        return self.is_connected()
 
     def __del__(self):
         
         print('is connected:', self.is_connected())
-         
-        
+
         self.close_connection()
 
         print('is connected:', self.is_connected())
 
-    def load_drivers(self,filename='C848_DLL.dll'):
+    def load_drivers(self, filename='C848_DLL.dll'):
         return ctypes.CDLL(r'C:\Users\external\PycharmProjects\Inzynierka\silniki_sterowanie\C848_DLL.dll')
 
     #work in progres
@@ -48,8 +51,7 @@ class manipulator:
             return controller_id
 
         else:
-            print("erore unable to conect")
-            # eror mesege window and program close
+            QMessageBox.warning(self, '', "erore unable to conect", QMessageBox.Ok)
             return None
 
     #create erore mesage window if conection wos failed
@@ -57,8 +59,7 @@ class manipulator:
     def conectioncheck(self):
 
         if not self.is_connected():
-            #eror mesage window
-            print("erore conection feiled")
+            QMessageBox.warning(self, '', "erore conection feiled", QMessageBox.Ok)
 
     def is_connected(self):
         '''
@@ -134,11 +135,8 @@ class manipulator:
 
     #workinprogres
     def move_axes_to_abs_woe(self,axes='xyz', positions=[25.0, 25.0, 25.0]):
-
-        if not self._move_axes_to_abs(axes, positions):
-            print("erore in move")
-            pass
-            #eroremesage
+        return self._move_axes_to_abs(axes, positions)
+            
 
     def _move_axes_to_abs(self, axes, positions):
         '''
@@ -147,7 +145,7 @@ class manipulator:
         axes that should be moved are given in parameter axes
         '''
         if len(axes) != len(positions):
-            print('number of axes and positions must be the same!')
+            QMessageBox.warning(self, '', 'number of axes and positions must be the same!', QMessageBox.Ok)
             return None
 
         c_id = self._convert_id(self.controller_id)
@@ -178,7 +176,6 @@ class manipulator:
             
         self.x, self.y, self.z = self.get_axes_positions('xyz')
         print(self.x, self.y, self.z)
-    #
 
     def check_on_target(self, axes='xyz'):
         '''
@@ -193,7 +190,7 @@ class manipulator:
             check = self.c848.C848_qONT(c_id, axis, bool_array)
             
             if check != 1:
-                print('something went terribly wrong')
+                QMessageBox.warning(self, '', 'something went terribly wrong', QMessageBox.Ok)
                 return
             
             status[c] = bool_array[0]
@@ -201,22 +198,29 @@ class manipulator:
 
     def weaith_for_target(self):
         while not all(self.check_on_target().values()):
-            sleep(1)
-
+            self.main.upadet_position_read()
+        self.x, self.y, self.z = self.get_axes_positions('xyz')
+        
     def move_up(self):
-        t = self.move_axes_to_abs_woe('z',[self.z+1])
+        self.z -= 1
+        t = self.move_axes_to_abs_woe('z',[self.z])
         self.weaith_for_target()
+        return t
        
     def move_dwn(self):
-        t = self.move_axes_to_abs_woe('z',[self.z-1])
+        self.z+=1
+        t = self.move_axes_to_abs_woe('z',[self.z])
         self.weaith_for_target()
+        return t
         
     def move_right(self):
-        t = self.move_axes_to_abs_woe('y',[self.y+1])
+        self.y-=1
+        t = self.move_axes_to_abs_woe('y',[self.y])
         self.weaith_for_target()
+        return t
 
     def move_left(self):
-        t = self.move_axes_to_abs_woe('y',[self.y-1])
+        self.y+=1
+        t = self.move_axes_to_abs_woe('y',[self.y])
         self.weaith_for_target()
-        
-
+        return t

@@ -1,11 +1,10 @@
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import *  # QFileDialog ,QMainWindow,QToolBar ,QAction
-from PyQt5.QtGui import QKeySequence
+from PyQt5.QtWidgets import *
 import Viue_label as obs
 import Map as M
 from engineclass import manipulator
-from time import sleep
+
 
 import camera as cam
 
@@ -17,8 +16,6 @@ class MainWindow(QMainWindow):
         
         super(MainWindow, self).__init__(*args, **kwargs)
 
-        self.manipulaor = manipulator()
-        
         self.setWindowIcon(QtGui.QIcon('icon.png'))
                 
         self.setWindowTitle("Mapowanie prubek") #nazwa
@@ -26,11 +23,14 @@ class MainWindow(QMainWindow):
         
         self.setMouseTracking(False)
 
-        #creating leyaut conteeiners for Gui formation
-        self._createleyouts()
-
         #stworzenie podglondu prubki i umiescenie go w leyaucie
         self.obraz = obs.Obraz(self)
+        
+        # linking to manipulator for movment
+        self.manipulaor = manipulator(self)
+        
+        #creating leyaut conteeiners for Gui formation
+        self._createleyouts()
 
         #stworzenie przycisków do przemiesczania podglondu
         self._Direction_buttons()
@@ -45,6 +45,12 @@ class MainWindow(QMainWindow):
         self._layout_marging()
 
         self._set_central_widget()
+        
+        toolbar = QToolBar("Funkcje") #stworzenie toolbara
+        self.addToolBar(toolbar)
+        action_6 = self.qactiontoolbar("Snap img",  lambda x: self.obraz.snap_img())
+        toolbar.addAction(action_6)
+
 
 
     def closeEvent(self, event):
@@ -81,26 +87,35 @@ class MainWindow(QMainWindow):
         self.kierunkowelayout = QGridLayout()
         self.przyciskilayout = QGridLayout()           
 
+    def upadet_position_read(self):
+        [label.setText(str(position)) for label, position in zip(self.position_labele,self.manipulaor.get_axes_positions())]
 
+        
+    def key_move(self,fun_manipulator,fun_obraz,key_en,key_dis):
+        t = fun_manipulator()
+        
+        fun_obraz()
+        
+        self.upadet_position_read()
+        x,y,z = self.manipulaor.get_axes_positions()
+
+        if t:
+            self.kierunkowe[key_en].setEnabled(True)
+        else:
+            self.kierunkowe[key_dis].setEnabled(False)
+        
+        
     def key_up(self):
-        self.obraz.up()
-        self.manipulaor.move_up()
-        self.manipulaor.print_curent_position()
+        self.key_move(self.manipulaor.move_up,self.obraz.up,3,0)
 
     def key_left(self):
-        self.obraz.left()
-        self.manipulaor.move_left()
-        self.manipulaor.print_curent_position()
+        self.key_move(self.manipulaor.move_left, self.obraz.left,2,1)
 
     def key_right(self):
-        self.obraz.right()
-        self.manipulaor.move_right()
-        self.manipulaor.print_curent_position()
-
+        self.key_move(self.manipulaor.move_right,self.obraz.right,1,2)
+        
     def key_dwn(self):
-        self.obraz.dawn()
-        self.manipulaor.move_dwn()
-        self.manipulaor.print_curent_position()
+        self.key_move(self.manipulaor.move_dwn,self.obraz.dawn,0,3)
 
     def _Direction_buttons(self):#Przyciski kierunkowe
 
@@ -113,7 +128,7 @@ class MainWindow(QMainWindow):
         [swich.setText(name) for name, swich in zip(nazwy, self.kierunkowe)]
 
         #przypiecie fukcji do przycisków
-        fun = [self.key_up, self.key_left, self.key_right,self.key_dwn ]
+        fun = [self.key_up, self.key_left, self.key_right,self.key_dwn]
 
         self.actions = [QAction("&up", self), QAction("&lf", self), QAction("&ri", self), QAction("&dw", self)]
 
@@ -134,15 +149,22 @@ class MainWindow(QMainWindow):
         menu = self.menuBar()
         test = menu.addMenu("directions")
         [test.addAction(f) for f in self.actions]
+        
+        self.position_labele = [QLabel(str(25.0)), QLabel(str(25.0)), QLabel(str(25.0))]
+        
 
- 
+        labelexyz = [QLabel("X"), QLabel("Y"), QLabel("Z")]
+        [self.kierunkowelayout.addWidget(value, 6, i) for i, value in zip(range(1,4,1), self.position_labele)]
+
+        #[self.kierunkowelayout.addWidget(value, i, 6) for i, value in zip(range(3), self.position_labele)]
+
     def _Multipurpos_butons(self):
 
         #przyciski multipurpus
         self.przyciski = [QPushButton() for _ in range(6)]
         [button.setMaximumWidth(100) for button in self.przyciski] 
         
-        nazwy = ["schow next", "dell all", "schow all", "schow privius", "", "hide all"]
+        nazwy = ["schow next", "dell all", "schow all", "schow privius", "map", "hide all"]
         
         [swich.setText(name) for name, swich in zip(nazwy, self.przyciski)]
         
@@ -162,7 +184,6 @@ class MainWindow(QMainWindow):
         [self.przyciskilayout.addWidget(w, j, i) for w, i, j in zip(self.przyciski, it, jt)]
 
     def schow_map(self):
-
         self.map = M.Map_window(self.obraz.get_map())
         self.map.show()
 

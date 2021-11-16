@@ -10,7 +10,7 @@ import sys, toupcam
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtGui import QPixmap, QImage
 import Clasa as oC
-
+import matplotlib.pyplot as plt
 
 class Obraz(QLabel):
     # Klaza Obraz dziedziczy z QLabel, pozwala na lepszą obsługę eventu mouseMoveEvent
@@ -19,7 +19,6 @@ class Obraz(QLabel):
     eventImage = pyqtSignal()
     snap_image_event = pyqtSignal()	
 
-        
     hcam = None
     buf = None      # video buffer
     w = 0           # video width
@@ -28,7 +27,6 @@ class Obraz(QLabel):
     x = 10
     y = 152
     total = 0
-
 
     # obiekt Klasy MainWindow podany jako argument przy tworzeniu obiektu klasy Obraz - pozwala na komunikację z oknem głównym
     main_window = ' '
@@ -51,7 +49,7 @@ class Obraz(QLabel):
     #prostokonty zaznaczone
     rectangles = []
 
-    last_name  = 0        
+    last_name = 0
        
     iloscklikniec = False
        
@@ -80,6 +78,8 @@ class Obraz(QLabel):
     
     first = True
 
+    delta_pixeli = 510
+
     #construvtor
     def __init__(self, main_window, *args, **kwargs):
         super(Obraz, self).__init__(*args, **kwargs)
@@ -87,7 +87,9 @@ class Obraz(QLabel):
         self.initUI() #inicializacja wymiarów obiektu pyqt
         
         self.initCamera() #inicializacja camery
-
+        
+        self.hcam.put_AutoExpoEnable(False)
+        
         self.main_window = main_window
         
         #Tworzy białe tło
@@ -101,16 +103,6 @@ class Obraz(QLabel):
 
         self.setMouseTracking(True)  
         # Domyślnie ustawione na False - gdy False mouseMoveEvent wywoływany jest tylko gdy któryś z przycisków myszki jest wciśnięty
-
-        # wgrywanie obrazu z pliku
-        #self.image = cam.get_opencvimage()
-        #print(self.image.shape)
-        #cv2.imread("5.jpg")# cv2.imread(path, flag)
-        
-        #wczytanie podgladu z kamery
-        #self.loadImage()
-
-        #self.Save_curent_viue()
                
 ###############################mous tracking##########################################
    
@@ -166,58 +158,15 @@ class Obraz(QLabel):
 
             self.update()
 
-    @staticmethod
-    def cameraCallback(nEvent, ctx):
-        if nEvent == toupcam.TOUPCAM_EVENT_IMAGE:
-            ctx.eventImage.emit()
-        elif nEvent == toupcam.TOUPCAM_EVENT_STILLIMAGE:
-            ctx.snap_image_event.emit()     
+###############################camera read##########################################
 
-
-    @staticmethod
-    def  convertQImageToMat(incomingImage):
-        '''  Converts a QImage into an opencv MAT format  '''
-
-        incomingImage = incomingImage.convertToFormat(4)
-
-        width = incomingImage.width()
-        height = incomingImage.height()
-
-        ptr = incomingImage.bits()
-        ptr.setsize(incomingImage.byteCount())
-        arr = np.array(ptr).reshape(height, width, 4)  #  Copies the data
-        return arr 
-
-
+    def snap_img(self):
+        self.hcam.Snap(1)
+    
     @pyqtSlot()
-    def eventImageSignal(self):
-        if self.hcam is not None:
-            try:
-                self.hcam.PullImageV2(self.buf, 24, None)
-                self.total += 1
-            except toupcam.HRESULTException:
-                print('pull image failed')
-                QMessageBox.warning(self, '', 'pull image failed', QMessageBox.Ok)
-            else:
-
-                self._img = QImage(self.buf, self.w, self.h, (self.w * 24 + 31) // 32 * 4, QImage.Format_RGB888)
-                
-                self.image =  self.convertQImageToMat(self._img)
-                
-                self.setPixmap(QPixmap.fromImage(self._img))
-                
-                self.loadImage()
-                
-                if self.first:
-                    self.Save_curent_viue()
-
-    @pyqtSlot()                
     def snap_image_event_signal(self):
-
         if self.hcam is not None:
-            w, h = self.hcam.get_Size()
-           # w= 2048
-           # h= 1536 
+            w, h = self.hcam.get_Size() 
             bufsize = ((w * 24 + 31) // 32 * 4) * h
             still_img_buf = bytes(bufsize)
             self.hcam.PullStillImageV2(still_img_buf, 24, None)
@@ -228,20 +177,65 @@ class Obraz(QLabel):
             img = self.bytes_to_array(still_img_buf)
             plt.imsave('img_frame_{}.png'.format(self.total), img)
 
+    @staticmethod
+    def cameraCallback(nEvent, ctx):
+        if nEvent == toupcam.TOUPCAM_EVENT_IMAGE:
+            ctx.eventImage.emit()
+        elif nEvent == toupcam.TOUPCAM_EVENT_STILLIMAGE:
+            ctx.snap_image_event.emit()
+
+    @staticmethod
+    def  convertQImageToMat(incomingImage):
+        '''  Converts a QImage into an opencv MAT format  '''
+        incomingImage = incomingImage.convertToFormat(4)
+
+        width = incomingImage.width()
+        height = incomingImage.height()
+
+        ptr = incomingImage.bits()
+        ptr.setsize(incomingImage.byteCount())
+        arr = np.array(ptr).reshape(height, width, 4)  #  Copies the data
+        return arr 
+
+    @pyqtSlot()
+    def eventImageSignal(self):
+
+        if self.hcam is not None:
+
+            try:
+                self.hcam.PullImageV2(self.buf, 24, None)
+                self.total += 1
+
+            except toupcam.HRESULTException:
+                print('pull image failed')
+                QMessageBox.warning(self, '', 'pull image failed', QMessageBox.Ok)
+
+            else:
+                self.Qimage_read_from_camera = QImage(self.buf,
+                                      self.w, self.h,
+                                      (self.w * 24 + 31) // 32 * 4,
+                                      QImage.Format_RGB888)
+                
+                self.image_opencv = self.convertQImageToMat(
+                    self.Qimage_read_from_camera)
+                
+                self.loadImage()
+                
+                if self.first:
+                    self.Save_curent_viue()
 
     def bytes_to_array(self, still_img_buf, dtype=np.uint8):
         arr_1d = np.frombuffer(still_img_buf, dtype=dtype)
         return arr_1d.reshape(self.h, self.w, 3)
-        #return arr_1d.reshape(1536, 2048, 3)
 
     def initCamera(self):
 
         a = toupcam.Toupcam.EnumV2()
 
         if len(a) <= 0:
-            print("erore during camera inicialisation")
-        else:
+            QMessageBox.warning(self, '',"erore during camera inicialisation", QMessageBox.Ok)
 
+        else:
             self.camname = a[0].displayname
 
             #create and conect custom pyqt5 signa
@@ -262,8 +256,6 @@ class Obraz(QLabel):
                 bufsize = ((self.w * 24 + 31) // 32 * 4) * self.h
                 self.buf = bytes(bufsize)
 
-         #       self.cb.setChecked(self.hcam.get_AutoExpoEnable())  
-
                 try:
                     if sys.platform == 'win32':
                         self.hcam.put_Option(toupcam.TOUPCAM_OPTION_BYTEORDER, 0) # QImage.Format_RGB888
@@ -275,23 +267,20 @@ class Obraz(QLabel):
 ######################################camera########################################	
 
     def initUI(self):
-     #   self.cb = QCheckBox('Auto Exposure', self)
-     #   self.cb.stateChanged.connect(self.changeAutoExposure)
-     #   self.label = QLabel(self)
-        self.setScaledContents(True)
-     #   self.label.move(0, 30)
-        self.resize(self.geometry().width(), self.geometry().height())
 
+        self.setScaledContents(True)
+
+        self.resize(self.geometry().width(), self.geometry().height())
 
 ####################################wgrywanie obrazu##################################
 
     #wagranie obrazu z pliku    
     def loadImage(self, drow_deskription = False, drow_single_rectagle = False):#przestac to wyoływac co update
         
-        self.C_image = self.image 
+        self.C_image = self.image_opencv
 
         #wgranie obrazu do labela
-        self.setPhoto(self.C_image,drow_deskription, drow_single_rectagle)
+        self.setPhoto(self.C_image, drow_deskription, drow_single_rectagle)
     
     #wstawienie obrazu do labela       
     def setPhoto(self, image, drow_deskription, drow_single_rectagle):
@@ -307,21 +296,21 @@ class Obraz(QLabel):
         if drow_deskription:
             for i,rectangle in enumerate(self.rectangles):
                 rX,rY = rectangle.gettextloc(self.ofsetx,self.ofsety,self.scall)
-                cv2.putText(frame,str(rectangle.getName()),(rX,rY),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2)
+                cv2.putText(frame, str(rectangle.getName()),(rX,rY),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2)
 
 
         if drow_single_rectagle:
             rX,rY = self.rectangles[self.ktury].gettextloc(self.ofsetx,self.ofsety,self.scall)
-            cv2.putText(frame,str(self.rectangles[self.ktury].getName()),(rX,rY),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2)
+            cv2.putText(frame, str(self.rectangles[self.ktury].getName()),(rX,rY),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2)
         
         #conwersja z open Cv image na Qimage
-        self._img = QImage(frame, frame.shape[1],frame.shape[0],frame.strides[0],QImage.Format_RGB888)
+        self._imgfromframe = QImage(frame, frame.shape[1],frame.shape[0],frame.strides[0],QImage.Format_RGB888)
         #QImage(cvImg.data, width, height, bytesPerLine, QImage.Format_RGB888)
-        self._img = QPixmap.fromImage(self._img)
+        self._pixmapdromframe = QPixmap.fromImage(self._imgfromframe)
         
         #wgranie obrazu
-        self.setPixmap(self._img)
-        self.setMaximumSize(self._img.width(),self._img.height())
+        self.setPixmap(self._pixmapdromframe)
+        self.setMaximumSize(self._pixmapdromframe.width(), self._pixmapdromframe.height())
         
 #############################Paint Event###############################################
 
@@ -331,20 +320,20 @@ class Obraz(QLabel):
         qp = QPainter(self)
 
         #rysowanie obrazu
-        qp.drawPixmap(self.rect(), self._img)
+        qp.drawPixmap(self.rect(), self._pixmapdromframe)
 
         #kolro i tlo
         br = QBrush(QColor(200, 10, 10, 200))
         
         #wgranie stylu 
         qp.setBrush(br)
-        
+
+        #variable for chusing if we drow numbers and rectagled
         tym = True
         num = False
         
         if self.whot_to_drow == 'all_rectagls': #pokazuje wsystkie prostkoaty
             self.all_Rectagles(qp)
-            
 
         elif self.whot_to_drow == 'no_rectagle': #howa wszystkie prostokaty
             tym = False
@@ -360,32 +349,30 @@ class Obraz(QLabel):
             self.move_viue()
             self.extend_map()
 
-
-
-   
         else: #podstawowa obcja rysuje nowy prostokat
             self.all_Rectagles(qp)
             qp.drawRect(QRect(self.begin, self.end))#rysowanie prostokonta na bierzoco jak podglond do ruchu myszka
 
         self.loadImage(tym, num)
-        return
 
     def extend_map(self):
         if self.direction_change == 'dawn':
-            self.exrend_map_up()
+            pass
+            #self.exrend_map_up()
         elif self.direction_change == 'up':
-            self.extend_map_dwn()
+            pass
+            #self.extend_map_dwn()
         elif self.direction_change == 'right':
-            self.extend_map_right()
+            pass
+            #self.extend_map_right()
         elif self.direction_change == 'left':
-            self.extend_map_left()
+            pass
+            #self.extend_map_left()
         else:
             pass
         self.direction_change = ''
 
-
     def all_Rectagles(self, Painter):
-          
         for rectangle in self.rectangles: # wyrysowanie poprzednich prostokotów
             Painter.drawRect(self.rectagledrow(rectangle))
     
@@ -400,7 +387,6 @@ class Obraz(QLabel):
 
     def rectagledrow(self,prostokat):
         x = prostokat.getrectangle(self.Rozmiar,self.ofsetx,self.ofsety)
-        #print(x)
         return x
 
     def rectaglecreate(self):
@@ -474,36 +460,28 @@ class Obraz(QLabel):
 ###########################przesuwanie podgladu##############################    
 
     def left(self):
-
-        if self.ofsety >= 10:
-            self.ofsety -= 10
-            self.whot_to_drow = 'viue_muve'
-            self.direction_change = 'left'
-            self.update()
+        self.ofsety -= self.delta_pixeli
+        self.whot_to_drow = 'viue_muve'
+        self.direction_change = 'left'
+        self.update()
     
     def right(self):
-
-        if self.ofsety < self.Rozmiar[0]-10:
-            self.ofsety += 10
-            self.whot_to_drow = 'viue_muve'
-            self.direction_change = 'right'
-            self.update()
+        self.ofsety += self.delta_pixeli
+        self.whot_to_drow = 'viue_muve'
+        self.direction_change = 'right'
+        self.update()
 
     def dawn(self):
-
-        if self.ofsetx >= 10:
-            self.ofsetx -= 10
-            self.whot_to_drow = 'viue_muve'
-            self.direction_change = 'dawn'
-            self.update()
+        self.ofsetx -= self.delta_pixeli
+        self.whot_to_drow = 'viue_muve'
+        self.direction_change = 'dawn'
+        self.update()
 
     def up(self):
-
-        if self.ofsetx < self.Rozmiar[1]-10:
-            self.ofsetx += 10
-            self.whot_to_drow = 'viue_muve'
-            self.direction_change = 'up'
-            self.update()
+        self.ofsetx += self.delta_pixeli
+        self.whot_to_drow = 'viue_muve'
+        self.direction_change = 'up'
+        self.update()
 
 ###########################map extetion##############################
 
@@ -525,9 +503,9 @@ class Obraz(QLabel):
     #technicli ok
     def extend_map_right(self):
 
-        dx = 100
+        dx = self.delta_pixeli
 
-        s = self._img.size() #wymiary podglondu
+        s = self._pixmapdromframe.size() #wymiary podglondu
         x = s.height()
         y = s.width()
 
@@ -563,9 +541,9 @@ class Obraz(QLabel):
     #technicli ok
     def extend_map_dwn(self):
 
-        dx = 100
+        dx = self.delta_pixeli
 
-        s = self._img.size() #wymiary podglondu
+        s = self._pixmapdromframe.size() #wymiary podglondu
         x = s.height()
         y = s.width()
 
@@ -584,9 +562,9 @@ class Obraz(QLabel):
 
     # technicli ok
     def extend_map_left(self):
-        dx = 100
+        dx = self.delta_pixeli
 
-        s = self._img.size()  # wymiary podglondu
+        s = self._pixmapdromframe.size()  # wymiary podglondu
         x = s.height()
         y = s.width()
 
@@ -601,7 +579,7 @@ class Obraz(QLabel):
             tab = np.ones((xm, ym, zm), dtype=np.uint8)
 
         # Wkopoiowanie istniejocej mapy
-        tab[0:xm, 0:ym + dx] = self.map
+        tab[0:xm, dx:ym + dx] = self.map
 
         # wkopiowanie nowego odkrytewgo fragmentu
         # print(np.shape(self.frame), np.shape(self.frame))
@@ -613,9 +591,9 @@ class Obraz(QLabel):
     # technicli notok
     def exrend_map_up(self):
 
-        dx = 100
+        dx = self.delta_pixeli
 
-        s = self._img.size()  # wymiary podglondu
+        s = self._pixmapdromframe.size()  # wymiary podglondu
         x = s.height()
         y = s.width()
 
@@ -636,7 +614,6 @@ class Obraz(QLabel):
                 pass
             
         self.map = tab
-
 
     def get_map(self):
         return self.map
