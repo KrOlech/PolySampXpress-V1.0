@@ -10,7 +10,7 @@ import sys, toupcam
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtGui import QPixmap, QImage
 import Clasa as oC
-
+import matplotlib.pyplot as plt
 
 class Obraz(QLabel):
     # Klaza Obraz dziedziczy z QLabel, pozwala na lepszą obsługę eventu mouseMoveEvent
@@ -78,7 +78,7 @@ class Obraz(QLabel):
     
     first = True
 
-    delta_pixeli = 10
+    delta_pixeli = 510
 
     #construvtor
     def __init__(self, main_window, *args, **kwargs):
@@ -87,7 +87,9 @@ class Obraz(QLabel):
         self.initUI() #inicializacja wymiarów obiektu pyqt
         
         self.initCamera() #inicializacja camery
-
+        
+        self.hcam.put_AutoExpoEnable(False)
+        
         self.main_window = main_window
         
         #Tworzy białe tło
@@ -158,10 +160,29 @@ class Obraz(QLabel):
 
 ###############################camera read##########################################
 
+    def snap_img(self):
+        self.hcam.Snap(1)
+    
+    @pyqtSlot()
+    def snap_image_event_signal(self):
+        if self.hcam is not None:
+            w, h = self.hcam.get_Size() 
+            bufsize = ((w * 24 + 31) // 32 * 4) * h
+            still_img_buf = bytes(bufsize)
+            self.hcam.PullStillImageV2(still_img_buf, 24, None)
+            print('saving image')
+        #    print(self.hcam.get_ExpoTime())
+            print(w, h)
+            print()
+            img = self.bytes_to_array(still_img_buf)
+            plt.imsave('img_frame_{}.png'.format(self.total), img)
+
     @staticmethod
     def cameraCallback(nEvent, ctx):
         if nEvent == toupcam.TOUPCAM_EVENT_IMAGE:
             ctx.eventImage.emit()
+        elif nEvent == toupcam.TOUPCAM_EVENT_STILLIMAGE:
+            ctx.snap_image_event.emit()
 
     @staticmethod
     def  convertQImageToMat(incomingImage):
@@ -256,7 +277,7 @@ class Obraz(QLabel):
     #wagranie obrazu z pliku    
     def loadImage(self, drow_deskription = False, drow_single_rectagle = False):#przestac to wyoływac co update
         
-        self.C_image = self.self.image_opencv
+        self.C_image = self.image_opencv
 
         #wgranie obrazu do labela
         self.setPhoto(self.C_image, drow_deskription, drow_single_rectagle)
@@ -299,7 +320,7 @@ class Obraz(QLabel):
         qp = QPainter(self)
 
         #rysowanie obrazu
-        qp.drawPixmap(self.rect(), self._img)
+        qp.drawPixmap(self.rect(), self._pixmapdromframe)
 
         #kolro i tlo
         br = QBrush(QColor(200, 10, 10, 200))
@@ -336,13 +357,17 @@ class Obraz(QLabel):
 
     def extend_map(self):
         if self.direction_change == 'dawn':
-            self.exrend_map_up()
+            pass
+            #self.exrend_map_up()
         elif self.direction_change == 'up':
-            self.extend_map_dwn()
+            pass
+            #self.extend_map_dwn()
         elif self.direction_change == 'right':
-            self.extend_map_right()
+            pass
+            #self.extend_map_right()
         elif self.direction_change == 'left':
-            self.extend_map_left()
+            pass
+            #self.extend_map_left()
         else:
             pass
         self.direction_change = ''
@@ -480,7 +505,7 @@ class Obraz(QLabel):
 
         dx = self.delta_pixeli
 
-        s = self._img.size() #wymiary podglondu
+        s = self._pixmapdromframe.size() #wymiary podglondu
         x = s.height()
         y = s.width()
 
@@ -518,7 +543,7 @@ class Obraz(QLabel):
 
         dx = self.delta_pixeli
 
-        s = self._img.size() #wymiary podglondu
+        s = self._pixmapdromframe.size() #wymiary podglondu
         x = s.height()
         y = s.width()
 
@@ -539,7 +564,7 @@ class Obraz(QLabel):
     def extend_map_left(self):
         dx = self.delta_pixeli
 
-        s = self._img.size()  # wymiary podglondu
+        s = self._pixmapdromframe.size()  # wymiary podglondu
         x = s.height()
         y = s.width()
 
@@ -554,7 +579,7 @@ class Obraz(QLabel):
             tab = np.ones((xm, ym, zm), dtype=np.uint8)
 
         # Wkopoiowanie istniejocej mapy
-        tab[0:xm, 0:ym + dx] = self.map
+        tab[0:xm, dx:ym + dx] = self.map
 
         # wkopiowanie nowego odkrytewgo fragmentu
         # print(np.shape(self.frame), np.shape(self.frame))
@@ -568,7 +593,7 @@ class Obraz(QLabel):
 
         dx = self.delta_pixeli
 
-        s = self._img.size()  # wymiary podglondu
+        s = self._pixmapdromframe.size()  # wymiary podglondu
         x = s.height()
         y = s.width()
 
