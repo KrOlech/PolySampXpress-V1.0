@@ -314,60 +314,61 @@ class Obraz(QLabel):
         
 #############################Paint Event###############################################
 
+
     def paintEvent(self, event):
         
         #inicializacja pintera
         qp = QPainter(self)
-
-        #rysowanie obrazu
-        qp.drawPixmap(self.rect(), self._pixmapdromframe)
-
-        #kolro i tlo
-        br = QBrush(QColor(200, 10, 10, 200))
         
-        #wgranie stylu 
-        qp.setBrush(br)
-
-        #variable for chusing if we drow numbers and rectagled
-        tym = True
-        num = False
-        
-        if self.whot_to_drow == 'all_rectagls': #pokazuje wsystkie prostkoaty
-            self.all_Rectagles(qp)
-
-        elif self.whot_to_drow == 'no_rectagle': #howa wszystkie prostokaty
-            tym = False
-    
-        elif self.whot_to_drow =='One_rectagle': #rysuje wybrany prostokat
-            self.chosen_rectagle(qp)
-            tym = False
-            num = True
+        try:
+            #rysowanie obrazu
+            qp.drawPixmap(self.rect(), self._pixmapdromframe)
+        except AttributeError:
+            pass
             
-        elif self.whot_to_drow == 'viue_muve':
+        finally:
+            #kolro i tlo
+            br = QBrush(QColor(200, 10, 10, 200))
+            
+            #wgranie stylu 
+            qp.setBrush(br)
 
-            self.all_Rectagles(qp)
-            self.move_viue()
-            self.extend_map()
+            #variable for chusing if we drow numbers and rectagled
+            tym = True
+            num = False
+            
+            if self.whot_to_drow == 'all_rectagls': #pokazuje wsystkie prostkoaty
+                self.all_Rectagles(qp)
 
-        else: #podstawowa obcja rysuje nowy prostokat
-            self.all_Rectagles(qp)
-            qp.drawRect(QRect(self.begin, self.end))#rysowanie prostokonta na bierzoco jak podglond do ruchu myszka
+            elif self.whot_to_drow == 'no_rectagle': #howa wszystkie prostokaty
+                tym = False
+        
+            elif self.whot_to_drow =='One_rectagle': #rysuje wybrany prostokat
+                self.chosen_rectagle(qp)
+                tym = False
+                num = True
+                
+            elif self.whot_to_drow == 'viue_muve':
 
-        self.loadImage(tym, num)
+                self.all_Rectagles(qp)
+                self.move_viue()
+                self.extend_map()
+
+            else: #podstawowa obcja rysuje nowy prostokat
+                self.all_Rectagles(qp)
+                qp.drawRect(QRect(self.begin, self.end))#rysowanie prostokonta na bierzoco jak podglond do ruchu myszka
+
+            self.loadImage(tym, num)
 
     def extend_map(self):
         if self.direction_change == 'dawn':
-            pass
-            #self.exrend_map_up()
+            self.extend_map_dwn()
         elif self.direction_change == 'up':
-            pass
-            #self.extend_map_dwn()
+            self.extend_map_up()
         elif self.direction_change == 'right':
-            pass
-            #self.extend_map_right()
+            self.extend_map_right()
         elif self.direction_change == 'left':
-            pass
-            #self.extend_map_left()
+            self.extend_map_left()
         else:
             pass
         self.direction_change = ''
@@ -589,7 +590,7 @@ class Obraz(QLabel):
         self.map = tab
 
     # technicli notok
-    def exrend_map_up(self):
+    def extend_map_up(self):
 
         dx = self.delta_pixeli
 
