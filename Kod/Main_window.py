@@ -23,11 +23,14 @@ class MainWindow(QMainWindow):
         
         self.setMouseTracking(False)
 
-        #creating leyaut conteeiners for Gui formation
-        self._createleyouts()
-
         #stworzenie podglondu prubki i umiescenie go w leyaucie
         self.obraz = obs.Obraz(self)
+        
+        # linking to manipulator for movment
+        self.manipulaor = manipulator(self)
+        
+        #creating leyaut conteeiners for Gui formation
+        self._createleyouts()
 
         #stworzenie przycisków do przemiesczania podglondu
         self._Direction_buttons()
@@ -42,9 +45,12 @@ class MainWindow(QMainWindow):
         self._layout_marging()
 
         self._set_central_widget()
+        
+        toolbar = QToolBar("Funkcje") #stworzenie toolbara
+        self.addToolBar(toolbar)
+        action_6 = self.qactiontoolbar("Snap img",  lambda x: self.obraz.snap_img())
+        toolbar.addAction(action_6)
 
-        # linking to manipulator for movment
-        self.manipulaor = manipulator(self)
 
 
     def closeEvent(self, event):
@@ -82,39 +88,34 @@ class MainWindow(QMainWindow):
         self.przyciskilayout = QGridLayout()           
 
     def upadet_position_read(self):
-        [label.setText(position) for label, position in zip(self.position_labele,self.manipulaor.get_axes_positions())]
+        [label.setText(str(position)) for label, position in zip(self.position_labele,self.manipulaor.get_axes_positions())]
 
-    def key_up(self):
-        if self.manipulaor.move_up():
-            self.upadet_position_read()
-            self.obraz.up()
-            self.self.kierunkowe[4].setEnabled(True)
+        
+    def key_move(self,fun_manipulator,fun_obraz,key_en,key_dis):
+        t = fun_manipulator()
+        
+        fun_obraz()
+        
+        self.upadet_position_read()
+        x,y,z = self.manipulaor.get_axes_positions()
+
+        if t:
+            self.kierunkowe[key_en].setEnabled(True)
         else:
-            self.self.kierunkowe[1].setEnabled(False)
+            self.kierunkowe[key_dis].setEnabled(False)
+        
+        
+    def key_up(self):
+        self.key_move(self.manipulaor.move_up,self.obraz.up,3,0)
 
     def key_left(self):
-        if self.manipulaor.move_left():
-            self.upadet_position_read()
-            self.obraz.left()
-            self.self.kierunkowe[3].setEnabled(True)
-        else:
-            self.self.kierunkowe[2].setEnabled(False)
+        self.key_move(self.manipulaor.move_left, self.obraz.left,2,1)
 
     def key_right(self):
-        if self.manipulaor.move_right():
-            self.upadet_position_read()
-            self.obraz.right()
-            self.self.kierunkowe[3].setEnabled(True)
-        else:
-            self.self.kierunkowe[3].setEnabled(False)
-
+        self.key_move(self.manipulaor.move_right,self.obraz.right,1,2)
+        
     def key_dwn(self):
-        if self.manipulaor.move_dwn():
-            self.upadet_position_read()
-            self.obraz.dawn()
-            self.self.kierunkowe[1].setEnabled(True)
-        else:
-            self.self.kierunkowe[4].setEnabled(False)
+        self.key_move(self.manipulaor.move_dwn,self.obraz.dawn,0,3)
 
     def _Direction_buttons(self):#Przyciski kierunkowe
 
@@ -148,12 +149,14 @@ class MainWindow(QMainWindow):
         menu = self.menuBar()
         test = menu.addMenu("directions")
         [test.addAction(f) for f in self.actions]
+        
+        self.position_labele = [QLabel(str(25.0)), QLabel(str(25.0)), QLabel(str(25.0))]
+        
 
         labelexyz = [QLabel("X"), QLabel("Y"), QLabel("Z")]
-        [self.kierunkowelayout.addWidget(value, i, 6) for i, value in zip(range(3), self.position_labele)]
+        [self.kierunkowelayout.addWidget(value, 6, i) for i, value in zip(range(1,4,1), self.position_labele)]
 
-        self.position_labele =[QLabel(str(25.0)), QLabel(str(25.0)), QLabel(str(25.0))]
-        [self.kierunkowelayout.addWidget(value, i, 6) for i, value in zip(range(3), self.position_labele)]
+        #[self.kierunkowelayout.addWidget(value, i, 6) for i, value in zip(range(3), self.position_labele)]
 
     def _Multipurpos_butons(self):
 
