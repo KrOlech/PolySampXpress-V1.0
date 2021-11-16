@@ -25,10 +25,10 @@ class MainWindow(QMainWindow):
 
         #stworzenie podglondu prubki i umiescenie go w leyaucie
         self.obraz = obs.Obraz(self)
-        
+
         # linking to manipulator for movment
         self.manipulaor = manipulator(self)
-        
+                
         #creating leyaut conteeiners for Gui formation
         self._createleyouts()
 
@@ -92,12 +92,13 @@ class MainWindow(QMainWindow):
 
         
     def key_move(self,fun_manipulator,fun_obraz,key_en,key_dis):
+    
         t = fun_manipulator()
-        
-        fun_obraz()
         
         self.upadet_position_read()
         x,y,z = self.manipulaor.get_axes_positions()
+        
+        fun_obraz()
 
         if t:
             self.kierunkowe[key_en].setEnabled(True)
