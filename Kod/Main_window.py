@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import *
 import Viue_label as obs
 import Map as M
 from engineclass import manipulator
+from time import sleep
 
 
 import camera as cam
@@ -52,7 +53,6 @@ class MainWindow(QMainWindow):
         toolbar.addAction(action_6)
 
 
-
     def closeEvent(self, event):
         
         reply = QMessageBox.question(self,"mesage","Czy napewno chcesz zamknac program?",
@@ -97,6 +97,8 @@ class MainWindow(QMainWindow):
         
         self.upadet_position_read()
         x,y,z = self.manipulaor.get_axes_positions()
+        
+        sleep(1)
         
         fun_obraz()
 
