@@ -19,7 +19,8 @@ class Obraz(QLabel):
 
 #signals for camera action
     eventImage = pyqtSignal()
-    snap_image_event = pyqtSignal()	
+    snap_image_event = pyqtSignal()
+    new_frame_event  =pyqtSignal()
 
     hcam = None
     buf = None      # video buffer
@@ -169,6 +170,11 @@ class Obraz(QLabel):
 
 ###############################camera read##########################################
 
+    @pyqtSlot()
+    def New_frame(self):
+        pass
+
+    #emits pyqtsignal
     def snap_img(self):
         self.hcam.Snap(1)
     
@@ -256,8 +262,8 @@ class Obraz(QLabel):
 
             #create and conect custom pyqt5 signa
             self.eventImage.connect(self.eventImageSignal)
-
             self.snap_image_event.connect(self.snap_image_event_signal)
+            self.new_frame_event.conect(self.newframe)
 
             #trying opening camera
             try:
@@ -434,7 +440,7 @@ class Obraz(QLabel):
     def rmv_rectagle(self,ROI):
         
         #print(self.rectangles,ROI)
-        if ROI in  self.rectangles:
+        if ROI in self.rectangles:
             self.rectangles.remove(ROI)
         
         self.main_window.remove_some_ROI(ROI)
