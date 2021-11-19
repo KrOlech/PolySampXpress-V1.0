@@ -11,6 +11,8 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtGui import QPixmap, QImage
 import Clasa as oC
 import matplotlib.pyplot as plt
+from threading import Thread
+from time import sleep
 
 class Obraz(QLabel):
     # Klaza Obraz dziedziczy z QLabel, pozwala na lepszą obsługę eventu mouseMoveEvent
@@ -67,18 +69,25 @@ class Obraz(QLabel):
     ofsetx = 0
     ofsety = 0
 
-    ofsetymax = 0
-    ofsetxmax = 0
-
     #scala
     scall = 1
 
     # rozmiar obszaru
     Rozmiar = (1024,768)
     
+    ofsetymax = Rozmiar[1]
+    ofsetxmax = Rozmiar[0]
+
+    ofsetymin = 0
+    ofsetxmin = 0
+    
     first = True
 
     delta_pixeli = 510
+    
+    frame = True
+    
+    waitontarget = False
 
     #construvtor
     def __init__(self, main_window, *args, **kwargs):
@@ -101,7 +110,7 @@ class Obraz(QLabel):
         #wyłacza skalowanie okna
         self.setScaledContents(False)
 
-        self.setMouseTracking(True)  
+        self.setMouseTracking(True)
         # Domyślnie ustawione na False - gdy False mouseMoveEvent wywoływany jest tylko gdy któryś z przycisków myszki jest wciśnięty
                
 ###############################mous tracking##########################################
@@ -220,9 +229,16 @@ class Obraz(QLabel):
                     self.Qimage_read_from_camera)
                 
                 self.loadImage()
-                
-                if self.first:
-                    self.Save_curent_viue()
+                try:
+                    if self.first:
+                        self.Save_curent_viue()
+                except ValueError:
+                    pass
+                    
+                if all(self.main_window.manipulaor.check_on_target().values()):
+                    self.newframe = True
+                else:
+                    self.newframe = False
 
     def bytes_to_array(self, still_img_buf, dtype=np.uint8):
         arr_1d = np.frombuffer(still_img_buf, dtype=dtype)
@@ -313,6 +329,10 @@ class Obraz(QLabel):
         self.setMaximumSize(self._pixmapdromframe.width(), self._pixmapdromframe.height())
         
 #############################Paint Event###############################################
+    @pyqtSlot()
+    def eventImageSignalT(self):
+        t = Thread(target=self.eventImageSignalT)
+        t.start()
 
 
     def paintEvent(self, event):
@@ -344,21 +364,25 @@ class Obraz(QLabel):
                 tym = False
         
             elif self.whot_to_drow =='One_rectagle': #rysuje wybrany prostokat
+                
                 self.chosen_rectagle(qp)
                 tym = False
                 num = True
                 
             elif self.whot_to_drow == 'viue_muve':
-
-                self.all_Rectagles(qp)
-                self.move_viue()
-                self.extend_map()
+                if self.newframe:
+                    self.all_Rectagles(qp)
+                    self.move_viue()
+                    self.extend_map()
 
             else: #podstawowa obcja rysuje nowy prostokat
                 self.all_Rectagles(qp)
                 qp.drawRect(QRect(self.begin, self.end))#rysowanie prostokonta na bierzoco jak podglond do ruchu myszka
 
             self.loadImage(tym, num)
+            
+            
+
 
     def extend_map(self):
         if self.direction_change == 'dawn':
@@ -420,7 +444,6 @@ class Obraz(QLabel):
         self.update()
 
 ####################################fukcje wywoływane przez guziki z gluwnego okna####################################
-
 
     def Narysujcaloscs(self): #rysowanie wsystkich prostokontów po nacisnieciu odpowiedniego przyciusku
 
@@ -488,14 +511,14 @@ class Obraz(QLabel):
 
     #save first viue to the map
     def Save_curent_viue(self):
+        if all(self.main_window.manipulaor.check_on_target().values()):   
+            self.map = self.frame
 
-        self.map = self.frame
+            self.map_shape = shape()
+            temp = squer(0, 0, 1024,768)
+            self.map_shape.add_squer(temp)
 
-        self.map_shape = shape()
-        temp = squer(0, 0, 1024,768)
-        self.map_shape.add_squer(temp)
-        
-        self.first = False
+            self.first = self.frame
 
     #not finieshed
     def reset_map(self):
@@ -503,40 +526,33 @@ class Obraz(QLabel):
 
     #technicli ok
     def extend_map_right(self):
+    
+        self.eventImageSignal()
 
         dx = self.delta_pixeli
 
-        s = self._pixmapdromframe.size() #wymiary podglondu
-        x = s.height()
-        y = s.width()
+        x,y,z = self.frame.shape #wymiary podglondu
 
         xm, ym, zm = self.map.shape #wymiary aktualnej mapy
 
-        #new = squer(x - xm + self.ofsetx, ym, xm + self.ofsetx, ym+10)
-        #self.map_shape.add_squer(new)
-        #tablica do któej wkopiujemy poszerzona mape
-        tab = np.ones((xm, ym+dx, zm), dtype=np.uint8)
-
-        #wkopiowanie nowego odkrytewgo fragmentu
-        #print(np.shape(self.frame), np.shape(self.frame))
-        #print(self.ofsetx, xm+self.ofsetx, ym, ym+dx)
-
+       #tablica do któej wkopiujemy poszerzona mape
         if self.ofsety+dx > self.ofsetymax:
             tab = np.ones((xm, ym + dx, zm), dtype=np.uint8)
             self.ofsetymax = self.ofsety
         else:
             tab = np.ones((xm, ym, zm), dtype=np.uint8)
+            
+            
         try:
-            tab[self.ofsetx: x + self.ofsetx, ym:ym+dx] = self.frame[:, y - dx:]
-        except ValueError:
-            pass
-
-        #tab[self.ofsetx: x+self.ofsetx, ym+self.ofsety-dx:ym+self.ofsety] = self.frame[:, y-dx:]
-
-        #ym + self.ofsety: ym + dx + self.ofsety
-        #Wkopoiowanie istniejocej mapy
-        tab[0:xm, 0:ym] = self.map
-
+            #Wkopoiowanie istniejocej mapy
+            tab[0:xm, 0:ym] = self.map
+            
+            #wkopiowanie nowego fragmentu
+            tab[self.ofsetx: x + self.ofsetx, ym:ym+dx] = self.frame[:, y-dx:]
+                
+        except ValueError as e:
+            print(e)
+            
         self.map = tab
 
     #technicli ok
@@ -551,14 +567,28 @@ class Obraz(QLabel):
         xm, ym, zm = self.map.shape #wymiary aktualnej mapy
 
         #tablica do któej wkopiujemy poszerzona mape
-        tab = np.ones((xm+dx, ym, zm), dtype=np.uint8)
-
-        #Wkopoiowanie istniejocej mapy
-        tab[0:xm, 0:ym] = self.map
+        if self.ofsety+dx > self.ofsetxmax:
+            tab = np.ones((xm+dx, ym, zm), dtype=np.uint8)
+            self.ofsetxmax = self.ofsetx
+        else:
+            tab = np.ones((xm, ym, zm), dtype=np.uint8)
+            
+        try:    
+            #Wkopoiowanie istniejocej mapy
+            tab[0:xm, 0:ym] = self.map
         
-        #wkopiowanie nowego odkrytewgo fragmentu
-        tab[xm:xm+dx, self.ofsety: y+self.ofsety] = self.frame[x-dx:, :]
-
+        except ValueError as e:
+            print(e,'map')
+        
+        try: 
+            #wkopiowanie nowego odkrytewgo fragmentu
+            tab[xm:xm+dx, self.ofsety: y+self.ofsety] = self.frame[x-dx:, :]
+        
+        except ValueError as e:
+            print(e,'frame')
+            print(tab[xm:xm+dx, self.ofsety: y+self.ofsety].shape,self.frame[x-dx:, :].shape)
+            print(xm,xm+dx)
+        
         self.map = tab
 
     # technicli ok
@@ -571,21 +601,30 @@ class Obraz(QLabel):
 
         xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
 
-        # new = squer(x - xm + self.ofsetx, ym, xm + self.ofsetx, ym+10)
-        # self.map_shape.add_squer(new)
+
         # tablica do któej wkopiujemy poszerzona mape
-        if self.ofsety < 0:
+        if self.ofsety < self.ofsetymin:
             tab = np.ones((xm, ym + dx, zm), dtype=np.uint8)
+            self.ofsetymin = self.ofsety
         else:
             tab = np.ones((xm, ym, zm), dtype=np.uint8)
 
-        # Wkopoiowanie istniejocej mapy
-        tab[0:xm, dx:ym + dx] = self.map
-
-        # wkopiowanie nowego odkrytewgo fragmentu
-        # print(np.shape(self.frame), np.shape(self.frame))
-        # print(self.ofsetx, xm+self.ofsetx, ym, ym+dx)
-        tab[self.ofsetx: x+self.ofsetx, self.ofsety:dx+self.ofsety] = self.frame[:, 0:dx]
+        try:
+            
+            if self.ofsety < 0:
+                # Wkopoiowanie istniejocej mapy
+                tab[0:xm, dx:] = self.map
+                
+            else:
+                tab = self.map
+             
+            # wkopiowanie nowego odkrytewgo fragmentu
+            tab[self.ofsetx: x+self.ofsetx, 0:dx] = self.frame[:, 0:dx]
+            
+        except Exception as e:
+            print(e)
+            print(tab[0:xm, dx:].shape,self.map.shape)
+        
 
         self.map = tab
 
