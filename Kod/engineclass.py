@@ -201,26 +201,26 @@ class manipulator:
             self.main.upadet_position_read()
         self.x, self.y, self.z = self.get_axes_positions('xyz')
         
-    def move_up(self):
-        self.z -= 1
+    def move_up(self,krok):
+        self.z -= krok
         t = self.move_axes_to_abs_woe('z',[self.z])
         self.weaith_for_target()
         return t
        
-    def move_dwn(self):
-        self.z+=1
+    def move_dwn(self,krok):
+        self.z+=krok
         t = self.move_axes_to_abs_woe('z',[self.z])
         self.weaith_for_target()
         return t
         
-    def move_right(self):
-        self.y-=1
+    def move_right(self,krok):
+        self.y-=krok
         t = self.move_axes_to_abs_woe('y',[self.y])
         self.weaith_for_target()
         return t
 
-    def move_left(self):
-        self.y+=1
+    def move_left(self,krok):
+        self.y+=krok
         t = self.move_axes_to_abs_woe('y',[self.y])
         self.weaith_for_target()
         return t
