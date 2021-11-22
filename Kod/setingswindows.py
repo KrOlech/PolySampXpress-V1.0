@@ -22,7 +22,7 @@ class axissetingwindow(QWidget):
         
         self.create_option("maximum slidera osi X",1,30)
         
-        self.create_option("Krok dla y i z",2,1)
+        self.create_option("Krok dla y i z w 0.1 mm",2,10)
         
         self.booton = QPushButton("Zapisz i zastosuj ustawienia")
         self.booton.clicked.connect(self.printimputs)
@@ -35,10 +35,9 @@ class axissetingwindow(QWidget):
         
     
     def printimputs(self):
-    
         self.mainwindow.slide.set_min_max(int(self.options[0].text()),int(self.options[1].text()))
-    
-        [print(type(int(option.text())),int(option.text())) for option in self.options]
+        self.mainwindow.setkrok(int(self.options[2].text()))
+        self.hide()
     
     def create_option(self,text,posytion,value):    
     
