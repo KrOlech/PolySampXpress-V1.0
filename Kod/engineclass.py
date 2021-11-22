@@ -224,3 +224,11 @@ class manipulator:
         t = self.move_axes_to_abs_woe('y',[self.y])
         self.weaith_for_target()
         return t
+
+    def move_x(self,value):
+        self.x = value
+        t = self.move_axes_to_abs_woe('x',[self.x])
+        self.weaith_for_target()
+        return t
+    
+
