@@ -5,6 +5,8 @@ import Viue_label as obs
 import Map as M
 from engineclass import manipulator
 from time import sleep
+from slider import slider
+from setingswindows import axissetingwindow
 
 
 import camera as cam
@@ -35,6 +37,9 @@ class MainWindow(QMainWindow):
 
         #stworzenie przycisków do przemiesczania podglondu
         self._Direction_buttons()
+        
+        #X axis slieder
+        self.slider_create()
 
         #stworzenie i dodanie przycisków do wszelkich zastosowan
         self._Multipurpos_butons()
@@ -47,11 +52,25 @@ class MainWindow(QMainWindow):
 
         self._set_central_widget()
         
+        self.toolbars()
+
+
+    def toolbars(self):
+    
         toolbar = QToolBar("Funkcje") #stworzenie toolbara
         self.addToolBar(toolbar)
         action_6 = self.qactiontoolbar("Snap img",  lambda x: self.obraz.snap_img())
         toolbar.addAction(action_6)
+        
 
+        seting_window = self.qactiontoolbar("Ustawienia osi", self.setings_for_axis)
+        toolbar.addAction(seting_window)
+    
+    def setings_for_axis(self):
+        
+        self.axissetings = axissetingwindow(self)
+        self.axissetings.show()
+        
 
     def closeEvent(self, event):
         
@@ -85,12 +104,13 @@ class MainWindow(QMainWindow):
         
         #leyauty przycisków i opisów
         self.kierunkowelayout = QGridLayout()
-        self.przyciskilayout = QGridLayout()           
+        self.przyciskilayout = QGridLayout() 
+
+        self.sliderleyout = QHBoxLayout()
 
     def upadet_position_read(self):
         [label.setText(str(position)) for label, position in zip(self.position_labele,self.manipulaor.get_axes_positions())]
-
-        
+      
     def key_move(self,fun_manipulator,fun_obraz,key_en,key_dis):
     
         t = fun_manipulator()
@@ -106,8 +126,7 @@ class MainWindow(QMainWindow):
             self.kierunkowe[key_en].setEnabled(True)
         else:
             self.kierunkowe[key_dis].setEnabled(False)
-        
-        
+           
     def key_up(self):
         self.key_move(self.manipulaor.move_up,self.obraz.up,3,0)
 
@@ -157,9 +176,15 @@ class MainWindow(QMainWindow):
         
 
         labelexyz = [QLabel("X"), QLabel("Y"), QLabel("Z")]
-        [self.kierunkowelayout.addWidget(value, 6, i) for i, value in zip(range(1,4,1), self.position_labele)]
+        [self.kierunkowelayout.addWidget(value, 7, i) for i, value in zip(range(2,5,1), self.position_labele)]
 
-        #[self.kierunkowelayout.addWidget(value, i, 6) for i, value in zip(range(3), self.position_labele)]
+    def slider_create(self):
+    
+        self.slide = slider(self,20,30,25,Qt.Horizontal)
+
+        
+        
+        self.sliderleyout.addWidget(self.slide)
 
     def _Multipurpos_butons(self):
 
@@ -218,6 +243,7 @@ class MainWindow(QMainWindow):
         #łoczenie leyautów
         self.secendarylayout.addWidget(self.scroll)        
         self.secendarylayout.addLayout(self.kierunkowelayout)
+        self.secendarylayout.addLayout(self.sliderleyout)
         self.secendarylayout.addLayout(self.przyciskilayout)
         self.mainlayout.addLayout(self.secendarylayout)
 
