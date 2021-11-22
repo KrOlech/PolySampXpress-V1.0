@@ -14,6 +14,8 @@ import camera as cam
 class MainWindow(QMainWindow):
 
     ROI = []
+    
+    krok = 10
 
     def __init__(self, *args, **kwargs):
         
@@ -113,7 +115,7 @@ class MainWindow(QMainWindow):
       
     def key_move(self,fun_manipulator,fun_obraz,key_en,key_dis):
     
-        t = fun_manipulator()
+        t = fun_manipulator(self.krok/10)
         
         self.upadet_position_read()
         x,y,z = self.manipulaor.get_axes_positions()
@@ -286,3 +288,9 @@ class MainWindow(QMainWindow):
         if len(self.ROI) == 0 and self.defalaut_lable == 0:
             self.defalaut_lable = QLabel("No Region of interest marked")
             self.vbox.addWidget(self.defalaut_lable)
+
+
+    
+    def setkrok(self,value):
+    
+        self.krok = value
