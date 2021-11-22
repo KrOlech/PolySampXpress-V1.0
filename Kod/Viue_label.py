@@ -19,8 +19,7 @@ class Obraz(QLabel):
 
 #signals for camera action
     eventImage = pyqtSignal()
-    snap_image_event = pyqtSignal()
-    new_frame_event  =pyqtSignal()
+    snap_image_event = pyqtSignal()	
 
     hcam = None
     buf = None      # video buffer
@@ -170,11 +169,6 @@ class Obraz(QLabel):
 
 ###############################camera read##########################################
 
-    @pyqtSlot()
-    def New_frame(self):
-        pass
-
-    #emits pyqtsignal
     def snap_img(self):
         self.hcam.Snap(1)
     
@@ -185,12 +179,28 @@ class Obraz(QLabel):
             bufsize = ((w * 24 + 31) // 32 * 4) * h
             still_img_buf = bytes(bufsize)
             self.hcam.PullStillImageV2(still_img_buf, 24, None)
-            print('saving image')
+            #print('saving image')
         #    print(self.hcam.get_ExpoTime())
-            print(w, h)
-            print()
+            #print(w, h)
+            
             img = self.bytes_to_array(still_img_buf)
-            plt.imsave('img_frame_{}.png'.format(self.total), img)
+            
+            self.Qimage_read_from_camera = QImage(still_img_buf,
+                                      self.w, self.h,
+                                      (self.w * 24 + 31) // 32 * 4,
+                                      QImage.Format_RGB888)
+                     
+            self.image_opencv = self.convertQImageToMat(
+                    self.Qimage_read_from_camera)
+            
+            if all(self.main_window.manipulaor.check_on_target().values()):
+                self.newframe = True
+            else:
+                self.newframe = False
+            
+            self.loadImage()
+            
+            #plt.imsave('img_frame_{}.png'.format(self.total), img)
 
     @staticmethod
     def cameraCallback(nEvent, ctx):
@@ -234,7 +244,6 @@ class Obraz(QLabel):
                 self.image_opencv = self.convertQImageToMat(
                     self.Qimage_read_from_camera)
                 
-                self.loadImage()
                 try:
                     if self.first:
                         self.Save_curent_viue()
@@ -245,6 +254,9 @@ class Obraz(QLabel):
                     self.newframe = True
                 else:
                     self.newframe = False
+                    
+                    
+                self.loadImage()
 
     def bytes_to_array(self, still_img_buf, dtype=np.uint8):
         arr_1d = np.frombuffer(still_img_buf, dtype=dtype)
@@ -262,8 +274,8 @@ class Obraz(QLabel):
 
             #create and conect custom pyqt5 signa
             self.eventImage.connect(self.eventImageSignal)
+
             self.snap_image_event.connect(self.snap_image_event_signal)
-            self.new_frame_event.conect(self.newframe)
 
             #trying opening camera
             try:
@@ -295,7 +307,6 @@ class Obraz(QLabel):
         self.resize(self.geometry().width(), self.geometry().height())
 
 ####################################wgrywanie obrazu##################################
-
     #wagranie obrazu z pliku    
     def loadImage(self, drow_deskription = False, drow_single_rectagle = False):#przestac to wyoływac co update
         
@@ -340,7 +351,6 @@ class Obraz(QLabel):
         t = Thread(target=self.eventImageSignalT)
         t.start()
 
-
     def paintEvent(self, event):
         
         #inicializacja pintera
@@ -376,10 +386,10 @@ class Obraz(QLabel):
                 num = True
                 
             elif self.whot_to_drow == 'viue_muve':
-                if self.newframe:
-                    self.all_Rectagles(qp)
-                    self.move_viue()
-                    self.extend_map()
+
+                self.all_Rectagles(qp)
+                self.move_viue()
+                self.extend_map()
 
             else: #podstawowa obcja rysuje nowy prostokat
                 self.all_Rectagles(qp)
@@ -387,9 +397,6 @@ class Obraz(QLabel):
 
             self.loadImage(tym, num)
             
-            
-
-
     def extend_map(self):
         if self.direction_change == 'dawn':
             self.extend_map_dwn()
@@ -413,7 +420,6 @@ class Obraz(QLabel):
     def move_viue(self):        
         self.loadImage()
             
-
 #############################create rectagle###############################################
 
     def rectagledrow(self,prostokat):
@@ -440,7 +446,7 @@ class Obraz(QLabel):
     def rmv_rectagle(self,ROI):
         
         #print(self.rectangles,ROI)
-        if ROI in self.rectangles:
+        if ROI in  self.rectangles:
             self.rectangles.remove(ROI)
         
         self.main_window.remove_some_ROI(ROI)
@@ -517,6 +523,7 @@ class Obraz(QLabel):
 
     #save first viue to the map
     def Save_curent_viue(self):
+        self.waite_for_manipulator()
         if all(self.main_window.manipulaor.check_on_target().values()):   
             self.map = self.frame
 
@@ -530,10 +537,14 @@ class Obraz(QLabel):
     def reset_map(self):
         pass
 
+    def waite_for_manipulator(self):
+        self.main_window.manipulaor.weaith_for_target()
+        self.snap_img()
+
     #technicli ok
     def extend_map_right(self):
     
-        self.eventImageSignal()
+        self.waite_for_manipulator()
 
         dx = self.delta_pixeli
 
@@ -563,6 +574,8 @@ class Obraz(QLabel):
 
     #technicli ok
     def extend_map_dwn(self):
+    
+        self.snap_img()
 
         dx = self.delta_pixeli
 
@@ -599,6 +612,9 @@ class Obraz(QLabel):
 
     # technicli ok
     def extend_map_left(self):
+    
+        self.snap_img()
+    
         dx = self.delta_pixeli
 
         s = self._pixmapdromframe.size()  # wymiary podglondu
@@ -636,6 +652,8 @@ class Obraz(QLabel):
 
     # technicli notok
     def extend_map_up(self):
+        
+        self.snap_img()
 
         dx = self.delta_pixeli
 
