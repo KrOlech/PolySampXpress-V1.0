@@ -28,9 +28,9 @@ class obszarzaznaczony():
 
     # konstruktor tworzocy obiekt ze wzglednych wspułrednych prubki w pixelach
     def __init__(self, Obraz_obcet ,xp0, yp0, xp1, yp1, image, py00=0, px00=0, s00=1, Name="defalaut"):
-        
+
         self.wzglednyRectagle = (xp0, yp0, xp1, yp1)
-        
+
         self.Obraz_obcet = Obraz_obcet
         
         self.Name = Name
@@ -128,10 +128,35 @@ class obszarzaznaczony():
 
         self.dxl = dx
         self.dyl = dy
-        
-        frame = image
 
+        dx += xpo+10
+        dy += ypo+10
+
+        xpo -= 10
+        ypo -= 10
+
+        if xpo < 0:
+            xpo = 0
+        if ypo < 0:
+            ypo = 0
+        if dx > 960:
+            dx = 960
+        if dy > 540:
+            dy = 540
+
+        image = image[ypo:dy,xpo:dx]
+
+        # wybranie interesujacego nas fragmetu obrazu
+        xHigh = dx+20
+        yHigh = dy+20
+        # image = image[xHigh,yHigh]
+
+        frame = cv2.resize(image, (xHigh, yHigh))
+        #frame = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+        # conwersja z open Cv image na Qimage
         img = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0],QImage.Format_RGB888)  
+        # QImage(cvImg.data, width, height, bytesPerLine, QImage.Format_RGB888)
 
         self.image = QPixmap.fromImage(img)
 
@@ -142,3 +167,27 @@ class obszarzaznaczony():
     
     def get_podglond(self):
         return self.podglond
+
+    def move_top_line(self):
+        pass
+
+    def move_dwn_line(self):
+        pass
+
+    def move_lft_line(self):
+        pass
+
+    def move_rig_line(self):
+        pass
+
+    def move_top(self):
+        pass
+
+    def move_dwn(self):
+        pass
+
+    def move_lft(self):
+        pass
+
+    def move_rig(self):
+        pass

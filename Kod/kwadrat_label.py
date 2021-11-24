@@ -31,12 +31,10 @@ class simple_obraz(QLabel):
         #wgranie obrazu
         self.setPixmap(self._img)
 
-    def update_rectagle(self,x,y,z,s):
-        Rect = []
-        Rect.append(self.Rectagle[0]/x)
-        Rect.append(self.Rectagle[1]/y)
-        Rect.append(self.Rectagle[2]/z)
-        Rect.append(self.Rectagle[3]/s)
+    def update_rectagle(self,kordy):
+
+        Rect = [r/a for r,a in zip(self.Rectagle,kordy)]
+
         self.rectangle = QRect(QPoint(Rect[0],Rect[1]),QPoint(Rect[2],Rect[3]))
 
     def paintEvent(self, QPaintEvent):
@@ -80,7 +78,7 @@ class podglond_roi(QWidget):
         ##################################Leyout##############################################
         ###################################################################################### 
         
-        self.buton_layout =  QHBoxLayout()
+        self.buton_layout = QHBoxLayout()
         
         self.secenduary_layout = QVBoxLayout()
         self.secenduary_layout.addWidget(self.name_lable)
@@ -160,7 +158,7 @@ class podglond_roi(QWidget):
         [swich.setText(name) for name, swich in zip(nazwy, self.kierunkowe)]
 
         #przypiecie fukcji do przycisków
-        fun = [lambda : None ,lambda : None,lambda : None,lambda : None]
+        fun = [self.top_booton ,self.dwn_booton, self.lef_booton, self.rig_bootom]
 
         [swich.clicked.connect(f) for f, swich in zip(fun, self.kierunkowe)]
         
@@ -174,8 +172,51 @@ class podglond_roi(QWidget):
         self.t.setMaximumWidth(50)
         self.t.setText("return")
         self.t.clicked.connect(self.normalbutons)
-        self.kierunkowelayout.addWidget(self.t,2,2)
-        
+        self.kierunkowelayout.addWidget(self.t, 2, 2)
+
+        self.move = QPushButton()
+        self.move.setMaximumWidth(50)
+        self.move.setCheckable(True)
+        self.move.setText("move")
+        self.move.clicked.connect(self.TogleMove)
+        self.kierunkowelayout.addWidget(self.move, 2, 4)
+
+    def top_booton(self):
+        if self.move.isChecked():
+            self.obiekt_oznaczony.move_top_line()
+        else:
+            self.obiekt_oznaczony.move_top()
+
+    def dwn_booton(self):
+        if self.move.isChecked():
+            self.obiekt_oznaczony.move_dwn_line()
+        else:
+            self.obiekt_oznaczony.move_dwn()
+
+    def lef_booton(self):
+        if self.move.isChecked():
+            self.obiekt_oznaczony.move_lft_line()
+        else:
+            self.obiekt_oznaczony.move_lft()
+
+    def rig_bootom(self):
+        if self.move.isChecked():
+            self.obiekt_oznaczony.move_rif_line()
+        else:
+            self.obiekt_oznaczony.rig_top()
+
+    def TogleMove(self):
+
+        if self.move.isChecked():
+             # setting background color to light-blue
+             self.button.setStyleSheet("background-color : lightblue")
+
+        else:
+             # set background color back to light-grey
+             self.button.setStyleSheet("background-color : lightgrey")
+        pass
+
+
     def normalbutons(self):
         [self.kierunkowelayout.removeWidget(b) for b in self.kierunkowe]
         self.kierunkowe = 0
@@ -191,56 +232,45 @@ class podglond_roi(QWidget):
         self.obiekt_oznaczony.kill()
         self.obiekt_oznaczony = 0
 
-    def set_size(self,x = 180,y = 180):
-        self.setMaximumSize(x,y)
-        self.setMinimumSize(x,y)
-        
-    def xp(self):
-        self.x += 0.001
-        self.podglond.update_rectagle(self.x, self.y, self.z, self.s)
-        print(self.x, self.y, self.z, self.s)
-        self.update()
-        
-    def yp(self):
-        self.y += 0.001
-        self.podglond.update_rectagle(self.x, self.y, self.z, self.s)
-        print(self.x, self.y, self.z, self.s)
-        self.update()
-        
-    def zp(self):
-        self.z += 0.001
-        self.podglond.update_rectagle(self.x, self.y, self.z, self.s)
-        print(self.x, self.y, self.z, self.s)
-        self.update()
-        
-    def sp(self):
-        self.s += 0.001
-        self.podglond.update_rectagle(self.x, self.y, self.z, self.s)
+    def set_size(self, x=180, y=180):
+        self.setMaximumSize(x, y)
+        self.setMinimumSize(x, y)
+
+    def chang(self):
+        self.podglond.update_rectagle((self.x, self.y, self.z, self.s))
         print(self.x, self.y, self.z, self.s)
         self.update()
 
+    def xp(self):
+        self.x += 0.001
+        self.chang()
+
+    def yp(self):
+        self.y += 0.001
+        self.chang()
+        
+    def zp(self):
+        self.z += 0.001
+        self.chang()
+        
+    def sp(self):
+        self.s += 0.001
+        self.chang()
+
     def xm(self):
         self.x -= 0.001
-        self.podglond.update_rectagle(self.x, self.y, self.z, self.s)
-        print(self.x, self.y, self.z, self.s)
-        self.update()
+        self.chang()
         
     def ym(self):
         self.y -= 0.001
-        self.podglond.update_rectagle(self.x, self.y, self.z, self.s)
-        print(self.x, self.y, self.z, self.s)
-        self.update()
+        self.chang()
         
     def zm(self):
         self.z -= 0.001
-        self.podglond.update_rectagle(self.x, self.y, self.z, self.s)
-        print(self.x, self.y, self.z, self.s)
-        self.update()
+        self.chang()
         
     def sm(self):
         self.s -= 0.001
-        self.podglond.update_rectagle(self.x, self.y, self.z, self.s)
-        print(self.x, self.y, self.z, self.s)
-        self.update()
+        self.chang()
 
 #
