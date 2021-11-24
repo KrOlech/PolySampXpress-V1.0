@@ -5,7 +5,7 @@ class slider(QSlider):
 
     max_slidera = 1000
 
-    def __init__(self,Mainwinow,min,max,value,*args, **kwargs):
+    def __init__(self,Mainwinow,min,max,value = 25,*args, **kwargs):
         super(slider, self).__init__(*args, **kwargs)
         self.mainwindow = Mainwinow
         
@@ -20,7 +20,7 @@ class slider(QSlider):
         self.setMaximum(self.max_slidera)
         self.setMinimum(0)
         
-        self.setValue(self.unconwert(25))
+        self.setValue(self.unconwert(self.value))
 
     def conwertion(self,value):
         return value/self.max_slidera*(self.max-self.min)+self.min
@@ -29,8 +29,12 @@ class slider(QSlider):
         return ((value-self.min)/(self.max-self.min))*self.max_slidera
     
     def changed(self,value):
-        #print(value,self.conwertion(value))
+        self.value = self.conwertion(value)
         self.mainwindow.manipulaor.move_x(self.conwertion(value))
     
     def set_min_max(self,min,max):
         self.max,self.min = int(max), int(min)
+        self.setValue(self.unconwert(self.value))
+
+    #def get_min_max(self):
+    #    return self.min, self.max
