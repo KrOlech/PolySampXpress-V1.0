@@ -56,24 +56,6 @@ class MainWindow(QMainWindow):
         
         self.toolbars()
 
-
-    def toolbars(self):
-    
-        toolbar = QToolBar("Funkcje") #stworzenie toolbara
-        self.addToolBar(toolbar)
-        action_6 = self.qactiontoolbar("Snap img",  lambda x: self.obraz.snap_img())
-        toolbar.addAction(action_6)
-        
-
-        seting_window = self.qactiontoolbar("Ustawienia osi", self.setings_for_axis)
-        toolbar.addAction(seting_window)
-    
-    def setings_for_axis(self):
-        
-        self.axissetings = axissetingwindow(self)
-        self.axissetings.show()
-        
-
     def closeEvent(self, event):
         
         reply = QMessageBox.question(self,"mesage","Czy napewno chcesz zamknac program?",
@@ -86,16 +68,39 @@ class MainWindow(QMainWindow):
             
         else:
             event.ignore()
+
+######################################################################################
+##################################Toolbars############################################
+######################################################################################
+
+    def toolbars(self):
+    
+        toolbar = QToolBar("Funkcje") #stworzenie toolbara
+        self.addToolBar(toolbar)
+        action_6 = self.qactiontoolbar("Snap img",  lambda x: self.obraz.snap_img())
+        toolbar.addAction(action_6)
+        
+
+        seting_window = self.qactiontoolbar("Ustawienia osi", self.setings_for_axis)
+        toolbar.addAction(seting_window)
+
+    def qactiontoolbar(self,nazwa, funkcja):
+            
+        Button = QAction(nazwa, self) 
+        #stworzenie czegos na kształt przycisku ale nie koniecznie muszacego posiadac jeden triger
+        Button.triggered.connect(funkcja) 
+        #dodanie trigera
+
+        return Button 
+ 
+    def setings_for_axis(self):
+        
+        self.axissetings = axissetingwindow(self)
+        self.axissetings.show()
         
 ######################################################################################
-##################################Fukcje##############################################
+##################################Leyout and widget###################################
 ######################################################################################
-
-    def _set_central_widget(self):
-
-        widget = QWidget()
-        widget.setLayout(self.mainlayout)
-        self.setCentralWidget(widget)
 
     def _createleyouts(self):
         #Głóny leyaut
@@ -108,38 +113,30 @@ class MainWindow(QMainWindow):
         self.kierunkowelayout = QGridLayout()
         self.przyciskilayout = QGridLayout() 
 
+
+        self.sliderlegendsleyout = QVBoxLayout()
         self.sliderleyout = QHBoxLayout()
 
-    def upadet_position_read(self):
-        [label.setText(str(position)) for label, position in zip(self.position_labele,self.manipulaor.get_axes_positions())]
-      
-    def key_move(self,fun_manipulator,fun_obraz,key_en,key_dis):
-    
-        t = fun_manipulator(self.krok/10)
-        
-        self.upadet_position_read()
-        x,y,z = self.manipulaor.get_axes_positions()
-        
-        sleep(1)
-        
-        fun_obraz()
+    def _layout_marging(self):
+     
+        self.mainlayout.addWidget(self.obraz)
+ 
+        #łoczenie leyautów
+        self.secendarylayout.addWidget(self.scroll)        
+        self.secendarylayout.addLayout(self.kierunkowelayout)
+        self.secendarylayout.addLayout(self.sliderleyout)
+        self.secendarylayout.addLayout(self.przyciskilayout)
+        self.mainlayout.addLayout(self.secendarylayout)
 
-        if t:
-            self.kierunkowe[key_en].setEnabled(True)
-        else:
-            self.kierunkowe[key_dis].setEnabled(False)
-           
-    def key_up(self):
-        self.key_move(self.manipulaor.move_up,self.obraz.up,3,0)
+    def _set_central_widget(self):
 
-    def key_left(self):
-        self.key_move(self.manipulaor.move_left, self.obraz.left,2,1)
+        widget = QWidget()
+        widget.setLayout(self.mainlayout)
+        self.setCentralWidget(widget)
 
-    def key_right(self):
-        self.key_move(self.manipulaor.move_right,self.obraz.right,1,2)
-        
-    def key_dwn(self):
-        self.key_move(self.manipulaor.move_dwn,self.obraz.dawn,0,3)
+######################################################################################
+############################Direction buttons#########################################
+######################################################################################
 
     def _Direction_buttons(self):#Przyciski kierunkowe
 
@@ -179,14 +176,41 @@ class MainWindow(QMainWindow):
 
         labelexyz = [QLabel("X"), QLabel("Y"), QLabel("Z")]
         [self.kierunkowelayout.addWidget(value, 7, i) for i, value in zip(range(2,5,1), self.position_labele)]
+  
+    def key_up(self):
+        self.key_move(self.manipulaor.move_up,self.obraz.up,3,0)
 
-    def slider_create(self):
+    def key_left(self):
+        self.key_move(self.manipulaor.move_left, self.obraz.left,2,1)
+
+    def key_right(self):
+        self.key_move(self.manipulaor.move_right,self.obraz.right,1,2)
+   
+    def key_dwn(self):
+        self.key_move(self.manipulaor.move_dwn,self.obraz.dawn,0,3)
+  
+    def key_move(self,fun_manipulator,fun_obraz,key_en,key_dis):
     
-        self.slide = slider(self,20,30,25,Qt.Horizontal)
+        t = fun_manipulator(self.krok/10)
+        
+        self.upadet_position_read()
+        x,y,z = self.manipulaor.get_axes_positions()
+        
+        sleep(1)
+        
+        fun_obraz()
 
-        
-        
-        self.sliderleyout.addWidget(self.slide)
+        if t:
+            self.kierunkowe[key_en].setEnabled(True)
+        else:
+            self.kierunkowe[key_dis].setEnabled(False)
+
+    def upadet_position_read(self):
+        [label.setText(str(position)) for label, position in zip(self.position_labele,self.manipulaor.get_axes_positions())]
+
+######################################################################################
+##########################multipurpus buttons#########################################
+######################################################################################
 
     def _Multipurpos_butons(self):
 
@@ -217,6 +241,10 @@ class MainWindow(QMainWindow):
         self.map = M.Map_window(self.obraz.get_map())
         self.map.show()
 
+######################################################################################
+##########################Scroll area#################################################
+######################################################################################
+
     def _Scroll_arrea(self):
         
         self.defalaut_lable = QLabel("No Region of interest marked")
@@ -238,26 +266,10 @@ class MainWindow(QMainWindow):
         
         self.vbox.addWidget(self.defalaut_lable)
 
-    def _layout_marging(self):
-     
-        self.mainlayout.addWidget(self.obraz)
- 
-        #łoczenie leyautów
-        self.secendarylayout.addWidget(self.scroll)        
-        self.secendarylayout.addLayout(self.kierunkowelayout)
-        self.secendarylayout.addLayout(self.sliderleyout)
-        self.secendarylayout.addLayout(self.przyciskilayout)
-        self.mainlayout.addLayout(self.secendarylayout)
+######################################################################################
+##########################ROI Menagment###############################################
+######################################################################################
 
-    def qactiontoolbar(self,nazwa, funkcja):
-            
-        Button = QAction(nazwa, self) 
-        #stworzenie czegos na kształt przycisku ale nie koniecznie muszacego posiadac jeden triger
-        Button.triggered.connect(funkcja) 
-        #dodanie trigera
-
-        return Button 
-     
     def add_ROI(self, ROI):
         
         if self.defalaut_lable != 0:
@@ -289,8 +301,23 @@ class MainWindow(QMainWindow):
             self.defalaut_lable = QLabel("No Region of interest marked")
             self.vbox.addWidget(self.defalaut_lable)
 
+######################################################################################
+##########################Slider menagment############################################
+######################################################################################
 
+    def slider_create(self):
     
+        self.slide = slider(self,20,30,25,Qt.Horizontal)
+
+        self.sliderleyout.addWidget(self.slide)
+
     def setkrok(self,value):
     
         self.krok = value
+        
+
+    
+
+        
+        
+    #eof
