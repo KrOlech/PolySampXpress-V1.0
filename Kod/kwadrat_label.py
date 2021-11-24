@@ -4,7 +4,7 @@ from PyQt5.QtCore import *
 
 class simple_obraz(QLabel):
 
-    kalibracja = [6.36,6.72,6.33,6.53]
+    kalibracja = [6.36, 6.72, 6.33, 6.53]
 
     def __init__(self, img, Rectagle, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
@@ -31,7 +31,7 @@ class simple_obraz(QLabel):
 
     def update_rectagle(self, kalibracja):
 
-        Rect = [r/a for r,a in zip(self.Rectagle,kalibracja)]
+        Rect = [r/a for r,a in zip(self.Rectagle, kalibracja)]
 
         self.rectangle = QRect(QPoint(Rect[0], Rect[1]), QPoint(Rect[2], Rect[3]))
 
@@ -55,19 +55,19 @@ class podglond_roi(QWidget):
     def __init__(self, text, img, obiekt_oznaczony, *args, **kwargs):
 
         super(QWidget, self).__init__(*args, **kwargs)
-        
-        
+
+        # wskaznik do obiekt clasy obszar oznaczony
         self.obiekt_oznaczony = obiekt_oznaczony
 
         ######################################################################################
         ##################################Przyciski i labele##################################
         ######################################################################################
 
-        
+        #custom label for viusalkizastion porpos
         self.podglond = simple_obraz(img,obiekt_oznaczony.get_wzgledny_rectagle())
         
-        self.name_lable = QLabel()    
-        self.name_lable.setText(text)            
+        self.name_lable = QLineEdit(text)
+        self.name_lable.textChanged.connect(self.newname)
 
         ######################################################################################
         ##################################Leyout##############################################
@@ -86,8 +86,7 @@ class podglond_roi(QWidget):
 
         self.kierunkowelayout = QGridLayout()
         self.main_layout.addLayout(self.kierunkowelayout)
-        
-        
+
         self.setLayout(self.main_layout)
         
         self.main_butons()
@@ -97,77 +96,131 @@ class podglond_roi(QWidget):
     def __del__(self):
         self.obiekt_oznaczony = 0
 
+    def set_size(self, x=180, y=180):
+        self.setMaximumSize(x, y)
+        self.setMinimumSize(x, y)
+
+    @staticmethod
+    def boton(fun, text, clicable = False):
+        booton = QPushButton()
+        booton.setMaximumWidth(50)
+        booton.setText(text)
+        elf.move.setCheckable(clicable)
+        booton.clicked.connect(fun)
+        return booton
+
+######################################################################################
+##################################boton config########################################
+######################################################################################
+
+    def main_butons(self):
+
+        self.butons = [QPushButton() for _ in range(3)]
+
+        [self.buton_layout.addWidget(Value) for Value in self.butons]
+
+        nazwy = ["edit", "fine edit", "del"]
+
+        [swich.setText(name) for name, swich in zip(nazwy, self.butons)]
+
+        fun = [self.edit, self.fine_edit, self.dellite]
+
+        [b.clicked.connect(f) for b, f in zip(self.butons, fun)]
+
+    def calibration_butons(self):
+
+        self.butons = [QPushButton() for _ in range(8)]
+
+        [self.buton_layout.addWidget(Value) for Value in self.butons]
+
+        nazwykalibracionmode = ['xp', "yp", "zp", 'sp', "xm", "ym", "zm", "sm"]
+
+        [swich.setText(name) for name, swich in zip(nazwy, self.butons)]
+
+        self.x, self.y, self.z, self.s = 6.36, 6.72, 6.33, 6.53
+
+        funkalibracionmode = [self.xp, self.yp, self.zp, self.sp, self.xm, self.ym, self.zm, self.sm]
+        [b.clicked.connect(f) for b, f in zip(self.butons, fun)]
+
+    def _Direction_buttons(self):
+
+            self.kierunkowe = [QPushButton() for _ in range(4)]
+
+            [button.setMaximumWidth(50) for button in self.kierunkowe]
+
+            # nadanie nazw przyciska
+            nazwy = ['/\\', "<", ">", '\/']
+            [swich.setText(name) for name, swich in zip(nazwy, self.kierunkowe)]
+
+            # przypiecie fukcji do przycisków
+            fun = [self.top_booton, self.dwn_booton, self.lef_booton, self.rig_bootom]
+
+            [swich.clicked.connect(f) for f, swich in zip(fun, self.kierunkowe)]
+
+            # dodanie do leyatów przyciskó kierunkowych
+            it = [3, 2, 4, 3]
+            jt = [2, 3, 3, 4]
+            [self.kierunkowelayout.addWidget(value, j, i) for j, i, value in zip(jt, it, self.kierunkowe)]
+
+            #Return to main bootons
+            self.t =self.boton(self.retyurn_to_normalbutons,"return")
+            self.kierunkowelayout.addWidget(self.t, 2, 2)
+            self.kierunkowe.append(self.t)
+
+            #przelaczanie pomiedzy ruszaniem obszarem a jego rozszerzaniem
+            self.move = self.boton(self.TogleMove,"move",True)
+            self.kierunkowelayout.addWidget(self.move, 2, 4)
+            self.kierunkowe.append(self.move)
+
+
+    def remove_kierunkowe(self):
+        #removing main bootons
+        [self.kierunkowelayout.removeWidget(b) for b in self.kierunkowe]
+        self.kierunkowe = 0
+
+    def remove_main_bootons(self):
+        #cliring standard bootons
+        [self.buton_layout.removeWidget(b) for b in self.butons]
+        self.butons = 0
+
+######################################################################################
+##################################Obiekt oznaczony komunication#######################
+######################################################################################
+
+    def newname(self):
+        self.obiekt_oznaczony.setName(self.name_lable.text())
+
+######################################################################################
+##################################Boton function######################################
+######################################################################################
+
     def edit(self):
         pass
 
-    def main_butons(self):
-        
-        self.butons = [QPushButton() for _ in range(3)]
-        
-        [self.buton_layout.addWidget(Value) for Value in self.butons]
-        
-        nazwy = ["edit", "fine edit", "del"]
-        
-        [swich.setText(name) for name, swich in zip(nazwy, self.butons)]
-         
-        fun = [self.edit,self.fine_edit,self.dellite]
-        
-        [b.clicked.connect(f) for b,f in zip(self.butons,fun)]
-        
-    def calibration_butons(self):
-    
-        self.butons = [QPushButton() for _ in range(8)]
-        
-        [self.buton_layout.addWidget(Value) for Value in self.butons]
-        
-        nazwykalibracionmode = ['xp', "yp", "zp", 'sp',"xm","ym","zm","sm"]
-        
-        [swich.setText(name) for name, swich in zip(nazwy, self.butons)]
-        
-        self.x, self.y, self.z, self.s = 6.36,6.72,6.33,6.53
-        
-        funkalibracionmode = [self.xp,self.yp,self.zp,self.sp,self.xm,self.ym,self.zm,self.sm]
-        [b.clicked.connect(f) for b,f in zip(self.butons,fun)]
+    def fine_edit(self):
+        self.remove_main_bootons()
 
-    def fine_edit(self):#
-        [self.buton_layout.removeWidget(b) for b in self.butons]
-        self.butons = 0
-        
+        #creating direction botons
         self._Direction_buttons()
-        self.set_size(180,240)
 
-    def _Direction_buttons(self):
-        self.kierunkowe = [QPushButton() for _ in range(4)]
+        #poprawienie ksztaltu okna
+        self.set_size(180, 240)
 
-        [button.setMaximumWidth(50) for button in self.kierunkowe]
+    #deleting object
+    def dellite(self):
+        self.obiekt_oznaczony.kill()
+        self.obiekt_oznaczony = 0
 
-        #nadanie nazw przyciska
-        nazwy = ['/\\', "<", ">", '\/']
-        [swich.setText(name) for name, swich in zip(nazwy, self.kierunkowe)]
+    def retyurn_to_normalbutons(self):
 
-        #przypiecie fukcji do przycisków
-        fun = [self.top_booton ,self.dwn_booton, self.lef_booton, self.rig_bootom]
+        self.remove_kierunkowe()
 
-        [swich.clicked.connect(f) for f, swich in zip(fun, self.kierunkowe)]
-        
-        #dodanie do leyatów przyciskó kierunkowych
-        it = [3, 2, 4, 3]
-        jt = [2, 3, 3, 4]
-        [self.kierunkowelayout.addWidget(value, j, i) for j, i, value in zip(jt, it, self.kierunkowe)]
-    
-        
-        self.t = QPushButton()
-        self.t.setMaximumWidth(50)
-        self.t.setText("return")
-        self.t.clicked.connect(self.normalbutons)
-        self.kierunkowelayout.addWidget(self.t, 2, 2)
+        self.main_butons()
+        self.set_size()
 
-        self.move = QPushButton()
-        self.move.setMaximumWidth(50)
-        self.move.setCheckable(True)
-        self.move.setText("move")
-        self.move.clicked.connect(self.TogleMove)
-        self.kierunkowelayout.addWidget(self.move, 2, 4)
+######################################################################################
+##################################Fine moving#########################################
+######################################################################################
 
     def top_booton(self):
         if self.move.isChecked():
@@ -202,32 +255,10 @@ class podglond_roi(QWidget):
         else:
              # set background color back to light-grey
              self.button.setStyleSheet("background-color : lightgrey")
-        pass
 
-
-    def normalbutons(self):
-        [self.kierunkowelayout.removeWidget(b) for b in self.kierunkowe]
-        self.kierunkowe = 0
-        
-        self.kierunkowelayout.removeWidget(self.t)
-        
-        self.t = 0
-
-        self.main_butons()
-        self.set_size()
-        
-    def dellite(self):
-        self.obiekt_oznaczony.kill()
-        self.obiekt_oznaczony = 0
-
-    def set_size(self, x=180, y=180):
-        self.setMaximumSize(x, y)
-        self.setMinimumSize(x, y)
-
-    def chang(self):
-        self.podglond.update_rectagle((self.x, self.y, self.z, self.s))
-        print(self.x, self.y, self.z, self.s)
-        self.update()
+######################################################################################
+##################################Kalibration#########################################
+######################################################################################
 
     def xp(self):
         self.x += 0.001
@@ -261,4 +292,7 @@ class podglond_roi(QWidget):
         self.s -= 0.001
         self.chang()
 
-#
+    def chang(self):
+        self.podglond.update_rectagle((self.x, self.y, self.z, self.s))
+        print(self.x, self.y, self.z, self.s)
+        self.update()
