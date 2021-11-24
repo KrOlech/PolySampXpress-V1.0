@@ -4,16 +4,14 @@ from PyQt5.QtCore import *
 
 class simple_obraz(QLabel):
 
+    kalibracja = [6.36,6.72,6.33,6.53]
+
     def __init__(self, img, Rectagle, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
         
         self.Rectagle = Rectagle
         
-        Rectagl = []
-        Rectagl.append(Rectagle[0]/6.36)
-        Rectagl.append(Rectagle[1]/6.72)
-        Rectagl.append(Rectagle[2]/6.33)
-        Rectagl.append(Rectagle[3]/6.53)
+        Rectagl = [r/a for r,a in zip(self.Rectagle,self.kalibracja)]
        
         self.wgraj(img, Rectagl)
 
@@ -31,11 +29,11 @@ class simple_obraz(QLabel):
         #wgranie obrazu
         self.setPixmap(self._img)
 
-    def update_rectagle(self,kordy):
+    def update_rectagle(self, kalibracja):
 
-        Rect = [r/a for r,a in zip(self.Rectagle,kordy)]
+        Rect = [r/a for r,a in zip(self.Rectagle,kalibracja)]
 
-        self.rectangle = QRect(QPoint(Rect[0],Rect[1]),QPoint(Rect[2],Rect[3]))
+        self.rectangle = QRect(QPoint(Rect[0], Rect[1]), QPoint(Rect[2], Rect[3]))
 
     def paintEvent(self, QPaintEvent):
         # inicializacja pintera
@@ -51,9 +49,6 @@ class simple_obraz(QLabel):
         qp.setBrush(br)
 
         qp.drawRect(self.rectangle)
-
-        
-        
 
 class podglond_roi(QWidget):
 
@@ -98,13 +93,6 @@ class podglond_roi(QWidget):
         self.main_butons()
         
         self.set_size()
-       
-
-        ######################################################################################
-        ##################################conected############################################
-        ######################################################################################
-
-        
     
     def __del__(self):
         self.obiekt_oznaczony = 0
