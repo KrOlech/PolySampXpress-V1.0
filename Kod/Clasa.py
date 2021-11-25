@@ -25,6 +25,20 @@ class obszarzaznaczony():
 
     # skala
     s00 = 1
+    
+    first_pres = False
+    
+    kanta_top = False
+    kanta_botom = False
+    kanta_left = False
+    kanta_right = False
+    
+    left_top = False
+    right_top = False
+    left_botom = False
+    right_bootom = False
+    
+    move_all = False
 
     # konstruktor tworzocy obiekt ze wzglednych wspułrednych prubki w pixelach
     def __init__(self, Obraz_obcet ,xp0, yp0, xp1, yp1, image, py00=0, px00=0, s00=1, Name="defalaut"):
@@ -45,6 +59,7 @@ class obszarzaznaczony():
         return self.wzglednyRectagle
 
     def kill(self):
+        self.end_edit()
         self.Obraz_obcet.rmv_rectagle(self)  # trece
         del self.podglond
 
@@ -118,52 +133,16 @@ class obszarzaznaczony():
 
     def create_Roi_label(self, image, py00, px00, s00):
 
-        xpo, ypo = self.gettop_corner(py00, px00, s00)
+        frame = image
 
-        self.xpl = xpo
-        self.ypl = ypo
-
-        dx = abs(self.x0 - self.x1)
-        dy = abs(self.y0 - self.y1)
-
-        self.dxl = dx
-        self.dyl = dy
-
-        dx += xpo+10
-        dy += ypo+10
-
-        xpo -= 10
-        ypo -= 10
-
-        if xpo < 0:
-            xpo = 0
-        if ypo < 0:
-            ypo = 0
-        if dx > 960:
-            dx = 960
-        if dy > 540:
-            dy = 540
-
-        image = image[ypo:dy,xpo:dx]
-
-        # wybranie interesujacego nas fragmetu obrazu
-        xHigh = dx+20
-        yHigh = dy+20
-        # image = image[xHigh,yHigh]
-
-        frame = cv2.resize(image, (xHigh, yHigh))
-        #frame = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-        # conwersja z open Cv image na Qimage
         img = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0],QImage.Format_RGB888)  
-        # QImage(cvImg.data, width, height, bytesPerLine, QImage.Format_RGB888)
 
         self.image = QPixmap.fromImage(img)
 
         self.podglond = kw.podglond_roi(str(self.getName()),self.get_image(),self)
 
     def get_image(self):
-        return self.image, self.xpl, self.ypl, self.dxl, self.dyl
+        return self.image
     
     def get_podglond(self):
         return self.podglond
@@ -191,3 +170,141 @@ class obszarzaznaczony():
 
     def move_rig(self):
         pass
+        
+    def edit(self):
+        self.Obraz_obcet.edit_roi(self)
+        
+    def end_edit(self):
+        self.Obraz_obcet.end_edit()
+        
+        
+        
+###############################self edit##########################################
+
+    def pres_cords(self,e,ofsetx, ofsety):
+    
+        self.first_pres = True
+    
+        self.kanta_top = False
+        self.kanta_botom = False
+        self.kanta_left = False
+        self.kanta_right = False
+        
+        self.move_all = False
+        
+        wopszaru = 10
+    
+        self.px0 , self.py0 = e.x() + ofsetx, e.y()+ofsety 
+        
+        if self.x0-wopszaru<self.px0<self.x0+wopszaru and self.y0-wopszaru<self.py0<self.y1+wopszaru:
+            self.kanta_right = True
+        
+        if self.x1-wopszaru<self.px0<self.x1+wopszaru and self.y0-wopszaru<self.py0<self.y1+wopszaru:
+            self.kanta_left = True
+            
+        if self.y0-wopszaru<self.py0<self.y0+wopszaru and self.x0-wopszaru<self.px0<self.x1+wopszaru:
+            self.kanta_top = True
+            
+        if self.y1-wopszaru<self.py0<self.y1+wopszaru and self.x0-wopszaru<self.px0<self.x1+wopszaru:
+            self.kanta_botom = True
+        
+            
+        self.left_top = self.kanta_left and self.kanta_top
+        self.right_top = self.kanta_right and self.kanta_top
+        
+        self.left_botom = self.kanta_left and self.kanta_botom
+        self.right_bootom = self.kanta_right and self.kanta_botom
+        
+        if self.y0-wopszaru<self.py0<self.y1+wopszaru and self.x0-wopszaru<self.px0<self.x1+wopszaru:
+            self.move_all = True
+        
+        #print(self.px0 , self.py0, self.x0,self.x1, self.y0, self.y1)
+        #print(self.x1-wopszaru<self.px0<self.x1+wopszaru and self.y0-wopszaru<self.py0<self.y1+wopszaru)
+
+    def relise_cords(self,e,ofsetx, ofsety):
+    
+        self.first_pres  = False
+    
+        self.px1 , self.py1 = e.x() + ofsetx, e.y()+ofsety 
+        
+        if self.move_all:
+            dx, dy = self.px1 - self.px0, self.py1 - self.py0
+            self.x0 += dx
+            self.x1 += dx
+            self.y0 += dy
+            self.y1 += dy
+        
+        elif self.left_top:
+            self.x1 = self.px1
+            self.y0 = self.py1
+            
+        elif self.left_botom:
+            self.x1 = self.px1
+            self.y1 = self.py1
+            
+        elif self.right_bootom:
+            self.x0 = self.px1
+            self.y1 = self.py1
+            
+        elif self.right_top:
+            self.x0 = self.px1
+            self.y0 = self.py1
+            
+        elif self.kanta_botom:
+            self.y1 = self.py1
+        elif self.kanta_left:
+            self.x1 = self.px1
+        elif self.kanta_right:
+            self.x0 = self.px1
+        elif self.kanta_top:
+            self.y0 = self.py1
+
+            
+            
+
+    def move_cords(self,e,ofsetx, ofsety):
+        if self.first_pres:
+            
+            self.px1 , self.py1 = e.x() + ofsetx, e.y()+ofsety 
+            
+            
+            if self.move_all:
+                dx, dy = self.px1 - self.px0, self.py1 - self.py0
+                self.x0 += dx
+                self.x1 += dx
+                self.y0 += dy
+                self.y1 += dy
+                self.px0 , self.py0 = e.x() + ofsetx, e.y()+ofsety
+        
+            elif self.left_top:
+                #print("left_top")
+                self.x1 = self.px1
+                self.y0 = self.py1
+                
+            elif self.left_botom:
+                #print("left_botom")
+                self.x1 = self.px1
+                self.y1 = self.py1
+                
+            elif self.right_bootom:
+                #print("right_bootom")
+                self.x0 = self.px1
+                self.y1 = self.py1
+                
+            elif self.right_top:
+                #print("right_top")
+                self.x0 = self.px1
+                self.y0 = self.py1
+                
+            elif self.kanta_botom:
+                #print("kanta_botom")
+                self.y1 = self.py1
+            elif self.kanta_left:
+                #print("kanta_left")
+                self.x1 = self.px1
+            elif self.kanta_right:
+                #print("kanta_right")
+                self.x0 = self.px1
+            elif self.kanta_top:
+                #print("kanta_TOP")
+                self.y0 = self.py1
