@@ -9,8 +9,6 @@ from slider import slider
 from setingswindows import axissetingwindow
 
 
-import camera as cam
-
 class MainWindow(QMainWindow):
 
     ROI = []
