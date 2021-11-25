@@ -4,7 +4,6 @@ from PyQt5.QtWidgets import QApplication
 
 import Main_window as m
 
-import bootupwindow as bw
 
 
 def main():
