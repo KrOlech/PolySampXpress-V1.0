@@ -18,11 +18,11 @@ class simple_obraz(QLabel):
     def wgraj(self, img, Rect):
     
         #wgranie obrazu
-        self._img = img[0]
+        self._img = img
 
         #odczyt wymiarw zaczytanego obrazu
-        h0 = img[0].size().height()
-        w0 = img[0].size().width()
+        h0 = img.size().height()
+        w0 = img.size().width()
         
         self.rectangle = QRect(QPoint(Rect[0],Rect[1]),QPoint(Rect[2],Rect[3]))
         
@@ -105,7 +105,7 @@ class podglond_roi(QWidget):
         booton = QPushButton()
         booton.setMaximumWidth(50)
         booton.setText(text)
-        elf.move.setCheckable(clicable)
+        booton.setCheckable(clicable)
         booton.clicked.connect(fun)
         return booton
 
@@ -126,6 +126,8 @@ class podglond_roi(QWidget):
         fun = [self.edit, self.fine_edit, self.dellite]
 
         [b.clicked.connect(f) for b, f in zip(self.butons, fun)]
+        
+        self.butons[0].setCheckable(True)
 
     def calibration_butons(self):
 
@@ -172,11 +174,12 @@ class podglond_roi(QWidget):
             self.kierunkowelayout.addWidget(self.move, 2, 4)
             self.kierunkowe.append(self.move)
 
-
     def remove_kierunkowe(self):
         #removing main bootons
         [self.kierunkowelayout.removeWidget(b) for b in self.kierunkowe]
         self.kierunkowe = 0
+        self.move = 0
+        self.t = 0
 
     def remove_main_bootons(self):
         #cliring standard bootons
@@ -195,8 +198,18 @@ class podglond_roi(QWidget):
 ######################################################################################
 
     def edit(self):
-        pass
+    
+        if self.butons[0].isChecked():
+            # setting background color to light-blue
+            self.butons[0].setStyleSheet("background-color : lightblue")
+            self.obiekt_oznaczony.edit()
 
+        else:
+            # set background color back to light-grey
+            self.butons[0].setStyleSheet("background-color : lightgrey")
+            self.obiekt_oznaczony.end_edit()
+        
+        
     def fine_edit(self):
         self.remove_main_bootons()
 
@@ -242,19 +255,19 @@ class podglond_roi(QWidget):
 
     def rig_bootom(self):
         if self.move.isChecked():
-            self.obiekt_oznaczony.move_rif_line()
+            self.obiekt_oznaczony.move_rig_line()
         else:
-            self.obiekt_oznaczony.rig_top()
+            self.obiekt_oznaczony.move_rig()
 
     def TogleMove(self):
 
         if self.move.isChecked():
              # setting background color to light-blue
-             self.button.setStyleSheet("background-color : lightblue")
+             self.move.setStyleSheet("background-color : lightblue")
 
         else:
              # set background color back to light-grey
-             self.button.setStyleSheet("background-color : lightgrey")
+             self.move.setStyleSheet("background-color : lightgrey")
 
 ######################################################################################
 ##################################Kalibration#########################################
