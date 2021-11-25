@@ -88,6 +88,9 @@ class Obraz(QLabel):
     frame = True
     
     waitontarget = False
+    
+    edit_trybe = False
+    edited_roi = None
 
     #construvtor
     def __init__(self, main_window, *args, **kwargs):
@@ -116,42 +119,51 @@ class Obraz(QLabel):
 ###############################mous tracking##########################################
    
     def mousePressEvent(self, e):#działąnia podczas klikniecia myszki
+        if self.edit_trybe:
+            self.edited_roi.pres_cords(e, self.ofsetx,self.ofsety)
+        
+        else:
+            #zapis pozycji klikniecia
+            self.x1 = e.x()
+            self.y1 = e.y()
 
-        #zapis pozycji klikniecia
-        self.x1 = e.x()
-        self.y1 = e.y()
+            #zapisanie pozycji pierwszego klikniecia jako obiekt klasy qpoint
+            self.begin = e.pos()
 
-        #zapisanie pozycji pierwszego klikniecia jako obiekt klasy qpoint
-        self.begin = e.pos()
+            self.iloscklikniec = True
 
-        self.iloscklikniec = True
-
-        self.whot_to_drow = 'previu_rectagle'
+            self.whot_to_drow = 'previu_rectagle'
 
     def mouseReleaseEvent(self, e):
+        if self.edit_trybe:
+            self.edited_roi.relise_cords(e,self.ofsetx,self.ofsety)
+            
+        else:    
+            # zapisanie wspułrzedne klikniecia
+            self.x2 = e.x()
+            self.y2 = e.y()
 
-        # zapisanie wspułrzedne klikniecia
-        self.x2 = e.x()
-        self.y2 = e.y()
+            # zapisanie pozycji klikniecia jako obiekt klasy qpoint
+            self.end = e.pos()
 
-        # zapisanie pozycji klikniecia jako obiekt klasy qpoint
-        self.end = e.pos()
+            # dopisanie nowego prostokata do listy
+            tym = self.rectaglecreate()
 
-        # dopisanie nowego prostokata do listy
-        tym = self.rectaglecreate()
+            self.rectangles.append(tym)
 
-        self.rectangles.append(tym)
+            # implementacja iteratora wyswietlanego prostokata
+            self.ktury += 1
 
-        # implementacja iteratora wyswietlanego prostokata
-        self.ktury += 1
+            self.iloscklikniec = False
+            self.whot_to_drow = 'all_rectagls'
 
-        self.iloscklikniec = False
-        self.whot_to_drow = 'all_rectagls'
-
-        self.update()
+            self.update()
 
     def mouseMoveEvent(self, e):
-        if self.iloscklikniec:
+        if self.edit_trybe:
+            self.edited_roi.move_cords(e,self.ofsetx,self.ofsety)
+            
+        elif self.iloscklikniec:
 
             self.x2 = e.x()
             self.y2 = e.y()
@@ -681,3 +693,12 @@ class Obraz(QLabel):
 
     def get_map(self):
         return self.map
+
+    def edit_roi(self,roi):
+        
+        self.edit_trybe = True
+        self.edited_roi = roi
+    
+    def end_edit(self):
+        self.edit_trybe = False
+        self.edited_roi = None
