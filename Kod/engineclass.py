@@ -134,10 +134,9 @@ class manipulator:
         arr = (ctypes.c_double * size)(*positions)
         return ctypes.cast(arr, ctypes.POINTER(ctypes.c_double))
 
-    #workinprogres
+    #Metoda zadajaca przesuniecie zadanych osi na zadana pozycje
     def move_axes_to_abs_woe(self,axes='xyz', positions=[25.0, 25.0, 25.0]):
         return self._move_axes_to_abs(axes, positions)
-            
 
     def _move_axes_to_abs(self, axes, positions):
         '''
@@ -171,6 +170,7 @@ class manipulator:
             #print('something went terribly wrong')
             return False
 
+    #wypisanie aktualnych pozycji manipulatora
     def print_curent_position(self):   
         while not self.get_axes_positions('xyz'):
             sleep(1)
@@ -197,12 +197,13 @@ class manipulator:
             status[c] = bool_array[0]
         return status
 
+    #metoda oczekujca az zostanie osiognieta zadana pozycja. jednoczesnie updatujaca napisy na glównym oknie
     def weaith_for_target(self):
         while not all(self.check_on_target().values()):
             self.main.upadet_position_read()
         self.x, self.y, self.z = self.get_axes_positions('xyz')
-        #print(time(),"osiongniecie pozycji")
-        
+
+  ########################metody odbierajace wysłąne poleca ruchu################
     def move_up(self,krok):
         self.z -= krok
         t = self.move_axes_to_abs_woe('z',[self.z])
@@ -232,15 +233,15 @@ class manipulator:
         t = self.move_axes_to_abs_woe('x',[self.x])
         self.weaith_for_target()
         return t
-    
-    def simple_stop(self,controller_id):
+
+    def simple_stop(self):
         '''
         stops movement of all axes
         '''
         c_id = self._convert_id(self.controller_id)
         return self.c848.C848_STP(c_id)
-        
-        
+
+    #metod alowing moving more than 1 axis at the time
     def move_axes_to_abs_woe_ofset(self,axes,tab):
         ntab = []
         for a,v in zip(axes,tab):

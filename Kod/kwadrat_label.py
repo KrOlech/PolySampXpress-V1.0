@@ -8,11 +8,14 @@ class simple_obraz(QLabel):
 
     def __init__(self, img, Rectagle, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
-        
+
+        #Roi cords for comunication purpuse
         self.Rectagle = Rectagle
-        
-        Rectagl = [r/a for r,a in zip(self.Rectagle,self.kalibracja)]
-       
+
+        #kalibrate reded cords
+        Rectagl = [r/a for r, a in zip(self.Rectagle,self.kalibracja)]
+
+       #wgraj obiekt
         self.wgraj(img, Rectagl)
 
     def wgraj(self, img, Rect):
@@ -29,12 +32,14 @@ class simple_obraz(QLabel):
         #wgranie obrazu
         self.setPixmap(self._img)
 
+    #metod alowing calibration of podglond
     def update_rectagle(self, kalibracja):
 
         Rect = [r/a for r,a in zip(self.Rectagle, kalibracja)]
 
         self.rectangle = QRect(QPoint(Rect[0], Rect[1]), QPoint(Rect[2], Rect[3]))
 
+    #overload metody paint event z Pyqt5
     def paintEvent(self, QPaintEvent):
         # inicializacja pintera
         qp = QPainter(self)
@@ -136,10 +141,12 @@ class podglond_roi(QWidget):
     def __del__(self):
         self.obiekt_oznaczony = 0
 
+    #blokada rozmiaru
     def set_size(self, x=180, y=225):
         self.setMaximumSize(x, y)
         self.setMinimumSize(x, y)
 
+    #metocda tworzoca przycisk o zadanych parametrach
     @staticmethod
     def boton(fun, text, clicable = False):
         booton = QPushButton()
@@ -153,6 +160,7 @@ class podglond_roi(QWidget):
 ##################################boton config########################################
 ######################################################################################
 
+    #metoda tworzoca glówne przyciski
     def main_butons(self):
 
         self.butons = [QPushButton() for _ in range(3)]
@@ -169,6 +177,7 @@ class podglond_roi(QWidget):
         
         self.butons[0].setCheckable(True)
 
+    #metod removing clasic bootons an aplaying calibration bootons
     def calibration_butons(self):
 
         self.butons = [QPushButton() for _ in range(8)]
@@ -236,13 +245,14 @@ class podglond_roi(QWidget):
 ##################################Obiekt oznaczony komunication#######################
 ######################################################################################
 
+    #live update nazwy obiektu
     def newname(self):
         self.obiekt_oznaczony.setName(self.name_lable.text())
 
-
+    #metoda updatujaca na bierzoco kordynaty wyswietlane na obiekcie
     def update_cords(self):
     
-        x,x1,y,y1 = self.obiekt_oznaczony.get_niezalezne_pixele()
+        x, x1, y, y1 = self.obiekt_oznaczony.get_niezalezne_pixele()
         
         
         self.x0_label.setText(str(x))
@@ -253,15 +263,16 @@ class podglond_roi(QWidget):
         self.y0_label.setText(str(y))
         self.y1_label.setText(str(y1))
         
-        self.poleL.setText(str(self.pole(x,x1,y,y1)))
+        self.poleL.setText(str(self.pole(x, x1, y, y1)))
 
-    def pole(self, x,x1,y,y1):
+    #fukcja liczaca pole obszaru oznaczonego
+    def pole(self, x, x1, y, y1):
     
-        xm = min(x,x1)
-        xM = max(x,x1)
+        xm = min(x, x1)
+        xM = max(x, x1)
         
-        ym = min(y,y1)
-        yM = max(y,y1)
+        ym = min(y, y1)
+        yM = max(y, y1)
         
         return abs(xM-xm)*abs(yM-ym)
         
@@ -269,6 +280,7 @@ class podglond_roi(QWidget):
 ##################################Boton function######################################
 ######################################################################################
 
+    #rising edit flag
     def edit(self):
     
         if self.butons[0].isChecked():
@@ -280,7 +292,8 @@ class podglond_roi(QWidget):
             # set background color back to light-grey
             self.butons[0].setStyleSheet("background-color : lightgrey")
             self.obiekt_oznaczony.end_edit()
-        
+
+    #swiching to fine edit bootns
     def fine_edit(self):
         self.remove_main_bootons()
 
@@ -295,6 +308,7 @@ class podglond_roi(QWidget):
         self.obiekt_oznaczony.kill()
         self.obiekt_oznaczony = 0
 
+    #metod removing fine bootons and seting main ones
     def retyurn_to_normalbutons(self):
 
         self.remove_kierunkowe()
@@ -306,6 +320,7 @@ class podglond_roi(QWidget):
 ##################################Fine moving#########################################
 ######################################################################################
 
+##########################dwutrybowe przyciski kierunkowe############################
     def top_booton(self):
         if self.move.isChecked():
             self.obiekt_oznaczony.move_top_line(self.incrise.isChecked())
@@ -338,6 +353,7 @@ class podglond_roi(QWidget):
             
         self.update_cords()
 
+######################################################################################
     def TogleMove(self):
 
         if self.move.isChecked():

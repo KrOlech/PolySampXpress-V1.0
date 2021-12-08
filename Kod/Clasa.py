@@ -25,34 +25,42 @@ class obszarzaznaczony():
 
     # skala
     s00 = 1
-    
+
+    #bolean value holding values allowing recognision of edition
     first_pres = False
-    
+
     kanta_top = False
     kanta_botom = False
     kanta_left = False
     kanta_right = False
     
     left_top = False
-    right_top = False
+    right_top = FalseW
     left_botom = False
     right_bootom = False
     
     move_all = False
+    ####################################
 
     # konstruktor tworzocy obiekt ze wzglednych wspułrednych prubki w pixelach
-    def __init__(self, Obraz_obcet ,xp0, yp0, xp1, yp1, image, py00=0, px00=0, s00=1, Name="defalaut"):
+    def __init__(self, obraz_obcet, xp0, yp0, xp1, yp1, image, py00=0, px00=0, s00=1, Name="defalaut"):
 
+        #wzgledny kwadrat wymagany do stworzenia podglondu
         self.wzglednyRectagle = (xp0, yp0, xp1, yp1)
 
-        self.Obraz_obcet = Obraz_obcet
-        
+        #Nadrzedny obiekt (map lub kamera) w któyrym strworzono obiektr przekazanoy w celu komunikacji
+        self.Obraz_obcet = obraz_obcet
+
+        #nazwa obiektu
         self.Name = Name
 
+        #metoda tworzoca niezalezne wspulrdzede prubki w pixelach
         self.set_niezalezne_pixele(xp0, yp0, xp1, yp1, px00, py00, s00)
 
+        #metoda tworzoca widget umozliwiajacy interakcje z obiektem
         self.create_Roi_label(image, py00, px00, s00)
 
+        #metoda tworzoca niezalerzne wspułredne prubki w mm
         self.set_niezalezne_Prubki()
 
     def get_wzgledny_rectagle(self):
@@ -83,11 +91,13 @@ class obszarzaznaczony():
     # metoda zwracajaca prostokoat qrect w układzei waktualnie wyswietlanym
     def getrectangle(self, Rozmiar, py00, px00, sy, sx ,s00=1):
 
+        #konwersja niezaleznych wspułrzednych prubki na zalezne dla obecnego ofsetu.
         xp0 = (self.x0 - px00) * s00*sx
         yp0 = (self.y0 - py00) * s00*sy
         xp1 = (self.x1 - px00) * s00*sx
         yp1 = (self.y1 - py00) * s00*sy
 
+        #sprawdzenie czy obszar nie wychodzi poza podglond
         if xp0 < 0:
             xp0 = 0
 
@@ -111,6 +121,7 @@ class obszarzaznaczony():
     def getName(self):
         return self.Name
 
+    #metoda zwracajaca najwyszy prawy naroznik obiektu
     def gettop_corner(self, ox, oy, s00):
 
         if self.x0 < self.x1 and self.y0 < self.y1:
@@ -128,6 +139,7 @@ class obszarzaznaczony():
 
         return xp0, yp0
 
+    #metoda zwracajaca lokacje nazwy wyswietlanej na podglondzie
     def gettextloc(self, ox, oy, s00=1):
 
         xp0, yp0 = self.gettop_corner(ox, oy, s00)
@@ -150,6 +162,7 @@ class obszarzaznaczony():
     def get_podglond(self):
         return self.podglond
 
+############edycja obiektu za pomoca strzalek####################
     def move_top_line(self, mode):
         if mode:
             self.y0 +=10
@@ -187,23 +200,24 @@ class obszarzaznaczony():
         self.x0 -=10
         self.x1 -=10
 
-    def move_rig(self):#dwn
+    def move_rig(self):
 
         self.x0 +=10
         self.x1 +=10
-        
+
+################odbieranie iw ysyłanie flagi edycji###########
+
     def edit(self):
         self.Obraz_obcet.edit_roi(self)
         
     def end_edit(self):
         self.Obraz_obcet.end_edit()
-        
-        
-        
+
 ###############################self edit##########################################
 
-    def pres_cords(self,e,ofsetx, ofsety):
-    
+    def pres_cords(self, e, ofsetx, ofsety):
+
+        #reseting previus paramiters
         self.first_pres = True
     
         self.kanta_top = False
@@ -216,7 +230,8 @@ class obszarzaznaczony():
         wopszaru = 10
     
         self.px0 , self.py0 = e.x() + ofsety, e.y()+ofsetx
-        
+
+        #recognising neret eage eages
         if self.x0-wopszaru<self.px0<self.x0+wopszaru and self.y0-wopszaru<self.py0<self.y1+wopszaru:
             self.kanta_right = True
         
@@ -229,24 +244,29 @@ class obszarzaznaczony():
         if self.y1-wopszaru<self.py0<self.y1+wopszaru and self.x0-wopszaru<self.px0<self.x1+wopszaru:
             self.kanta_botom = True
         
-            
+        #checkig for corners
         self.left_top = self.kanta_left and self.kanta_top
         self.right_top = self.kanta_right and self.kanta_top
         
         self.left_botom = self.kanta_left and self.kanta_botom
         self.right_bootom = self.kanta_right and self.kanta_botom
-        
+
+        #checking for center of the marked region
         if self.y0+wopszaru<self.py0<self.y1-wopszaru and self.x0+wopszaru<self.px0<self.x1-wopszaru:
             self.move_all = True
-            
+
+        #update kordynat
         self.podglond.update_cords()
 
     def relise_cords(self,e,ofsetx, ofsety):
-    
-        self.first_pres  = False
-    
+
+        #reset pres caount
+        self.first_pres = False
+
+        #read and ofset cords
         self.px1 , self.py1 = e.x() + ofsety, e.y()+ofsetx
-        
+
+        #chec for trybe
         if self.move_all:
             dx, dy = self.px1 - self.px0, self.py1 - self.py0
             self.x0 += dx
@@ -281,12 +301,15 @@ class obszarzaznaczony():
             
         self.podglond.update_cords()
       
-    def move_cords(self,e,ofsetx, ofsety):
+    def move_cords(self, e, ofsetx, ofsety):
+
+        #chec if maouse is presed
         if self.first_pres:
-            
+
+            #ofset reded cords
             self.px1 , self.py1 = e.x() + ofsety, e.y()+ofsetx
             
-            
+            #chec for trybe
             if self.move_all:
                 dx, dy = self.px1 - self.px0, self.py1 - self.py0
                 self.x0 += dx
@@ -316,18 +339,13 @@ class obszarzaznaczony():
                 self.y0 = self.py1
                 
             elif self.kanta_botom:
-                #print("kanta_botom")
                 self.y1 = self.py1
             elif self.kanta_left:
-                #print("kanta_left")
                 self.x1 = self.px1
             elif self.kanta_right:
-                #print("kanta_right")
                 self.x0 = self.px1
             elif self.kanta_top:
-                #print("kanta_TOP")
                 self.y0 = self.py1
                 
             self.podglond.update_cords()
                 
-#

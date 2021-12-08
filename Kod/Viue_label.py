@@ -155,6 +155,7 @@ class Obraz(ROI_maping):
                     
                 self.loadImage()
 
+    #conwert Qpixmap to numpy tab
     def bytes_to_array(self, still_img_buf, dtype=np.uint8):
         arr_1d = np.frombuffer(still_img_buf, dtype=dtype)
         return arr_1d.reshape(self.h, self.w, 3)
@@ -247,7 +248,8 @@ class Obraz(ROI_maping):
     def extend_map(self):
         if self.direction_change:
             self.waite_for_manipulator()
-        
+
+    #ches map change direction
     def extend_map_camera(self):
         print("extend_map")
         if self.direction_change == 'dawn':
@@ -267,8 +269,6 @@ class Obraz(ROI_maping):
       
     def move_viue(self):        
         self.loadImage()
-            
-
 
 ####################################fukcje wywoływane przez guziki z gluwnego okna####################################
 
@@ -336,6 +336,7 @@ class Obraz(ROI_maping):
 
 ###########################map extetion##############################
 
+    #update map on center on click metod WIP
     def mapupdate(self):
     
         xm, ym, zm = self.map.shape #wymiary aktualnej mapy
@@ -358,8 +359,8 @@ class Obraz(ROI_maping):
         print(self.dxp,self.dyp)
         
         if self.dyp > 0:
-            self.whot_to_drow = 'viue_muve'
-            self.direction_change = 'right' 
+            #self.whot_to_drow = 'viue_muve'
+            #self.direction_change = 'right'
             print('right')
         else:
             self.dyp = abs(self.dyp)
@@ -394,8 +395,8 @@ class Obraz(ROI_maping):
     def reset_map(self):
         pass
 
+    #waiting for manipulator and snap ne frame
     def waite_for_manipulator(self):
-        
         self.main_window.manipulaor.weaith_for_target()
         self.snap_img()
           
