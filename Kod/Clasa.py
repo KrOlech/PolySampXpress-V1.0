@@ -57,6 +57,9 @@ class obszarzaznaczony():
 
     def get_wzgledny_rectagle(self):
         return self.wzglednyRectagle
+        
+    def get_niezalezne_pixele(self):
+        return self.x0, self.x1, self.y0, self.y1
 
     def kill(self):
         self.end_edit()
@@ -78,12 +81,12 @@ class obszarzaznaczony():
         self.y1 = (yp1 + py00)*s00
 
     # metoda zwracajaca prostokoat qrect w układzei waktualnie wyswietlanym
-    def getrectangle(self, Rozmiar, py00, px00, s00=1):
+    def getrectangle(self, Rozmiar, py00, px00, sy, sx ,s00=1):
 
-        xp0 = (self.x0 - px00) * s00
-        yp0 = (self.y0 - py00) * s00
-        xp1 = (self.x1 - px00) * s00
-        yp1 = (self.y1 - py00) * s00
+        xp0 = (self.x0 - px00) * s00*sx
+        yp0 = (self.y0 - py00) * s00*sy
+        xp1 = (self.x1 - px00) * s00*sx
+        yp1 = (self.y1 - py00) * s00*sy
 
         if xp0 < 0:
             xp0 = 0
@@ -147,29 +150,47 @@ class obszarzaznaczony():
     def get_podglond(self):
         return self.podglond
 
-    def move_top_line(self):
-        pass
+    def move_top_line(self, mode):
+        if mode:
+            self.y0 +=10
+        else:
+            self.y0 -=10
 
-    def move_dwn_line(self):
-        pass
+    def move_dwn_line(self, mode):
+        if mode:
+            self.y1 -=10
+        else:
+            self.y1 +=10
 
-    def move_lft_line(self):
-        pass
+    def move_lft_line(self, mode):
+        if mode:
+            self.x0 +=10
+        else:
+            self.x0 -=10
 
-    def move_rig_line(self):
-        pass
+    def move_rig_line(self, mode):
+        if mode:
+            self.x1 -=10
+        else:
+            self.x1 +=10
 
     def move_top(self):
-        pass
+        self.y0 -=10
+        self.y1 -=10
 
-    def move_dwn(self):
-        pass
+    def move_dwn(self):#left
+
+        self.y0 +=10
+        self.y1 +=10
 
     def move_lft(self):
-        pass
+        self.x0 -=10
+        self.x1 -=10
 
-    def move_rig(self):
-        pass
+    def move_rig(self):#dwn
+
+        self.x0 +=10
+        self.x1 +=10
         
     def edit(self):
         self.Obraz_obcet.edit_roi(self)
@@ -194,7 +215,7 @@ class obszarzaznaczony():
         
         wopszaru = 10
     
-        self.px0 , self.py0 = e.x() + ofsetx, e.y()+ofsety 
+        self.px0 , self.py0 = e.x() + ofsety, e.y()+ofsetx
         
         if self.x0-wopszaru<self.px0<self.x0+wopszaru and self.y0-wopszaru<self.py0<self.y1+wopszaru:
             self.kanta_right = True
@@ -215,17 +236,16 @@ class obszarzaznaczony():
         self.left_botom = self.kanta_left and self.kanta_botom
         self.right_bootom = self.kanta_right and self.kanta_botom
         
-        if self.y0-wopszaru<self.py0<self.y1+wopszaru and self.x0-wopszaru<self.px0<self.x1+wopszaru:
+        if self.y0+wopszaru<self.py0<self.y1-wopszaru and self.x0+wopszaru<self.px0<self.x1-wopszaru:
             self.move_all = True
-        
-        #print(self.px0 , self.py0, self.x0,self.x1, self.y0, self.y1)
-        #print(self.x1-wopszaru<self.px0<self.x1+wopszaru and self.y0-wopszaru<self.py0<self.y1+wopszaru)
+            
+        self.podglond.update_cords()
 
     def relise_cords(self,e,ofsetx, ofsety):
     
         self.first_pres  = False
     
-        self.px1 , self.py1 = e.x() + ofsetx, e.y()+ofsety 
+        self.px1 , self.py1 = e.x() + ofsety, e.y()+ofsetx
         
         if self.move_all:
             dx, dy = self.px1 - self.px0, self.py1 - self.py0
@@ -258,14 +278,13 @@ class obszarzaznaczony():
             self.x0 = self.px1
         elif self.kanta_top:
             self.y0 = self.py1
-
             
-            
-
+        self.podglond.update_cords()
+      
     def move_cords(self,e,ofsetx, ofsety):
         if self.first_pres:
             
-            self.px1 , self.py1 = e.x() + ofsetx, e.y()+ofsety 
+            self.px1 , self.py1 = e.x() + ofsety, e.y()+ofsetx
             
             
             if self.move_all:
@@ -274,7 +293,7 @@ class obszarzaznaczony():
                 self.x1 += dx
                 self.y0 += dy
                 self.y1 += dy
-                self.px0 , self.py0 = e.x() + ofsetx, e.y()+ofsety
+                self.px0 , self.py0 = e.x() + ofsety, e.y()+ofsetx
         
             elif self.left_top:
                 #print("left_top")
@@ -308,3 +327,7 @@ class obszarzaznaczony():
             elif self.kanta_top:
                 #print("kanta_TOP")
                 self.y0 = self.py1
+                
+            self.podglond.update_cords()
+                
+#
