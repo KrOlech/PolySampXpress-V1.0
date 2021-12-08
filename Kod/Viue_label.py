@@ -343,21 +343,27 @@ class Obraz(ROI_maping):
         
         if self.ofsetx < self.ofsetxmin:
             xm += abs(self.dxp)
-        elif self.ofsetx < self.ofsetxmin:
+            self.ofsetxmin = self.ofsetx
+        elif self.ofsetx > self.ofsetxmax:
             xm += abs(self.dxp)
+            self.ofsetxmax = self.ofsetx
         else:
             pass
             
-        if self.ofsetx > self.ofsetxmax:
+        if self.ofsety < self.ofsetymin:
             ym += abs(self.dyp)
+            self.ofsetymin = self.ofsety
         elif self.ofsety > self.ofsetymax:
             ym += abs(self.dyp)
+            self.ofsetymax = self.ofsety
         else:
             pass
             
         self.mape_impute_tab = np.ones((xm, ym, zm), dtype=np.uint8)
         print(self.dxp,self.dyp)
-        
+
+        self.mape_impute_tab[:,:] = self.map
+
         if self.dyp > 0:
             #self.whot_to_drow = 'viue_muve'
             #self.direction_change = 'right'

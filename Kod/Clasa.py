@@ -35,7 +35,7 @@ class obszarzaznaczony():
     kanta_right = False
     
     left_top = False
-    right_top = FalseW
+    right_top = False
     left_botom = False
     right_bootom = False
     
