@@ -106,22 +106,20 @@ class ROI_maping(QLabel):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         self.frame = cv2.resize(image, self.rozmiar)
-        #self.frame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
-
 
         if drow_deskription:
             for i,rectangle in enumerate(self.main_window.rectangles):
-                rX,rY = rectangle.gettextloc(self.ofsetx,self.ofsety,self.scall)
-                cv2.putText(frame, str(rectangle.getName()),(rX,rY),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2)
+                rX,rY = rectangle.gettextloc(self.ofsetx, self.ofsety, self.scall)
+                cv2.putText(frame, str(rectangle.getName()), (rX, rY), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
 
         if drow_single_rectagle:
-            rX,rY = self.main_window.rectangles[self.ktury].gettextloc(self.ofsetx,self.ofsety,self.scall)
-            cv2.putText(frame, str(self.main_window.rectangles[self.ktury].getName()),(rX,rY),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2)
+            rX,rY = self.main_window.rectangles[self.ktury].gettextloc(self.ofsetx, self.ofsety, self.scall)
+            cv2.putText(frame, str(self.main_window.rectangles[self.ktury].getName()), (rX, rY), cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2)
         
         #conwersja z open Cv image na Qimage
-        self._imgfromframe = QImage(frame, frame.shape[1],frame.shape[0],frame.strides[0],QImage.Format_RGB888)
-        #QImage(cvImg.data, width, height, bytesPerLine, QImage.Format_RGB888)
+        self._imgfromframe = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0], QImage.Format_RGB888)
+
         self._pixmapdromframe = QPixmap.fromImage(self._imgfromframe)
         
         #wgranie obrazu

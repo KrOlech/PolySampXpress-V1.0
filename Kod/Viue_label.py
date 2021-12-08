@@ -252,6 +252,8 @@ class Obraz(ROI_maping):
             self.extend_map_right()
         elif self.direction_change == 'left':
             self.extend_map_left()
+        elif self.direction_change == 'multi':
+            self.extend_map_multi()
         else:
             pass
         self.direction_change = ''
@@ -329,12 +331,11 @@ class Obraz(ROI_maping):
 
 ###########################map extetion##############################
 
-    #update map on center on click metod WIP
-    def mapupdate(self):
+    #metoda generujaca pusty
+    def map_size_update(self):
 
-        # wymiary aktualnej mapy
         xm, ym, zm = self.map.shape
-        
+
         if self.ofsetx < self.ofsetxmin:
             xm += abs(self.dxp)
             self.ofsetxmin = self.ofsetx
@@ -343,7 +344,7 @@ class Obraz(ROI_maping):
             self.ofsetxmax = self.ofsetx
         else:
             pass
-            
+
         if self.ofsety < self.ofsetymin:
             ym += abs(self.dyp)
             self.ofsetymin = self.ofsety
@@ -352,16 +353,53 @@ class Obraz(ROI_maping):
             self.ofsetymax = self.ofsety
         else:
             pass
-            
-        self.mape_impute_tab = np.ones((xm, ym, zm), dtype=np.uint8)
-        print(self.dxp,self.dyp)
 
-        #self.mape_impute_tab[:,:] = self.map
+        return np.ones((xm, ym, zm), dtype=np.uint8)
+
+    def inject_map(self):
+
+        xm, ym, zm = self.map.shape
+
+        if self.dxp >= 0 and  self.dyp >= 0:
+            self.mape_impute_tab[:xm, :ym] = self.map
+
+        elif self.dxp<0 and  self.dyp >= 0:
+            self.mape_impute_tab[self.dxp:, :ym] = self.map
+
+        elif self.dxp>=0 and  self.dyp < 0:
+            self.mape_impute_tab[:xm, self.dyp:] = self.map
+
+        elif self.dxp<0 and  self.dyp < 0:
+            self.mape_impute_tab[self.dxp:, self.dyp:] = self.map
+
+    #update map on center on click metod WIP
+    def mapupdate(self):
+
+        self.mape_impute_tab = self.map_size_update()
+
+        print(self.dxp, self.dyp)
+
+        self.inject_map()
+
+        self.whot_to_drow = 'viue_muve'
+        self.direction_change = 'multi'
+        self.update()
+
+    def extend_map_multi(self):
+
+        dy = self.dyp
+        dx = self.dxp
+
+        x, y, z = self.frame_2.shape  # wymiary podglondu
+
+        xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
 
         if self.dyp > 0:
             #self.whot_to_drow = 'viue_muve'
             #self.direction_change = 'right'
             print('right')
+            # wkopiowanie nowego fragmentu
+            tab[self.ofsetx - self.ofsetxmin: x + self.ofsetx - self.ofsetxmin, ym:ym + dx] = self.frame_2[:, y - dx:]
         else:
             self.dyp = abs(self.dyp)
             print('left')
@@ -401,141 +439,81 @@ class Obraz(ROI_maping):
         self.main_window.manipulaor.weaith_for_target()
         self.snap_img()
 
-    def extend_map_right(self,tab = False):
-        
-        dx = self.delta_pixeli if not self.dyp else self.dyp
+    def extend_map_exeqiute(self, test_extend, ofset, borderofset, dx, dy, tx, ty, fx, fy):
 
-        x,y,z = self.frame.shape #wymiary podglondu
+        x, y, z = self.frame_2.shape  # wymiary podglondu
 
-        xm, ym, zm = self.map.shape #wymiary aktualnej mapy
+        xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
 
-       #tablica do któej wkopiujemy poszerzona mape
-        if len(self.mape_impute_tab)==0:
-            if self.ofsety > self.ofsetymax:
-                tab = np.ones((xm, ym + dx, zm), dtype=np.uint8)
-                self.ofsetymax = self.ofsety
-            else:
-                tab = np.ones((xm, ym, zm), dtype=np.uint8)
+        if test_extend:
+            tab = np.ones((xm + dx, ym+dy, zm), dtype=np.uint8)
+            borderofset = ofset
+            # Wkopoiowanie istniejocej mapy
+            tab[dx:xm + dx, dy:ym+dy] = self.map
         else:
-            tab = self.mape_impute_tab
-            
-        try: 
-            #Wkopoiowanie istniejocej mapy
-            tab[0:xm, 0:ym] = self.map
-            
-            #wkopiowanie nowego fragmentu 
-            tab[self.ofsetx-self.ofsetxmin: x + self.ofsetx-self.ofsetxmin, ym:ym+dx] = self.frame_2[:, y-dx:]
-                
+            tab = self.map
+
+        try:
+            tab[tx[0]:tx[1], ty[0]:ty[1]] = self.frame_2[fx[0]:fx[1], fy[0]:fy[1]]
+
         except ValueError as e:
             print(e)
-            print(tab[self.ofsetx-self.ofsetxmin: x + self.ofsetx-self.ofsetxmin, ym:ym+dx].shape,'map')
-            print(self.frame[:, y-dx:].shape,'frame')
-            
-            
-        self.map = tab
-        
-        self.dxp = False
-        
-        self.mape_impute_tab = []
+            print(tab[0:dx, self.ofsety - self.ofsetymin: y + self.ofsety - self.ofsetymin].shape, "map")
+            pritn(self.frame_2[0:dx, :].shape,"frame")
+
+            self.map = tab
+
+    def extend_map_right(self):
+
+        x, y, z = self.frame_2.shape  # wymiary podglondu
+
+
+        xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
+
+        self.extend_map_exeqiute(self.ofsety > self.ofsetymax, self.ofsety, self.ofsetymax,
+                                  0, self.delta_pixeli,
+                                 (self.ofsetx-self.ofsetxmin, x + self.ofsetx-self.ofsetxmin),
+                                 (self.ofsety - self.ofsetymin, y + self.ofsety - self.ofsetymin),
+                                 (0, y),
+                                 (y-self.delta_pixeli, y))
+
 
     def extend_map_dwn(self):
-    
-        dx = self.delta_pixeli if not self.dxp else self.dxp
 
-        x,y,z = self.frame.shape #wymiary podglondu
+        x, y, z = self.frame_2.shape  # wymiary podglondu
 
-        xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
-        
-        if len(self.mape_impute_tab)==0:
-            if self.ofsetx < self.ofsetxmin:
-                tab = np.ones((xm + dx, ym, zm), dtype=np.uint8)
-                self.ofsetxmin = self.ofsetx
-                # Wkopoiowanie istniejocej mapy
-                tab[dx:xm+dx, 0:ym] = self.map
-            else:
-                tab = self.map
-        else:
-            tab = self.mape_impute_tab
-        try:
-            tab[0:dx, self.ofsety-self.ofsetymin: y + self.ofsety-self.ofsetymin] = self.frame_2[0:dx, :]
-        except ValueError as e:
-            print(e)
-            print(tab[0:dx, self.ofsety-self.ofsetymin: y + self.ofsety-self.ofsetymin].shape,'map')
-            print(self.frame[0:dx, :].shape,'frame')
+        self.extend_map_exeqiute(self.ofsetx < self.ofsetxmin ,self.ofsetx, self.ofsetxmin,
+                                self.delta_pixeli, 0,
+                                (0, self.delta_pixeli),
+                                (self.ofsety - self.ofsetymin, y + self.ofsety - self.ofsetymin),
+                                (0, self.delta_pixeli),
+                                (0, y))
 
-            
-        self.map = tab
-        self.dyp = False
-        self.mape_impute_tab = []
-        
+
     def extend_map_left(self):
 
-    
-        dx = self.delta_pixeli if not self.dyp else self.dyp
+        x, y, z = self.frame_2.shape  # wymiary podglondu
 
-        x,y,z = self.frame.shape #wymiary podglondu
 
         xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
 
-        # tablica do któej wkopiujemy poszerzona mape
-        if len(self.mape_impute_tab)==0:
-            if self.ofsety < self.ofsetymin:
-                tab = np.ones((xm, ym + dx, zm), dtype=np.uint8)
-                self.ofsetymin = self.ofsety
-                tab[0:xm, dx:] = self.map
-            else:
-                tab = self.map
-        else:
-            tab = self.mape_impute_tab
-            
-        try:
-            # wkopiowanie nowego odkrytewgo fragmentu
-            tab[self.ofsetx-self.ofsetxmin: x+self.ofsetx-self.ofsetxmin, 0:dx] = self.frame_2[:, 0:dx]
-            
-        except Exception as e:
-            print(e)
-            print(tab[self.ofsetx-self.ofsetxmin: x+self.ofsetx-self.ofsetxmin, 0:dx].shape,'map')
-            print(self.frame[:, 0:dx].shape,'frame')
-        
+        self.extend_map_exeqiute(self.ofsety < self.ofsetymin, self.ofsety, self.ofsetymin,
+                                 self.delta_pixeli, 0,
+                                 (self.ofsetx-self.ofsetxmin, x+self.ofsetx-self.ofsetxmin),
+                                 (0, self.delta_pixeli),
+                                 (0, y),
+                                 (0, self.delta_pixeli))
 
-        self.map = tab
-        self.dxp = False
-        self.mape_impute_tab = []
 
     def extend_map_up(self):
 
-        dx =  self.delta_pixeli if not self.dxp else self.dxp
+        x, y, z = self.frame_2.shape  # wymiary podglondu
 
-        x,y,z = self.frame.shape #wymiary podglondu
-
-        xm, ym, zm = self.map.shape #wymiary aktualnej mapy
-
-        #tablica do któej wkopiujemy poszerzona mape
-        if len(self.mape_impute_tab)==0:
-            if self.ofsetx > self.ofsetxmax:
-                tab = np.ones((xm+dx, ym, zm), dtype=np.uint8)
-                self.ofsetxmax = self.ofsetx
-                tab[0:xm, 0:ym] = self.map
-            else:
-                tab = self.map
-                
-        else:
-            tab = self.mape_impute_tab   
-            
-        try:   
-            
-            #wkopiowanie nowego odkrytewgo fragmentu
-            tab[xm:dx+xm, self.ofsety-self.ofsetymin: y+self.ofsety-self.ofsetymin] = self.frame_2[x-dx:, :]
-            
-        except ValueError as e:
-            print(e)
-            print(tab[xm:dx+xm, self.ofsety-self.ofsetymin: y+self.ofsety-self.ofsetymin].shape,'map')
-            print(self.frame[x-dx:, :].shape,'frame')
-
-        
-        self.map = tab
-        self.dyp = False
-        self.mape_impute_tab = []
-        
+        self.extend_map_exeqiute(self.ofsetx > self.ofsetxmax, self.ofsetx, self.ofsetxmax,
+                                 0, 0,
+                                 (xm, self.delta_pixeli+xm),
+                                 (self.ofsety - self.ofsetymin, y + self.ofsety - self.ofsetymin),
+                                 (x-self.ofsety-self.ofsetymin, x),
+                                 (0, y))
 
 
