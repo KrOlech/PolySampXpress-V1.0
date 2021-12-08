@@ -385,40 +385,7 @@ class Obraz(ROI_maping):
         self.direction_change = 'multi'
         self.update()
 
-    def extend_map_multi(self):
 
-        dy = self.dyp
-        dx = self.dxp
-
-        x, y, z = self.frame_2.shape  # wymiary podglondu
-
-        xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
-
-        if self.dyp > 0:
-            #self.whot_to_drow = 'viue_muve'
-            #self.direction_change = 'right'
-            print('right')
-            # wkopiowanie nowego fragmentu
-            tab[self.ofsetx - self.ofsetxmin: x + self.ofsetx - self.ofsetxmin, ym:ym + dx] = self.frame_2[:, y - dx:]
-        else:
-            self.dyp = abs(self.dyp)
-            print('left')
-            #self.whot_to_drow = 'viue_muve'
-            #self.direction_change = 'left'
-            
-        #self.update()
-        
-        if self.dxp > 0:
-            #self.whot_to_drow = 'viue_muve'
-            #self.direction_change = 'up'
-            print('up')
-            
-        else:
-            self.dxp = abs(self.dxp)
-            print('dwn')
-            #self.whot_to_drow = 'viue_muve'
-            #self.direction_change = 'dawn'
-        self.update()
 
     def get_map(self):
         if self.first:
@@ -448,8 +415,7 @@ class Obraz(ROI_maping):
         if test_extend:
             tab = np.ones((xm + dx, ym+dy, zm), dtype=np.uint8)
             borderofset = ofset
-            # Wkopoiowanie istniejocej mapy
-            tab[dx:xm + dx, dy:ym+dy] = self.map
+            tab[dx:xm + dx, dy:ym+dy] = self.map # Wkopoiowanie istniejocej mapy
         else:
             tab = self.map
 
@@ -467,7 +433,6 @@ class Obraz(ROI_maping):
 
         x, y, z = self.frame_2.shape  # wymiary podglondu
 
-
         xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
 
         self.extend_map_exeqiute(self.ofsety > self.ofsetymax, self.ofsety, self.ofsetymax,
@@ -476,7 +441,6 @@ class Obraz(ROI_maping):
                                  (self.ofsety - self.ofsetymin, y + self.ofsety - self.ofsetymin),
                                  (0, y),
                                  (y-self.delta_pixeli, y))
-
 
     def extend_map_dwn(self):
 
@@ -489,11 +453,9 @@ class Obraz(ROI_maping):
                                 (0, self.delta_pixeli),
                                 (0, y))
 
-
     def extend_map_left(self):
 
         x, y, z = self.frame_2.shape  # wymiary podglondu
-
 
         xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
 
@@ -503,7 +465,6 @@ class Obraz(ROI_maping):
                                  (0, self.delta_pixeli),
                                  (0, y),
                                  (0, self.delta_pixeli))
-
 
     def extend_map_up(self):
 
@@ -516,4 +477,31 @@ class Obraz(ROI_maping):
                                  (x-self.ofsety-self.ofsetymin, x),
                                  (0, y))
 
+    def extend_map_multi(self):
 
+        dy = abs(self.dyp)
+        dx = abs(self.dxp)
+
+        x, y, z = self.frame_2.shape  # wymiary podglondu
+
+        xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
+
+        if self.dyp > 0:
+            print('right')
+            self.mape_impute_tab[self.ofsetx - self.ofsetxmin: x + self.ofsetx - self.ofsetxmin, ym: ym + dy] = \
+                self.frame_2[:, y - dy:]
+        else:
+            print('left')
+            self.mape_impute_tab[self.ofsetx - self.ofsetxmin: x + self.ofsetx - self.ofsetxmin, 0: dy] = \
+                self.frame_2[:, 0:dy]
+
+        if self.dxp > 0:
+            print('up')
+            self.mape_impute_tab[xm: dx + xm, self.ofsety - self.ofsetymin: y + self.ofsety - self.ofsetymin] = \
+                self.frame_2[x - dx:, :]
+        else:
+            print('dwn')
+            self.mape_impute_tab[0:dx, self.ofsety - self.ofsetymin: y + self.ofsety - self.ofsetymin] = \
+                self.frame_2[0:dx, :]
+
+        self.map = self.mape_impute_tab
