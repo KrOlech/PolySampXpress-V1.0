@@ -146,9 +146,9 @@ class Obraz(ROI_maping):
                 self.loadImage()
 
     #conwert Qpixmap to numpy tab
-    def bytes_to_array(self, still_img_buf, dtype=np.uint8):
-        arr_1d = np.frombuffer(still_img_buf, dtype=dtype)
-        return arr_1d.reshape(self.h, self.w, 3)
+    #def bytes_to_array(self, still_img_buf, dtype=np.uint8):
+    #    arr_1d = np.frombuffer(still_img_buf, dtype=dtype)
+    #   return arr_1d.reshape(self.h, self.w, 3)
 
     def initCamera(self):
 
