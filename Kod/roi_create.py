@@ -81,7 +81,8 @@ class ROI_maping(QLabel):
         self.setScaledContents(False)
 
         self.setMouseTracking(True)
-        # Domyślnie ustawione na False - gdy False mouseMoveEvent wywoływany jest tylko gdy któryś z przycisków myszki jest wciśnięty
+        # Domyślnie ustawione na False - gdy False
+        # mouseMoveEvent wywoływany jest tylko gdy któryś z przycisków myszki jest wciśnięty
 
     def initUI(self):
 

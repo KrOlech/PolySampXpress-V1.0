@@ -226,7 +226,7 @@ class MainWindow(QMainWindow):
         self.przyciski = [QPushButton() for _ in range(9)]
         [button.setMaximumWidth(100) for button in self.przyciski] 
         
-        nazwy = ["schow next", "dell all", "schow all", "schow privius", "map", "hide all","move to","stop"]
+        nazwy = ["schow next", "dell all", "schow all", "schow privius", "map", "hide all","move to","stop","map clear"]
         
         [swich.setText(name) for name, swich in zip(nazwy, self.przyciski)]
         
@@ -244,9 +244,12 @@ class MainWindow(QMainWindow):
         self.przyciski[6].clicked.connect(self.togle_move_on_pres)
         
         self.przyciski[7].clicked.connect(self.manipulaor.simple_stop)
+
+        self.przyciski[8].clicked.connect(self.obraz.reset_map)
+
         #dodanie przycisków
-        it = [2, 3, 4, 2, 3, 4,2,3,4]
-        jt = [5, 5, 5, 6, 6, 6,7,7,7]
+        it = [2, 3, 4, 2, 3, 4, 2, 3, 4]
+        jt = [5, 5, 5, 6, 6, 6, 7, 7, 7]
         [self.przyciskilayout.addWidget(w, j, i) for w, i, j in zip(self.przyciski, it, jt)]
 
     def schow_map(self):

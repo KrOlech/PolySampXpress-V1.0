@@ -146,9 +146,9 @@ class Obraz(ROI_maping):
                 self.loadImage()
 
     #conwert Qpixmap to numpy tab
-    #def bytes_to_array(self, still_img_buf, dtype=np.uint8):
-    #    arr_1d = np.frombuffer(still_img_buf, dtype=dtype)
-    #   return arr_1d.reshape(self.h, self.w, 3)
+    def bytes_to_array(self, still_img_buf, dtype=np.uint8):
+        arr_1d = np.frombuffer(still_img_buf, dtype=dtype)
+        return arr_1d.reshape(self.h, self.w, 3)
 
     def initCamera(self):
 
@@ -240,6 +240,11 @@ class Obraz(ROI_maping):
     def extend_map(self):
         if self.direction_change:
             self.waite_for_manipulator()
+
+    # waiting for manipulator and snap ne frame
+    def waite_for_manipulator(self):
+        self.main_window.manipulaor.weaith_for_target()
+        self.snap_img()
 
     # ches map change direction
     def extend_map_camera(self):
@@ -385,26 +390,21 @@ class Obraz(ROI_maping):
         self.direction_change = 'multi'
         self.update()
 
-
-
-    def get_map(self):
-        if self.first:
-            self.save_curent_viue()
-        return self.map
-
     # save first viue to the map
     def save_curent_viue(self):
         self.map = self.frame
         self.first = False
-            
-    # not finieshed
-    def reset_map(self):
-        pass
 
-    # waiting for manipulator and snap ne frame
-    def waite_for_manipulator(self):
-        self.main_window.manipulaor.weaith_for_target()
-        self.snap_img()
+    def reset_map(self):
+        self.save_curent_viue()
+        self.ofsetymax = 0
+        self.ofsetxmax = 0
+
+        self.ofsetymin = 0
+        self.ofsetxmin = 0
+
+        self.ofsetx = 0
+        self.ofsety = 0
 
     def extend_map_exeqiute(self, test_extend, ofset, borderofset, dx, dy, tx, ty, fx, fy):
 
@@ -505,3 +505,8 @@ class Obraz(ROI_maping):
                 self.frame_2[0:dx, :]
 
         self.map = self.mape_impute_tab
+
+    def get_map(self):
+        if self.first:
+            self.save_curent_viue()
+        return self.map
