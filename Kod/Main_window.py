@@ -170,7 +170,7 @@ class MainWindow(QMainWindow):
 
         [a.setShortcut(k) for a, k in zip(self.actions, keyband)]
 
-        [swich.clicked.connect(f) for f, swich in zip(fun, self.kierunkowe)]
+        [swich.released.connect(f) for f, swich in zip(fun, self.kierunkowe)]
 
         #dodanie do leyatów przyciskó kierunkowych
         it = [3, 2, 4, 3]
