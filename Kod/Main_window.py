@@ -13,7 +13,14 @@ class MainWindow(QMainWindow):
 
     ROI = []
     
+    #prostokonty zaznaczone
+    rectangles = []
+    
     krok = 10
+    
+    last_name = 0
+    
+    map = None
 
     def __init__(self, *args, **kwargs):
         
@@ -53,8 +60,13 @@ class MainWindow(QMainWindow):
         self._set_central_widget()
         
         self.toolbars()
+        
+        self.upadet_position_read()
 
     def closeEvent(self, event):
+    
+        if self.map != None:
+            del self.map
         
         reply = QMessageBox.question(self,"mesage","Czy napewno chcesz zamknac program?",
                                      QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
@@ -147,9 +159,9 @@ class MainWindow(QMainWindow):
         [swich.setText(name) for name, swich in zip(nazwy, self.kierunkowe)]
 
         #przypiecie fukcji do przycisków
-        fun = [self.key_up, self.key_left, self.key_right,self.key_dwn]
+        fun = [self.key_dwn, self.key_left, self.key_right,self.key_up]
 
-        self.actions = [QAction("&up", self), QAction("&lf", self), QAction("&ri", self), QAction("&dw", self)]
+        self.actions = [QAction("&dw", self), QAction("&lf", self), QAction("&ri", self), QAction("&up", self)]
 
         [a.triggered.connect(f) for a, f in zip(self.actions, fun)]
 
@@ -194,8 +206,6 @@ class MainWindow(QMainWindow):
         self.upadet_position_read()
         x,y,z = self.manipulaor.get_axes_positions()
         
-        sleep(1)
-        
         fun_obraz()
 
         if t:
@@ -213,10 +223,10 @@ class MainWindow(QMainWindow):
     def _Multipurpos_butons(self):
 
         #przyciski multipurpus
-        self.przyciski = [QPushButton() for _ in range(6)]
+        self.przyciski = [QPushButton() for _ in range(9)]
         [button.setMaximumWidth(100) for button in self.przyciski] 
         
-        nazwy = ["schow next", "dell all", "schow all", "schow privius", "map", "hide all"]
+        nazwy = ["schow next", "dell all", "schow all", "schow privius", "map", "hide all","move to","stop"]
         
         [swich.setText(name) for name, swich in zip(nazwy, self.przyciski)]
         
@@ -229,15 +239,43 @@ class MainWindow(QMainWindow):
         self.przyciski[1].clicked.connect(self.remove_ROI)
 
         self.przyciski[4].clicked.connect(self.schow_map)
-
+        
+        self.przyciski[6].setCheckable(True)
+        self.przyciski[6].clicked.connect(self.togle_move_on_pres)
+        
+        self.przyciski[7].clicked.connect(self.manipulaor.simple_stop)
         #dodanie przycisków
-        it = [2, 3, 4, 2, 3, 4]
-        jt = [5, 5, 5, 6, 6, 6]
+        it = [2, 3, 4, 2, 3, 4,2,3,4]
+        jt = [5, 5, 5, 6, 6, 6,7,7,7]
         [self.przyciskilayout.addWidget(w, j, i) for w, i, j in zip(self.przyciski, it, jt)]
 
     def schow_map(self):
-        self.map = M.Map_window(self.obraz.get_map())
-        self.map.show()
+        if self.map is None:
+            self.map = M.Map_window(self.obraz.get_map(), self)
+            self.map.show()
+        else:
+            self.map.new_image(self.obraz.get_map())
+            self.map.show()
+
+    def togle_move_on_pres(self):
+
+        if self.przyciski[6].isChecked():
+             # setting background color to light-blue
+             self.przyciski[6].setStyleSheet("background-color : lightblue")
+             
+             if self.map is not None:
+                self.map.move_to_point = False
+             self.obraz.move_to_point = False
+             
+
+        else:
+             # set background color back to light-grey
+             self.przyciski[6].setStyleSheet("background-color : lightgrey")
+
+             if self.map is not None:
+                self.map.move_to_point = True
+             self.obraz.move_to_point = True
+             
 
 ######################################################################################
 ##########################Scroll area#################################################
@@ -304,8 +342,8 @@ class MainWindow(QMainWindow):
 ######################################################################################
 
     def slider_create(self):
-    
-        self.slide = slider(self,20,30,25,Qt.Horizontal)
+        x = self.manipulaor.get_axes_positions('x')[0]
+        self.slide = slider(self,x-5,x+5,x,Qt.Horizontal)
 
         self.sliderleyout.addWidget(self.slide)
 
