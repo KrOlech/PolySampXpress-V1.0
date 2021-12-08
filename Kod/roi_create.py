@@ -4,7 +4,6 @@ import cv2
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *  # QFileDialog ,QMainWindow,QToolBar ,QAction
-import numpy as np
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtGui import QPixmap, QImage
 import Clasa as oC
@@ -51,7 +50,7 @@ class ROI_maping(QLabel):
     ofsety = 0
     
     # rozmiar obszaru
-    Rozmiar = (1024,768)
+    rozmiar = (1024, 768)
     
     #calibration value
     delta_pixeli = 510
@@ -103,10 +102,10 @@ class ROI_maping(QLabel):
     def setPhoto(self, image, drow_deskription, drow_single_rectagle):
 
         #scalowanie obrazu
-        frame = cv2.resize(image, self.Rozmiar)
+        frame = cv2.resize(image, self.rozmiar)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        self.frame = cv2.resize(image, self.Rozmiar)
+        self.frame = cv2.resize(image, self.rozmiar)
         #self.frame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
 
 
@@ -138,7 +137,7 @@ class ROI_maping(QLabel):
         elif self.move_to_point:
             x1 = int(e.x()/self.skalx)
             y1 = int(e.y()/self.skaly)
-            ccx, ccy = self.Rozmiar[0]/2,self.Rozmiar[1]/2
+            ccx, ccy = self.rozmiar[0] / 2, self.rozmiar[1] / 2
             self.dxp, self.dyp = int(y1-ccy),int(x1-ccx)
             dx,dy = (x1-ccx)/self.delta_pixeli,(y1-ccy)/self.delta_pixeli
             self.main_window.manipulaor.move_axes_to_abs_woe_ofset('yz',[dx,dy])
@@ -229,7 +228,7 @@ class ROI_maping(QLabel):
 #############################create rectagle###############################################
 
     def rectagledrow(self,prostokat):
-        x = prostokat.getrectangle(self.Rozmiar,self.ofsetx,self.ofsety,self.skalx, self.skaly)
+        x = prostokat.getrectangle(self.rozmiar, self.ofsetx, self.ofsety, self.skalx, self.skaly)
         return x
 
     def rectaglecreate(self):

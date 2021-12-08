@@ -5,7 +5,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *  # QFileDialog ,QMainWindow,QToolBar ,QAction
 import sys
-import toupcam as toupcam
+import toupcam as tcam
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtGui import QPixmap, QImage
 import Clasa as oC
@@ -34,7 +34,7 @@ class Obraz(ROI_maping):
     direction_change = ''
 
     # rozmiar obszaru
-    Rozmiar = (1024, 768)
+    rozmiar = (1024, 768)
     
     # value that remember whot part of the sample have been seen save to map
     ofsetymax = 0
@@ -59,11 +59,11 @@ class Obraz(ROI_maping):
     def __init__(self, main_window, *args, **kwargs):
         super(Obraz, self).__init__(main_window,*args, **kwargs)
         
-        self.initCamera() #inicializacja camery
+        self.initCamera() # inicializacja camery
         
         self.h_cam.put_AutoExpoEnable(False)
         
-        #Tworzy białe tło
+        # Tworzy białe tło
         self.setAutoFillBackground(True)       
         
 ###############################camera read##########################################
@@ -72,7 +72,7 @@ class Obraz(ROI_maping):
         if self.first:
             self.save_curent_viue()
         print("wywolanie wymuszenia eventu")
-        #sleep(1)
+        # sleep(1)
         self.h_cam.Snap(1)
     
     @pyqtSlot()
@@ -84,9 +84,6 @@ class Obraz(ROI_maping):
             bufsize = ((w * 24 + 31) // 32 * 4) * h
             still_img_buf = bytes(bufsize)
             self.h_cam.PullStillImageV2(still_img_buf, 24, None)
-            #print('saving image')
-        #    print(self.h_cam.get_ExpoTime())
-            #print(w, h)
             
             img = self.bytes_to_array(still_img_buf)
             
@@ -98,20 +95,20 @@ class Obraz(ROI_maping):
             self.image_opencv_2 = self.convertQImageToMat(
                     self.Qimage_read_from_camera)
             
-            #self.loadImage()
+            # self.loadImage()
             
           
-            self.frame_2 = cv2.resize(self.image_opencv_2, self.Rozmiar)
+            self.frame_2 = cv2.resize(self.image_opencv_2, self.rozmiar)
             self.extend_map_camera()
 
-            #plt.imsave('img_frame_{}.png'.format(self.total), img)
+            # plt.imsave('img_frame_{}.png'.format(self.total), img)
 
 
     @staticmethod
     def cameraCallback(nEvent, ctx):
-        if nEvent == toupcam.TOUPCAM_EVENT_IMAGE:
+        if nEvent == tcam.TOUPCAM_EVENT_IMAGE:
             ctx.eventImage.emit()
-        elif nEvent == toupcam.TOUPCAM_EVENT_STILLIMAGE:
+        elif nEvent == tcam.TOUPCAM_EVENT_STILLIMAGE:
             ctx.snap_image_event.emit()
 
     @staticmethod
@@ -136,7 +133,7 @@ class Obraz(ROI_maping):
                 self.h_cam.PullImageV2(self.buf, 24, None)
                 self.total += 1
 
-            except toupcam.HRESULTException:
+            except tcam.HRESULTException:
                 print('pull image failed')
                 QMessageBox.warning(self, '', 'pull image failed', QMessageBox.Ok)
 
@@ -160,7 +157,7 @@ class Obraz(ROI_maping):
 
     def initCamera(self):
 
-        a = toupcam.Toupcam.EnumV2()
+        a = tcam.Toupcam.EnumV2()
 
         if len(a) <= 0:
             QMessageBox.warning(self, '',"erore during camera inicialisation", QMessageBox.Ok)
@@ -175,9 +172,9 @@ class Obraz(ROI_maping):
 
             #trying opening camera
             try:
-                self.h_cam = toupcam.Toupcam.Open(a[0].id)
+                self.h_cam = tcam.Toupcam.Open(a[0].id)
 
-            except toupcam.HRESULTException:
+            except tcam.HRESULTException:
                 QMessageBox.warning(self, '', 'failed to open camera', QMessageBox.Ok)
 
             else:
@@ -188,10 +185,10 @@ class Obraz(ROI_maping):
 
                 try:
                     if sys.platform == 'win32':
-                        self.h_cam.put_Option(toupcam.TOUPCAM_OPTION_BYTEORDER, 0) # QImage.Format_RGB888
+                        self.h_cam.put_Option(tcam.TOUPCAM_OPTION_BYTEORDER, 0) # QImage.Format_RGB888
 
                     self.h_cam.StartPullModeWithCallback(self.cameraCallback, self)
-                except toupcam.HRESULTException:
+                except tcam.HRESULTException:
                     QMessageBox.warning(self, '', 'failed to start camera', QMessageBox.Ok)		
 
 
