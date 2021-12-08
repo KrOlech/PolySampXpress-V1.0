@@ -230,10 +230,10 @@ class MainWindow(QMainWindow):
         
         [swich.setText(name) for name, swich in zip(nazwy, self.przyciski)]
         
-        self.przyciski[2].clicked.connect(self.obraz.Narysujcaloscs)
+        self.przyciski[2].clicked.connect(self.obraz.narysujcaloscs)
         self.przyciski[5].clicked.connect(self.obraz.schowajcalosc)
         
-        self.przyciski[0].clicked.connect(self.obraz.Next)
+        self.przyciski[0].clicked.connect(self.obraz.next)
         self.przyciski[3].clicked.connect(self.obraz.last)
 
         self.przyciski[1].clicked.connect(self.remove_ROI)

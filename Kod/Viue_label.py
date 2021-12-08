@@ -14,6 +14,7 @@ from threading import Thread
 from time import sleep, time
 from roi_create import ROI_maping
 
+
 class Obraz(ROI_maping):
     # Klaza Obraz dziedziczy z QLabel, pozwala na lepszą obsługę eventu mouseMoveEvent
 
@@ -55,9 +56,9 @@ class Obraz(ROI_maping):
     
     mape_impute_tab = []
     
-    #construvtor
+    # construvtor
     def __init__(self, main_window, *args, **kwargs):
-        super(Obraz, self).__init__(main_window,*args, **kwargs)
+        super(Obraz, self).__init__(main_window, *args, **kwargs)
         
         self.initCamera() # inicializacja camery
         
@@ -87,13 +88,13 @@ class Obraz(ROI_maping):
             
             img = self.bytes_to_array(still_img_buf)
             
-            self.Qimage_read_from_camera = QImage(still_img_buf,
+            qimage_read_from_camera = QImage(still_img_buf,
                                       self.w, self.h,
                                       (self.w * 24 + 31) // 32 * 4,
                                       QImage.Format_RGB888)
                      
             self.image_opencv_2 = self.convertQImageToMat(
-                    self.Qimage_read_from_camera)
+                    qimage_read_from_camera)
             
             # self.loadImage()
             
@@ -267,7 +268,7 @@ class Obraz(ROI_maping):
 
 ####################################fukcje wywoływane przez guziki z gluwnego okna####################################
 
-    def Narysujcaloscs(self): #rysowanie wsystkich prostokontów po nacisnieciu odpowiedniego przyciusku
+    def narysujcaloscs(self): #rysowanie wsystkich prostokontów po nacisnieciu odpowiedniego przyciusku
 
         self.whot_to_drow = 'all_rectagls'
         self.iloscklikniec = True
@@ -279,7 +280,7 @@ class Obraz(ROI_maping):
         self.iloscklikniec = True
         self.update()
             
-    def Next(self):#narysowanie nastempnego prostokata
+    def next(self):#narysowanie nastempnego prostokata
     
         self.whot_to_drow = 'One_rectagle'
         self.iloscklikniec = True
@@ -333,8 +334,9 @@ class Obraz(ROI_maping):
 
     #update map on center on click metod WIP
     def mapupdate(self):
-    
-        xm, ym, zm = self.map.shape #wymiary aktualnej mapy
+
+        # wymiary aktualnej mapy
+        xm, ym, zm = self.map.shape
         
         if self.ofsetx < self.ofsetxmin:
             xm += abs(self.dxp)
@@ -388,21 +390,19 @@ class Obraz(ROI_maping):
             self.save_curent_viue()
         return self.map
 
-
-    #save first viue to the map
+    # save first viue to the map
     def save_curent_viue(self):
         self.map = self.frame
         self.first = False
             
-    #not finieshed
+    # not finieshed
     def reset_map(self):
         pass
 
-    #waiting for manipulator and snap ne frame
+    # waiting for manipulator and snap ne frame
     def waite_for_manipulator(self):
         self.main_window.manipulaor.weaith_for_target()
         self.snap_img()
-          
 
     def extend_map_right(self,tab = False):
         
@@ -440,7 +440,6 @@ class Obraz(ROI_maping):
         self.dxp = False
         
         self.mape_impute_tab = []
-
 
     def extend_map_dwn(self):
     
