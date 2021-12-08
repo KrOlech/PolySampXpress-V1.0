@@ -4,9 +4,8 @@ import cv2
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *  # QFileDialog ,QMainWindow,QToolBar ,QAction
-import numpy as np
 import sys
-import toupcam
+import toupcam as toupcam
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtGui import QPixmap, QImage
 import Clasa as oC
@@ -33,25 +32,21 @@ class Obraz(ROI_maping):
 
     # '' 'up' 'dawn' 'right' 'left'
     direction_change = ''
-        
- 
 
     # rozmiar obszaru
-    Rozmiar = (1024,768)
+    Rozmiar = (1024, 768)
     
-    #value that remember whot part of the sample have been seen save to map
+    # value that remember whot part of the sample have been seen save to map
     ofsetymax = 0
     ofsetxmax = 0
 
     ofsetymin = 0
     ofsetxmin = 0
     
-    #boolean alowing to snap first schown image as a map prive
+    # boolean alowing to snap first schown image as a map prive
     first = True
-    
 
-    
-    #pixmap object reded from camera/file
+    # pixmap object reded from camera/file
     frame = True
     
     waitontarget = False
@@ -389,9 +384,14 @@ class Obraz(ROI_maping):
             print('dwn')
             #self.whot_to_drow = 'viue_muve'
             #self.direction_change = 'dawn'
-        self.update() 
-            
-            
+        self.update()
+
+    def get_map(self):
+        if self.first:
+            self.save_curent_viue()
+        return self.map
+
+
     #save first viue to the map
     def save_curent_viue(self):
         self.map = self.frame
@@ -544,8 +544,5 @@ class Obraz(ROI_maping):
         self.dyp = False
         self.mape_impute_tab = []
         
-    def get_map(self):
-        if self.first:
-            self.save_curent_viue()
-        return self.map
+
 
