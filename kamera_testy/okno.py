@@ -31,7 +31,7 @@ class Camera(QLabel):
         self.initUI()
         self.initCamera()
         
-      #  self.hcam.put_AutoExpoEnable(True)
+      #  self.h_cam.put_AutoExpoEnable(True)
 
 
     def initUI(self):
@@ -77,7 +77,7 @@ class Camera(QLabel):
             still_img_buf = bytes(bufsize)
             self.hcam.PullStillImageV2(still_img_buf, 24, None)
             print('saving image')
-        #    print(self.hcam.get_ExpoTime())
+        #    print(self.h_cam.get_ExpoTime())
             print(w, h)
             print()
             img = self.bytes_to_array(still_img_buf)
@@ -109,7 +109,7 @@ class Camera(QLabel):
                 self.w, self.h = self.hcam.get_Size()
                 bufsize = ((self.w * 24 + 31) // 32 * 4) * self.h
                 self.buf = bytes(bufsize)
-         #       self.cb.setChecked(self.hcam.get_AutoExpoEnable())            
+         #       self.cb.setChecked(self.h_cam.get_AutoExpoEnable())
                 try:
                     if sys.platform == 'win32':
                         self.hcam.put_Option(toupcam.TOUPCAM_OPTION_BYTEORDER, 0) # QImage.Format_RGB888
@@ -130,7 +130,7 @@ class Camera(QLabel):
     def restart(self):
         pass
       #  print(se;f)
-       # self.hcam.StartPullModeWithCallback(self.cameraCallback, self)
+       # self.h_cam.StartPullModeWithCallback(self.cameraCallback, self)
 
     def close(self):
         print('closing')

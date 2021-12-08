@@ -1,27 +1,28 @@
 import numpy as np
-from PyQt5.QtWidgets import * #QFileDialog ,QMainWindow,QToolBar ,QAction
+from PyQt5.QtWidgets import *
 import cv2
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *  # QFileDialog ,QMainWindow,QToolBar ,QAction
 import numpy as np
-import sys, toupcam
+import sys
+import toupcam
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtGui import QPixmap, QImage
 import Clasa as oC
 import matplotlib.pyplot as plt
 from threading import Thread
-from time import sleep,time
+from time import sleep, time
 from roi_create import ROI_maping
 
 class Obraz(ROI_maping):
     # Klaza Obraz dziedziczy z QLabel, pozwala na lepszą obsługę eventu mouseMoveEvent
 
-#signals for camera action
+# signals for camera action
     eventImage = pyqtSignal()
     snap_image_event = pyqtSignal()	
 
-    hcam = None
+    h_cam = None
     buf = None      # video buffer
     w = 0           # video width
     h = 0           # video height
@@ -65,7 +66,7 @@ class Obraz(ROI_maping):
         
         self.initCamera() #inicializacja camery
         
-        self.hcam.put_AutoExpoEnable(False)
+        self.h_cam.put_AutoExpoEnable(False)
         
         #Tworzy białe tło
         self.setAutoFillBackground(True)       
@@ -77,19 +78,19 @@ class Obraz(ROI_maping):
             self.save_curent_viue()
         print("wywolanie wymuszenia eventu")
         #sleep(1)
-        self.hcam.Snap(1)
+        self.h_cam.Snap(1)
     
     @pyqtSlot()
     def snap_image_event_signal(self):
         print("wymuszony event")
         
-        if self.hcam is not None:
-            w, h = self.hcam.get_Size() 
+        if self.h_cam is not None:
+            w, h = self.h_cam.get_Size()
             bufsize = ((w * 24 + 31) // 32 * 4) * h
             still_img_buf = bytes(bufsize)
-            self.hcam.PullStillImageV2(still_img_buf, 24, None)
+            self.h_cam.PullStillImageV2(still_img_buf, 24, None)
             #print('saving image')
-        #    print(self.hcam.get_ExpoTime())
+        #    print(self.h_cam.get_ExpoTime())
             #print(w, h)
             
             img = self.bytes_to_array(still_img_buf)
@@ -134,10 +135,10 @@ class Obraz(ROI_maping):
     @pyqtSlot()
     def eventImageSignal(self):
 
-        if self.hcam is not None:
+        if self.h_cam is not None:
 
             try:
-                self.hcam.PullImageV2(self.buf, 24, None)
+                self.h_cam.PullImageV2(self.buf, 24, None)
                 self.total += 1
 
             except toupcam.HRESULTException:
@@ -179,22 +180,22 @@ class Obraz(ROI_maping):
 
             #trying opening camera
             try:
-                self.hcam = toupcam.Toupcam.Open(a[0].id)
+                self.h_cam = toupcam.Toupcam.Open(a[0].id)
 
             except toupcam.HRESULTException:
                 QMessageBox.warning(self, '', 'failed to open camera', QMessageBox.Ok)
 
             else:
                 #creating bufer for image hold
-                self.w, self.h = self.hcam.get_Size()
+                self.w, self.h = self.h_cam.get_Size()
                 bufsize = ((self.w * 24 + 31) // 32 * 4) * self.h
                 self.buf = bytes(bufsize)
 
                 try:
                     if sys.platform == 'win32':
-                        self.hcam.put_Option(toupcam.TOUPCAM_OPTION_BYTEORDER, 0) # QImage.Format_RGB888
+                        self.h_cam.put_Option(toupcam.TOUPCAM_OPTION_BYTEORDER, 0) # QImage.Format_RGB888
 
-                    self.hcam.StartPullModeWithCallback(self.cameraCallback, self)
+                    self.h_cam.StartPullModeWithCallback(self.cameraCallback, self)
                 except toupcam.HRESULTException:
                     QMessageBox.warning(self, '', 'failed to start camera', QMessageBox.Ok)		
 
