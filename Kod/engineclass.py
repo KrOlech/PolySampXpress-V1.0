@@ -1,5 +1,5 @@
 import ctypes
-from time import sleep
+from time import sleep,time
 from PyQt5.QtWidgets import QMessageBox
 class manipulator:
 
@@ -14,9 +14,10 @@ class manipulator:
         self.conect()
         
         self.conectioncheck()
-
-        self.reference_axes()
-
+        
+        if not self.get_axes_positions():
+            self.reference_axes()
+        
         self.print_curent_position()
 
     def conect(self):
@@ -200,6 +201,7 @@ class manipulator:
         while not all(self.check_on_target().values()):
             self.main.upadet_position_read()
         self.x, self.y, self.z = self.get_axes_positions('xyz')
+        #print(time(),"osiongniecie pozycji")
         
     def move_up(self,krok):
         self.z -= krok
@@ -231,4 +233,26 @@ class manipulator:
         self.weaith_for_target()
         return t
     
-
+    def simple_stop(self,controller_id):
+        '''
+        stops movement of all axes
+        '''
+        c_id = self._convert_id(self.controller_id)
+        return self.c848.C848_STP(c_id)
+        
+        
+    def move_axes_to_abs_woe_ofset(self,axes,tab):
+        ntab = []
+        for a,v in zip(axes,tab):
+            if a == 'x':
+                self.x -= v
+                ntab.append(self.x)
+            if a == 'y':
+                self.y -= v
+                ntab.append(self.y)
+            if a == 'z':
+                self.z-=v
+                ntab.append(self.z)
+            
+        self.move_axes_to_abs_woe(axes,ntab)
+        self.weaith_for_target()
