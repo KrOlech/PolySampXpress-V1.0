@@ -70,11 +70,13 @@ class Obraz(ROI_maping):
         #Tworzy białe tło
         self.setAutoFillBackground(True)       
         
-
 ###############################camera read##########################################
 
     def snap_img(self):
+        if self.first:
+                self.Save_curent_viue()
         print("wywolanie wymuszenia eventu")
+        #sleep(1)
         self.hcam.Snap(1)
     
     @pyqtSlot()
@@ -97,12 +99,17 @@ class Obraz(ROI_maping):
                                       (self.w * 24 + 31) // 32 * 4,
                                       QImage.Format_RGB888)
                      
-            self.image_opencv = self.convertQImageToMat(
+            self.image_opencv_2 = self.convertQImageToMat(
                     self.Qimage_read_from_camera)
             
             #self.loadImage()
+            
+          
+            self.frame_2 = cv2.resize(self.image_opencv_2, self.Rozmiar)
             self.extend_map_camera()
+
             #plt.imsave('img_frame_{}.png'.format(self.total), img)
+
 
     @staticmethod
     def cameraCallback(nEvent, ctx):
@@ -146,11 +153,6 @@ class Obraz(ROI_maping):
                 self.image_opencv = self.convertQImageToMat(
                     self.Qimage_read_from_camera)
                 
-                try:
-                    if self.first:
-                        self.Save_curent_viue()
-                except ValueError:
-                    pass
                     
                     
                 self.loadImage()
@@ -362,7 +364,7 @@ class Obraz(ROI_maping):
         self.mape_impute_tab = np.ones((xm, ym, zm), dtype=np.uint8)
         print(self.dxp,self.dyp)
 
-        self.mape_impute_tab[:,:] = self.map
+        #self.mape_impute_tab[:,:] = self.map
 
         if self.dyp > 0:
             #self.whot_to_drow = 'viue_muve'
@@ -391,11 +393,9 @@ class Obraz(ROI_maping):
             
     #save first viue to the map
     def Save_curent_viue(self):
-        self.waite_for_manipulator()
         
-        if all(self.main_window.manipulaor.check_on_target().values()):   
-            self.map = self.frame
-            self.first = self.frame
+        self.map = self.frame
+        self.first = False
             
     #not finieshed
     def reset_map(self):
@@ -430,7 +430,7 @@ class Obraz(ROI_maping):
             tab[0:xm, 0:ym] = self.map
             
             #wkopiowanie nowego fragmentu 
-            tab[self.ofsetx-self.ofsetxmin: x + self.ofsetx-self.ofsetxmin, ym:ym+dx] = self.frame[:, y-dx:]
+            tab[self.ofsetx-self.ofsetxmin: x + self.ofsetx-self.ofsetxmin, ym:ym+dx] = self.frame_2[:, y-dx:]
                 
         except ValueError as e:
             print(e)
@@ -464,7 +464,7 @@ class Obraz(ROI_maping):
         else:
             tab = self.mape_impute_tab
         try:
-            tab[0:dx, self.ofsety-self.ofsetymin: y + self.ofsety-self.ofsetymin] = self.frame[0:dx, :]
+            tab[0:dx, self.ofsety-self.ofsetymin: y + self.ofsety-self.ofsetymin] = self.frame_2[0:dx, :]
         except ValueError as e:
             print(e)
             print(tab[0:dx, self.ofsety-self.ofsetymin: y + self.ofsety-self.ofsetymin].shape,'map')
@@ -497,7 +497,7 @@ class Obraz(ROI_maping):
             
         try:
             # wkopiowanie nowego odkrytewgo fragmentu
-            tab[self.ofsetx-self.ofsetxmin: x+self.ofsetx-self.ofsetxmin, 0:dx] = self.frame[:, 0:dx]
+            tab[self.ofsetx-self.ofsetxmin: x+self.ofsetx-self.ofsetxmin, 0:dx] = self.frame_2[:, 0:dx]
             
         except Exception as e:
             print(e)
@@ -532,7 +532,7 @@ class Obraz(ROI_maping):
         try:   
             
             #wkopiowanie nowego odkrytewgo fragmentu
-            tab[xm:dx+xm, self.ofsety-self.ofsetymin: y+self.ofsety-self.ofsetymin] = self.frame[x-dx:, :]
+            tab[xm:dx+xm, self.ofsety-self.ofsetymin: y+self.ofsety-self.ofsetymin] = self.frame_2[x-dx:, :]
             
         except ValueError as e:
             print(e)
