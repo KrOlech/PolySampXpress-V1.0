@@ -31,7 +31,7 @@ class Obraz(ROI_maping):
     y = 152
     total = 0
 
-    # '' 'up' 'dawn' 'right' 'left'
+    # '' 'up' 'dawn' 'right' 'left' 'multi'
     direction_change = ''
 
     # rozmiar obszaru
@@ -49,11 +49,7 @@ class Obraz(ROI_maping):
 
     # pixmap object reded from camera/file
     frame = True
-    
-    waitontarget = False
-    
-    move_to_point = True
-    
+
     map = []
     
     # construvtor
@@ -63,17 +59,13 @@ class Obraz(ROI_maping):
         self.initCamera() # inicializacja camery
         
         self.h_cam.put_AutoExpoEnable(False)
-        
-        # Tworzy białe tło
-        self.setAutoFillBackground(True)       
-        
+
 ###############################camera read##########################################
 
     def snap_img(self):
         if self.first:
             self.save_curent_viue()
         print("wywolanie wymuszenia eventu")
-        # sleep(1)
         self.h_cam.Snap(1)
     
     @pyqtSlot()
@@ -100,7 +92,6 @@ class Obraz(ROI_maping):
             self.extend_map_camera()
 
             # plt.imsave('img_frame_{}.png'.format(self.total), img)
-
 
     @staticmethod
     def cameraCallback(nEvent, ctx):
