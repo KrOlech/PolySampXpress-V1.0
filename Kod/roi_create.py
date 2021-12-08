@@ -1,9 +1,9 @@
 import numpy as np
-from PyQt5.QtWidgets import * #QFileDialog ,QMainWindow,QToolBar ,QAction
+from PyQt5.QtWidgets import *
 import cv2
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *  # QFileDialog ,QMainWindow,QToolBar ,QAction
+from PyQt5.QtWidgets import *
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtGui import QPixmap, QImage
 import Clasa as oC
@@ -14,7 +14,8 @@ from time import sleep
 
 class ROI_maping(QLabel):
 
-    # obiekt Klasy MainWindow podany jako argument przy tworzeniu obiektu klasy Obraz - pozwala na komunikację z oknem głównym
+    # obiekt Klasy MainWindow podany jako argument przy tworzeniu obiektu klasy Obraz -
+    # pozwala na komunikację z oknem głównym
     main_window = ' '
 
     #aktualna pozycja myszki nad widgetem
@@ -27,8 +28,7 @@ class ROI_maping(QLabel):
 
     x2 = 0
     y2 = 0
-    
-    
+
     skalx = 1
     skaly = 1
         

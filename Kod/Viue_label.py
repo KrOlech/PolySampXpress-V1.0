@@ -54,7 +54,7 @@ class Obraz(ROI_maping):
     
     move_to_point = True
     
-    mape_impute_tab = []
+    map = []
     
     # construvtor
     def __init__(self, main_window, *args, **kwargs):
@@ -93,13 +93,10 @@ class Obraz(ROI_maping):
                                       (self.w * 24 + 31) // 32 * 4,
                                       QImage.Format_RGB888)
                      
-            self.image_opencv_2 = self.convertQImageToMat(
-                    qimage_read_from_camera)
-            
-            # self.loadImage()
-            
-          
-            self.frame_2 = cv2.resize(self.image_opencv_2, self.rozmiar)
+            #self.image_opencv_2 = self.convertQImageToMat(
+            #        qimage_read_from_camera) self.image_opencv_2
+
+            self.frame_2 = cv2.resize(img, self.rozmiar)
             self.extend_map_camera()
 
             # plt.imsave('img_frame_{}.png'.format(self.total), img)
@@ -144,11 +141,8 @@ class Obraz(ROI_maping):
                                       (self.w * 24 + 31) // 32 * 4,
                                       QImage.Format_RGB888)
                 
-                self.image_opencv = self.convertQImageToMat(
-                    self.Qimage_read_from_camera)
-                
-                    
-                    
+                self.image_opencv = self.bytes_to_array(still_img_buf)
+
                 self.loadImage()
 
     #conwert Qpixmap to numpy tab
@@ -197,33 +191,33 @@ class Obraz(ROI_maping):
 
     def paintEvent(self, event):
         
-        #inicializacja pintera
+        # inicializacja pintera
         qp = QPainter(self)
         
         try:
-            #rysowanie obrazu
+            # rysowanie obrazu
             qp.drawPixmap(self.rect(), self._pixmapdromframe)
         except AttributeError:
             pass
             
         finally:
-            #kolro i tlo
-            br = QBrush(QColor(200, 10, 10, 200))#,Qt.CrossPattern)
+            # kolro i tlo
+            br = QBrush(QColor(200, 10, 10, 200))
             
-            #wgranie stylu 
+            # wgranie stylu
             qp.setBrush(br)
 
-            #variable for chusing if we drow numbers and rectagled
+            # variable for chusing if we drow numbers and rectagled
             tym = True
             num = False
             
-            if self.whot_to_drow == 'all_rectagls': #pokazuje wsystkie prostkoaty
+            if self.whot_to_drow == 'all_rectagls':  #pokazuje wsystkie prostkoaty
                 self.all_Rectagles(qp)
 
-            elif self.whot_to_drow == 'no_rectagle': #howa wszystkie prostokaty
+            elif self.whot_to_drow == 'no_rectagle':  #howa wszystkie prostokaty
                 tym = False
         
-            elif self.whot_to_drow =='One_rectagle': #rysuje wybrany prostokat
+            elif self.whot_to_drow =='One_rectagle':  #rysuje wybrany prostokat
                 
                 self.chosen_rectagle(qp)
                 tym = False
@@ -235,9 +229,11 @@ class Obraz(ROI_maping):
                 self.move_viue()
                 self.extend_map()
 
-            else: #podstawowa obcja rysuje nowy prostokat
+            else:
+                # podstawowa obcja rysuje nowy prostokat
                 self.all_Rectagles(qp)
-                qp.drawRect(QRect(self.begin, self.end))#rysowanie prostokonta na bierzoco jak podglond do ruchu myszka
+                qp.drawRect(QRect(self.begin, self.end))
+                # rysowanie prostokonta na bierzoco jak podglond do ruchu myszka
 
             self.loadImage(tym, num)
     
@@ -245,7 +241,7 @@ class Obraz(ROI_maping):
         if self.direction_change:
             self.waite_for_manipulator()
 
-    #ches map change direction
+    # ches map change direction
     def extend_map_camera(self):
         print("extend_map")
         if self.direction_change == 'dawn':
@@ -268,7 +264,8 @@ class Obraz(ROI_maping):
 
 ####################################fukcje wywoływane przez guziki z gluwnego okna####################################
 
-    def narysujcaloscs(self): #rysowanie wsystkich prostokontów po nacisnieciu odpowiedniego przyciusku
+    # rysowanie wsystkich prostokontów po nacisnieciu odpowiedniego przyciusku
+    def narysujcaloscs(self):
 
         self.whot_to_drow = 'all_rectagls'
         self.iloscklikniec = True
