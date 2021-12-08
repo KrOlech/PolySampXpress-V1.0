@@ -74,7 +74,7 @@ class Obraz(ROI_maping):
 
     def snap_img(self):
         if self.first:
-                self.Save_curent_viue()
+            self.save_curent_viue()
         print("wywolanie wymuszenia eventu")
         #sleep(1)
         self.hcam.Snap(1)
@@ -392,8 +392,7 @@ class Obraz(ROI_maping):
             
             
     #save first viue to the map
-    def Save_curent_viue(self):
-        
+    def save_curent_viue(self):
         self.map = self.frame
         self.first = False
             
@@ -545,5 +544,7 @@ class Obraz(ROI_maping):
         self.mape_impute_tab = []
         
     def get_map(self):
+        if self.first:
+            self.save_curent_viue()
         return self.map
 
