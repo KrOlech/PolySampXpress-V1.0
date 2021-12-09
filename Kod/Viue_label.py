@@ -63,8 +63,7 @@ class Obraz(ROI_maping):
 ###############################camera read##########################################
 
     def snap_img(self):
-        if self.first:
-            self.save_curent_viue()
+        self.save_curent_viue()
         print("wywolanie wymuszenia eventu")
         self.h_cam.Snap(1)
     
@@ -132,8 +131,8 @@ class Obraz(ROI_maping):
                                       (self.w * 24 + 31) // 32 * 4,
                                       QImage.Format_RGB888)
                 
-                self.image_opencv = self.bytes_to_array(still_img_buf)
-
+                self.image_opencv = self.bytes_to_array(self.buf)
+                
                 self.loadImage()
 
     #conwert Qpixmap to numpy tab
@@ -355,21 +354,24 @@ class Obraz(ROI_maping):
     def inject_map(self):
 
         xm, ym, zm = self.map.shape
+        try:
+            if self.dxp >= 0 and  self.dyp >= 0:
+                self.mape_impute_tab[:xm, :ym] = self.map
 
-        if self.dxp >= 0 and  self.dyp >= 0:
-            self.mape_impute_tab[:xm, :ym] = self.map
+            elif self.dxp<0 and  self.dyp >= 0:
+                self.mape_impute_tab[self.dxp:, :ym] = self.map
 
-        elif self.dxp<0 and  self.dyp >= 0:
-            self.mape_impute_tab[self.dxp:, :ym] = self.map
+            elif self.dxp>=0 and  self.dyp < 0:
+                self.mape_impute_tab[:xm, self.dyp:] = self.map
 
-        elif self.dxp>=0 and  self.dyp < 0:
-            self.mape_impute_tab[:xm, self.dyp:] = self.map
-
-        elif self.dxp<0 and  self.dyp < 0:
-            self.mape_impute_tab[self.dxp:, self.dyp:] = self.map
-
+            elif self.dxp<0 and  self.dyp < 0:
+                self.mape_impute_tab[self.dxp:, self.dyp:] = self.map
+        except Exception as e:
+            print(e)
     #update map on center on click metod WIP
     def mapupdate(self):
+    
+        self.save_curent_viue()
 
         self.mape_impute_tab = self.map_size_update()
 
@@ -383,19 +385,13 @@ class Obraz(ROI_maping):
 
     # save first viue to the map
     def save_curent_viue(self):
-        self.map = self.frame
-        self.first = False
+        if self.first:
+            self.map = self.frame
+            self.first = False
 
     def reset_map(self):
-        self.save_curent_viue()
-        self.ofsetymax = 0
-        self.ofsetxmax = 0
+        pass
 
-        self.ofsetymin = 0
-        self.ofsetxmin = 0
-
-        self.ofsetx = 0
-        self.ofsety = 0
 
     def extend_map_exeqiute(self, test_extend, ofset, borderofset, dx, dy, tx, ty, fx, fy):
 
@@ -404,9 +400,9 @@ class Obraz(ROI_maping):
         xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
 
         if test_extend:
-            tab = np.ones((xm + dx, ym+dy, zm), dtype=np.uint8)
+            tab = np.ones((xm + dx[0], ym+dy[0], zm), dtype=np.uint8)
             borderofset = ofset
-            tab[dx:xm + dx, dy:ym+dy] = self.map # Wkopoiowanie istniejocej mapy
+            tab[dx[1]:xm + dx[1], dy[1]:ym+dy[1]] = self.map # Wkopoiowanie istniejocej mapy
         else:
             tab = self.map
 
@@ -415,10 +411,10 @@ class Obraz(ROI_maping):
 
         except ValueError as e:
             print(e)
-            print(tab[0:dx, self.ofsety - self.ofsetymin: y + self.ofsety - self.ofsetymin].shape, "map")
-            pritn(self.frame_2[0:dx, :].shape,"frame")
+            print(tab[tx[0]:tx[1], ty[0]:ty[1]].shape, "map")
+            print(self.frame_2[fx[0]:fx[1], fy[0]:fy[1]].shape,"frame")
 
-            self.map = tab
+        self.map = tab
 
     def extend_map_right(self):
 
@@ -427,18 +423,18 @@ class Obraz(ROI_maping):
         xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
 
         self.extend_map_exeqiute(self.ofsety > self.ofsetymax, self.ofsety, self.ofsetymax,
-                                  0, self.delta_pixeli,
+                                  (0,0), (self.delta_pixeli,0),
                                  (self.ofsetx-self.ofsetxmin, x + self.ofsetx-self.ofsetxmin),
-                                 (self.ofsety - self.ofsetymin, y + self.ofsety - self.ofsetymin),
+                                 (ym, ym+self.delta_pixeli),
                                  (0, y),
                                  (y-self.delta_pixeli, y))
 
     def extend_map_dwn(self):
-
+       
         x, y, z = self.frame_2.shape  # wymiary podglondu
 
         self.extend_map_exeqiute(self.ofsetx < self.ofsetxmin ,self.ofsetx, self.ofsetxmin,
-                                self.delta_pixeli, 0,
+                                (self.delta_pixeli,self.delta_pixeli), (0,0),
                                 (0, self.delta_pixeli),
                                 (self.ofsety - self.ofsetymin, y + self.ofsety - self.ofsetymin),
                                 (0, self.delta_pixeli),
@@ -451,7 +447,7 @@ class Obraz(ROI_maping):
         xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
 
         self.extend_map_exeqiute(self.ofsety < self.ofsetymin, self.ofsety, self.ofsetymin,
-                                 self.delta_pixeli, 0,
+                                 (0,0),(self.delta_pixeli,self.delta_pixeli),
                                  (self.ofsetx-self.ofsetxmin, x+self.ofsetx-self.ofsetxmin),
                                  (0, self.delta_pixeli),
                                  (0, y),
@@ -460,9 +456,11 @@ class Obraz(ROI_maping):
     def extend_map_up(self):
 
         x, y, z = self.frame_2.shape  # wymiary podglondu
+        
+        xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
 
         self.extend_map_exeqiute(self.ofsetx > self.ofsetxmax, self.ofsetx, self.ofsetxmax,
-                                 0, 0,
+                                 (self.delta_pixeli,0), (0,0),
                                  (xm, self.delta_pixeli+xm),
                                  (self.ofsety - self.ofsetymin, y + self.ofsety - self.ofsetymin),
                                  (x-self.ofsety-self.ofsetymin, x),
@@ -476,28 +474,29 @@ class Obraz(ROI_maping):
         x, y, z = self.frame_2.shape  # wymiary podglondu
 
         xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
+    
+        try:
+            if self.dyp > 0:
+                print('right')
+                self.mape_impute_tab[self.ofsetx - self.ofsetxmin: x + self.ofsetx - self.ofsetxmin, ym: ym + dy] = \
+                    self.frame_2[:, y - dy:]
+            else:
+                print('left')
+                self.mape_impute_tab[self.ofsetx - self.ofsetxmin: x + self.ofsetx - self.ofsetxmin, 0: dy] = \
+                    self.frame_2[:, 0:dy]
 
-        if self.dyp > 0:
-            print('right')
-            self.mape_impute_tab[self.ofsetx - self.ofsetxmin: x + self.ofsetx - self.ofsetxmin, ym: ym + dy] = \
-                self.frame_2[:, y - dy:]
-        else:
-            print('left')
-            self.mape_impute_tab[self.ofsetx - self.ofsetxmin: x + self.ofsetx - self.ofsetxmin, 0: dy] = \
-                self.frame_2[:, 0:dy]
+            if self.dxp > 0:
+                print('up')
+                self.mape_impute_tab[xm: dx + xm, self.ofsety - self.ofsetymin: y + self.ofsety - self.ofsetymin] = \
+                    self.frame_2[x - dx:, :]
+            else:
+                print('dwn')
+                self.mape_impute_tab[0:dx, self.ofsety - self.ofsetymin: y + self.ofsety - self.ofsetymin] = \
+                    self.frame_2[0:dx, :]
 
-        if self.dxp > 0:
-            print('up')
-            self.mape_impute_tab[xm: dx + xm, self.ofsety - self.ofsetymin: y + self.ofsety - self.ofsetymin] = \
-                self.frame_2[x - dx:, :]
-        else:
-            print('dwn')
-            self.mape_impute_tab[0:dx, self.ofsety - self.ofsetymin: y + self.ofsety - self.ofsetymin] = \
-                self.frame_2[0:dx, :]
-
-        self.map = self.mape_impute_tab
-
+            self.map = self.mape_impute_tab
+        except Exception as e:
+            print(e)
     def get_map(self):
-        if self.first:
-            self.save_curent_viue()
+        self.save_curent_viue()
         return self.map
