@@ -15,8 +15,13 @@ class manipulator:
         
         self.conectioncheck()
         
-        if not self.get_axes_positions():
-            self.reference_axes()
+        #self.set_referencing_mode()
+        #self.get_axes_positions()
+        #self.reference_axes()
+        
+        #self.save_positions()
+        
+        self.set_abs_positions_from_file()
         
         self.print_curent_position()
 
@@ -24,7 +29,97 @@ class manipulator:
         self.controller_id = self.conncect_to_controller()
         return self.is_connected()
 
+
+    def get_szAxes(self,axes = 'XYZ'):
+        '''
+        Takes string defining axes as parameter (axes defined in XYZ string)
+        return char pointer to string with axes, usually char *const szAxes parameter in c848 dll functions.
+        '''
+        axes_ABC = self._get_axes(axes)
+        return ctypes.c_char_p(axes_ABC.encode('utf-8'))
+
+    def set_referencing_mode(self, axes='xyz', on=True):
+        '''
+        function sets axes to referencing mode or turns it of
+        '''
+        c_id = self._convert_id(self.controller_id)
+        for c in axes:
+            axis = self.get_szAxes(c)
+            bool_array = self._create_bool_array(size=1, values=on)
+            check = self.c848.C848_RON(c_id, axis, bool_array)
+        return bool(check)
+        
+    @staticmethod
+    def read_positions():
+        '''
+        read positions of axes from a config file
+        '''
+        position_dict = {}
+        with open('positions.txt', 'r') as file:
+            for line in file:
+                ax, position = line.split(':')
+                position_dict[ax.strip()] = float(position.strip())
+                
+        return position_dict
+
+    def split_axes_positions(self,position_dict):
+        '''
+        reads dictionary with posiotions and converts it to tuple with axes string and list of positions
+        '''
+        axes = []
+        positions = []
+        for ax, position in position_dict.items():
+            axes.append(ax)
+            positions.append(position)
+
+        axes = ''.join(axes)
+        return axes, positions
+        
+    def set_abs_positions_from_file(self):
+        '''
+        function turns off referencing mode and sets axes absolute positions read from conf file.
+        '''
+        self.set_referencing_mode(on=False)
+        position_dict = self.read_positions()
+       # print(position_dict)
+        axes, positions = self.split_axes_positions(position_dict)
+       # print(axes, positions)
+        return self.set_abs_positions(axes=axes, positions=positions)    
+        
+    def save_positions(self):
+        '''
+        saves positions of axes in a config file
+        '''
+        axes = 'xyz'
+        positions = self.get_axes_positions(axes)
+        with open('positions.txt', 'w') as file:
+            for ax, position in zip(axes, positions):
+                file.write('{}: {}\n'.format(ax, position))
+
+
+    def set_abs_positions(self, axes='xyz', positions = None):
+        '''
+        set absolut positions for not referenced axes
+        
+        referencing mode has to be turned off (function set_referencing_mode)
+        '''
+        if positions == None:
+            return None
+        
+        if len(axes) != len(positions):
+            print('number of axes and positions must be the same!')
+            return None
+        
+        c_id = self._convert_id(self.controller_id)
+        sz_axes = self.get_szAxes(axes)
+        c_double_array = self._create_double_array(len(axes), positions)
+        success = self.c848.C848_POS(c_id, sz_axes, c_double_array)
+        
+        return bool(success)
+          
     def __del__(self):
+        
+        self.save_positions()
         
         print('is connected:', self.is_connected())
 

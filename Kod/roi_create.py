@@ -100,7 +100,7 @@ class ROI_maping(QLabel):
 
         # scalowanie obrazu
         frame = cv2.resize(image, self.rozmiar)
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         self.frame = cv2.resize(image, self.rozmiar)
 
@@ -234,7 +234,7 @@ class ROI_maping(QLabel):
                                 self,
                                 self.x1, self.y1,
                                 self.x2, self.y2,
-                                cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB),
+                                self.frame,
                                 self.ofsetx,
                                 self.ofsety,
                                 self.scall,

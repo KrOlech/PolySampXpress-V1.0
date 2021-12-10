@@ -72,7 +72,7 @@ class MainWindow(QMainWindow):
                                      QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
         
         if reply == QMessageBox.Yes:
-            self.manipulaor.close_connection()
+            #self.manipulaor.close_connection()
             del self.manipulaor
             event.accept()
             
@@ -89,7 +89,8 @@ class MainWindow(QMainWindow):
         self.addToolBar(toolbar)
         action_6 = self.qactiontoolbar("Snap img",  lambda x: self.obraz.snap_img())
         toolbar.addAction(action_6)
-        
+        action_7 = self.qactiontoolbar("center",  lambda x: self.manipulaor.move_axes_to_abs_woe())
+        toolbar.addAction(action_7)
 
         seting_window = self.qactiontoolbar("Ustawienia osi", self.setings_for_axis)
         toolbar.addAction(seting_window)
@@ -200,6 +201,8 @@ class MainWindow(QMainWindow):
         self.key_move(self.manipulaor.move_dwn,self.obraz.dawn,0,3)
   
     def key_move(self,fun_manipulator,fun_obraz,key_en,key_dis):
+    
+        self.obraz.save_curent_viue()
     
         t = fun_manipulator(self.krok/10)
         

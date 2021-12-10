@@ -64,13 +64,11 @@ class Obraz(ROI_maping):
 
     def snap_img(self):
         self.save_curent_viue()
-        print("wywolanie wymuszenia eventu")
         self.h_cam.Snap(1)
     
     @pyqtSlot()
     def snap_image_event_signal(self):
-        print("wymuszony event")
-        
+         
         if self.h_cam is not None:
             w, h = self.h_cam.get_Size()
             bufsize = ((w * 24 + 31) // 32 * 4) * h
@@ -386,7 +384,9 @@ class Obraz(ROI_maping):
     # save first viue to the map
     def save_curent_viue(self):
         if self.first:
+           
             self.map = self.frame
+            
             self.first = False
 
     def reset_map(self):
@@ -408,12 +408,13 @@ class Obraz(ROI_maping):
 
         try:
             tab[tx[0]:tx[1], ty[0]:ty[1]] = self.frame_2[fx[0]:fx[1], fy[0]:fy[1]]
-
+            print(tx[0],tx[1], ty[0],ty[1])
         except ValueError as e:
             print(e)
             print(tab[tx[0]:tx[1], ty[0]:ty[1]].shape, "map")
             print(self.frame_2[fx[0]:fx[1], fy[0]:fy[1]].shape,"frame")
-
+        
+        
         self.map = tab
 
     def extend_map_right(self):
@@ -421,22 +422,30 @@ class Obraz(ROI_maping):
         x, y, z = self.frame_2.shape  # wymiary podglondu
 
         xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
-
-        self.extend_map_exeqiute(self.ofsety > self.ofsetymax, self.ofsety, self.ofsetymax,
-                                  (0,0), (self.delta_pixeli,0),
-                                 (self.ofsetx-self.ofsetxmin, x + self.ofsetx-self.ofsetxmin),
+        
+        tx1 = self.ofsetx-self.ofsetxmax if self.ofsetx-self.ofsetxmax > 0 else self.ofsetx-self.ofsetxmax-768
+        tx2 = x+self.ofsetx-self.ofsetxmin if x+self.ofsetx-self.ofsetxmin > 0 else x+self.ofsetx-self.ofsetxmin-768
+        tx = (tx1,tx2)
+        
+        self.extend_map_exeqiute(self.ofsety > self.ofsetymax, self.ofsety+514, self.ofsetymax,
+                                 (0,0), (self.delta_pixeli,0),
+                                  tx,
                                  (ym, ym+self.delta_pixeli),
-                                 (0, y),
+                                 (0, x),
                                  (y-self.delta_pixeli, y))
 
     def extend_map_dwn(self):
        
         x, y, z = self.frame_2.shape  # wymiary podglondu
+        
+        ty1 = self.ofsety-self.ofsetymin if self.ofsety-self.ofsetymin > 0 else self.ofsety-self.ofsetymin-1028
+        ty2 = y + self.ofsety-self.ofsetymin if y + self.ofsety-self.ofsetymin > 0 else y + self.ofsety-self.ofsetymin-1024
+        ty = (ty1,ty2)
 
-        self.extend_map_exeqiute(self.ofsetx < self.ofsetxmin ,self.ofsetx, self.ofsetxmin,
+        self.extend_map_exeqiute(self.ofsetx < self.ofsetxmin ,self.ofsetx+258, self.ofsetxmin,
                                 (self.delta_pixeli,self.delta_pixeli), (0,0),
                                 (0, self.delta_pixeli),
-                                (self.ofsety - self.ofsetymin, y + self.ofsety - self.ofsetymin),
+                                ty,
                                 (0, self.delta_pixeli),
                                 (0, y))
 
@@ -445,12 +454,16 @@ class Obraz(ROI_maping):
         x, y, z = self.frame_2.shape  # wymiary podglondu
 
         xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
+        
+        tx1 = self.ofsetx-self.ofsetxmax if self.ofsetx-self.ofsetxmax > 0 else self.ofsetx-self.ofsetxmax-768
+        tx2 = x+self.ofsetx-self.ofsetxmin if x+self.ofsetx-self.ofsetxmin > 0 else x+self.ofsetx-self.ofsetxmin-768
+        tx = (tx1,tx2)
 
-        self.extend_map_exeqiute(self.ofsety < self.ofsetymin, self.ofsety, self.ofsetymin,
+        self.extend_map_exeqiute(self.ofsety < self.ofsetymin, self.ofsety+514, self.ofsetymin,
                                  (0,0),(self.delta_pixeli,self.delta_pixeli),
-                                 (self.ofsetx-self.ofsetxmin, x+self.ofsetx-self.ofsetxmin),
+                                 tx,
                                  (0, self.delta_pixeli),
-                                 (0, y),
+                                 (0, x),
                                  (0, self.delta_pixeli))
 
     def extend_map_up(self):
@@ -458,12 +471,16 @@ class Obraz(ROI_maping):
         x, y, z = self.frame_2.shape  # wymiary podglondu
         
         xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
-
-        self.extend_map_exeqiute(self.ofsetx > self.ofsetxmax, self.ofsetx, self.ofsetxmax,
+        
+        ty1 = self.ofsety-self.ofsetymin if self.ofsety-self.ofsetymin > 0 else self.ofsety-self.ofsetymin-1028
+        ty2 = y + self.ofsety-self.ofsetymin if y + self.ofsety-self.ofsetymin > 0 else y + self.ofsety-self.ofsetymin-1024
+        ty = (ty1,ty2)
+        
+        self.extend_map_exeqiute(self.ofsetx > self.ofsetxmax, self.ofsetx+258,  self.ofsetxmax,
                                  (self.delta_pixeli,0), (0,0),
                                  (xm, self.delta_pixeli+xm),
-                                 (self.ofsety - self.ofsetymin, y + self.ofsety - self.ofsetymin),
-                                 (x-self.ofsety-self.ofsetymin, x),
+                                 ty,
+                                 (x-self.delta_pixeli, x),
                                  (0, y))
 
     def extend_map_multi(self):
