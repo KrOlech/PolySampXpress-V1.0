@@ -119,4 +119,59 @@ def extend_map_exeqiute_old(self, test_extend, ofset, borderofset, dx, dy, tx, t
             self.map = self.mape_impute_tab
         except Exception as e:
             print(e)
+        #metoda generujaca pusty
+    def map_size_update(self):
+
+        xm, ym, zm = self.map.shape
+
+        if self.ofsetx < self.ofsetxmin:
+            xm += abs(self.dxp)
+            self.ofsetxmin = self.ofsetx
+        elif self.ofsetx > self.ofsetxmax:
+            xm += abs(self.dxp)
+            self.ofsetxmax = self.ofsetx
+        else:
+            pass
+
+        if self.ofsety < self.ofsetymin:
+            ym += abs(self.dyp)
+            self.ofsetymin = self.ofsety
+        elif self.ofsety > self.ofsetymax:
+            ym += abs(self.dyp)
+            self.ofsetymax = self.ofsety
+        else:
+            pass
+
+        return np.ones((xm, ym, zm), dtype=np.uint8)
+
+    def inject_map(self):
+
+        xm, ym, zm = self.map.shape
+        try:
+            if self.dxp >= 0 and  self.dyp >= 0:
+                self.mape_impute_tab[:xm, :ym] = self.map
+
+            elif self.dxp<0 and  self.dyp >= 0:
+                self.mape_impute_tab[self.dxp:, :ym] = self.map
+
+            elif self.dxp>=0 and  self.dyp < 0:
+                self.mape_impute_tab[:xm, self.dyp:] = self.map
+
+            elif self.dxp<0 and  self.dyp < 0:
+                self.mape_impute_tab[self.dxp:, self.dyp:] = self.map
+        except Exception as e:
+            print(e)
+    #update map on center on click metod WIP
+    def mapupdate(self):
     
+        self.save_curent_viue()
+
+        self.mape_impute_tab = self.map_size_update()
+
+        print(self.dxp, self.dyp)
+
+        self.inject_map()
+
+        self.whot_to_drow = 'viue_muve'
+        self.direction_change = 'multi'
+        self.update()
