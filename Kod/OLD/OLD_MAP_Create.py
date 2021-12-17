@@ -175,3 +175,21 @@ def extend_map_exeqiute_old(self, test_extend, ofset, borderofset, dx, dy, tx, t
         self.whot_to_drow = 'viue_muve'
         self.direction_change = 'multi'
         self.update()
+        
+        
+            # ches map change direction
+    def extend_map_camera(self):
+        print("extend_map")
+        if self.direction_change == 'dawn':
+            self.extend_map_dwn()
+        elif self.direction_change == 'up':
+            self.extend_map_up()
+        elif self.direction_change == 'right':
+            self.extend_map_right()
+        elif self.direction_change == 'left':
+            self.extend_map_left()
+        elif self.direction_change == 'multi':
+            self.extend_map_multi()
+        else:
+            pass
+        self.direction_change = ''
