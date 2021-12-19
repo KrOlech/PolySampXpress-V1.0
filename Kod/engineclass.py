@@ -24,6 +24,8 @@ class manipulator:
         
         self.print_curent_position()
 
+        self.x, self.y, self.z = self.get_axes_positions('xyz')
+
     def conect(self):
         self.controller_id = self.conncect_to_controller()
         return self.is_connected()
@@ -41,11 +43,13 @@ class manipulator:
         '''
         function sets axes to referencing mode or turns it of
         '''
+        check = False
         c_id = self._convert_id(self.controller_id)
         for c in axes:
             axis = self.get_szAxes(c)
             bool_array = self._create_bool_array(size=1, values=on)
             check = self.c848.C848_RON(c_id, axis, bool_array)
+
         return bool(check)
         
     @staticmethod
