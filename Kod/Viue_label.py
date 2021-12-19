@@ -317,14 +317,14 @@ class Obraz(ROI_maping):
         ym, zm = int((50-ym)*510/self.skala), int((50-zm)*510/self.skala)
         
         #przeskalowanei podglondu
-        klatka = cv2.resize(self.frame_2,(int(x/self.skala),int(y/self.skala)))
+        klatka = cv2.resize(self.frame_2, (int(x/self.skala), int(y/self.skala)))
         
         #wklejenie podglondu we własciwe miejsce na mapie
         try:
-            self.map[zm:zm+int(y/self.skala),ym:ym+int(x/self.skala)] = klatka
+            self.map[zm:zm+int(y/self.skala), ym:ym+int(x/self.skala)] = klatka
         except Exception as e:
             print(e)
-            print(self.map[ym:ym+int(x/self.skala),zm:zm+int(y/self.skala)].shape)
+            print(self.map[ym:ym+int(x/self.skala), zm:zm+int(y/self.skala)].shape)
             print(klatka.shape)
 
         if self.main_window.map is None:
