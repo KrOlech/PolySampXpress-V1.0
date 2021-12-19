@@ -66,6 +66,17 @@ class ROI_maping(QLabel):
 
     dxp, dyp = False, False
 
+
+    #hold copy of image reded from camera
+    C_image = np.zeros(1)
+
+    #hold resazi copy of image
+    frame = cv2.resize(c_image, self.rozmiar)
+
+    _imgfromframe = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0], QImage.Format_RGB888)
+
+    _pixmapdromframe = QPixmap.fromImage(self._imgfromframe)
+
     def __init__(self, main_window, *args, **kwargs):
         super(ROI_maping, self).__init__(*args, **kwargs)
         
@@ -100,20 +111,19 @@ class ROI_maping(QLabel):
 
         # scalowanie obrazu
         frame = cv2.resize(image, self.rozmiar)
-        #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         self.frame = cv2.resize(image, self.rozmiar)
 
         if drow_deskription:
             for i, rectangle in enumerate(self.main_window.rectangles):
-                rX, rY = rectangle.gettextloc(self.ofsetx, self.ofsety, self.scall)
-                cv2.putText(frame, str(rectangle.getName()), (rX, rY), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                rx, ry = rectangle.gettextloc(self.ofsetx, self.ofsety, self.scall)
+                cv2.putText(frame, str(rectangle.getName()), (rx, ry), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
         if drow_single_rectagle:
-            rX,rY = self.main_window.rectangles[self.ktury].gettextloc(self.ofsetx, self.ofsety, self.scall)
-            cv2.putText(frame, str(self.main_window.rectangles[self.ktury].getName()), (rX, rY), cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2)
+            rx, ry = self.main_window.rectangles[self.ktury].gettextloc(self.ofsetx, self.ofsety, self.scall)
+            cv2.putText(frame, str(self.main_window.rectangles[self.ktury].getName()), (rx, ry), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         
-        # conwersja z open Cv image na Qimage
+        # conwersja z open Cv image na QImage
         self._imgfromframe = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0], QImage.Format_RGB888)
 
         self._pixmapdromframe = QPixmap.fromImage(self._imgfromframe)

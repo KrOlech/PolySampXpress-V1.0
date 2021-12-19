@@ -45,7 +45,7 @@ class Map_window(QWidget):
     def __init__(self, map, main_window, *args, **kwargs):
         super(Map_window, self).__init__(*args, **kwargs)
 
-        self.setWindowTitle("Mapa Prubki")
+        self.setWindowTitle("Mapa Próbki")
         self.setWindowIcon(QtGui.QIcon('icon.png'))
 
         self.setGeometry(0, 0, 1024, 720)
