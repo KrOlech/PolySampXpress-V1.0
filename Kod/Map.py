@@ -11,18 +11,15 @@ class Map(ROI_maping):
     def __init__(self, img, main_window, *args, **kwargs):
         super(Map, self).__init__(main_window, *args, **kwargs)
 
-        # shape of a new image
-        x,y, z = img.shape
-
-        # zapisanie rozmiaru obrazu w celu implementacji przyszłego skalaowania.
-        self.Rozmiar = (y, x)
-        self.orgx = x
-        self.orgy = y
-
         # zapisanie nowego obrazu
-        self.image_opencv = img
+        self.image_opencv =  cv2.resize(img,self.rozmiar)
+        
+        img = self.image_opencv
+        
+        self.resize(self.rozmiar[0],self.rozmiar[1])
 
         self.img = QImage(img, img.shape[1],img.shape[0],img.strides[0],QImage.Format_RGB888)
+
         #QImage(cvImg.data, width, height, bytesPerLine, QImage.Format_RGB888)
         self.img = QPixmap.fromImage(self.img)
 
@@ -31,35 +28,19 @@ class Map(ROI_maping):
 
     def new_image(self, img):
 
-        #shape of a new image
-        x,y, z = img.shape
-
-        #zapisanie rozmiaru obrazu w celu implementacji przyszłego skalaowania.
-        self.Rozmiar = (y, x)
-        self.orgx = x
-        self.orgy = y
-
         #zapisanie nowego obrazu
-        self.image_opencv = img
+        self.image_opencv =  cv2.resize(img,self.rozmiar)
 
         self.img = QImage(img, img.shape[1],img.shape[0],img.strides[0],QImage.Format_RGB888)
         #QImage(cvImg.data, width, height, bytesPerLine, QImage.Format_RGB888)
         self.img = QPixmap.fromImage(self.img)
 
-    #overload of pyqt5  resize event
-    def resizeEvent(self, event):
-
-        #read curent window size
-        x, y = self.height(), self.width()
-
-        #calculate scal for mouse reed
-        self.skalx = x/self.orgx
-        self.skaly = y/self.orgy
-        
-        #print(self.skalx, self.skaly)
 
 
 class Map_window(QWidget):
+
+    # rozmiar obszaru
+    rozmiar = (1024, 768)
 
     def __init__(self, map, main_window, *args, **kwargs):
         super(Map_window, self).__init__(*args, **kwargs)
@@ -67,12 +48,14 @@ class Map_window(QWidget):
         self.setWindowTitle("Mapa Prubki")
         self.setWindowIcon(QtGui.QIcon('icon.png'))
 
-        #main layout
+        self.setGeometry(0, 0, 1024, 720)
+        self.resize(self.rozmiar[0],self.rozmiar[1])
         self.layout = QVBoxLayout()
 
         #map object
         self.map = Map(map, main_window)
-
+        
+        self.resize(self.height(), self.width())
         self.layout.addWidget(self.map, Qt.AlignCenter)
         self.setLayout(self.layout)
 

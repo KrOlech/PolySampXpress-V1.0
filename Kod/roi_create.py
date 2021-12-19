@@ -291,4 +291,5 @@ class ROI_maping(QLabel):
     def all_Rectagles(self, Painter):
         for rectangle in self.main_window.rectangles: # wyrysowanie poprzednich prostokotów
             Painter.drawRect(self.rectagledrow(rectangle))
+       
 

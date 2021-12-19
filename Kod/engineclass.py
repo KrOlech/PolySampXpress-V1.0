@@ -15,13 +15,12 @@ class manipulator:
         
         self.conectioncheck()
         
-        #self.set_referencing_mode()
-        #self.get_axes_positions()
-        #self.reference_axes()
-        
-        #self.save_positions()
-        
-        self.set_abs_positions_from_file()
+        try:
+            self.set_abs_positions_from_file()
+        except Exception:
+            self.set_referencing_mode()
+            self.get_axes_positions()
+            self.reference_axes()
         
         self.print_curent_position()
 
@@ -255,6 +254,8 @@ class manipulator:
         function gives positions of given axes
 
         returns list of positions in order of given axes
+        
+        if manipulator in move returns False
         '''
         c_id = self._convert_id(self.controller_id)
         sz_axes = self._get_szAxes(axes)
@@ -296,7 +297,7 @@ class manipulator:
     def weaith_for_target(self):
         while not all(self.check_on_target().values()):
             self.main.upadet_position_read()
-        self.x, self.y, self.z = self.get_axes_positions('xyz')
+            self.x, self.y, self.z = self.get_axes_positions('xyz')
 
   ########################metody odbierajace wysłąne poleca ruchu################
     def move_up(self,krok):

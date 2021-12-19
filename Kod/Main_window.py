@@ -62,19 +62,24 @@ class MainWindow(QMainWindow):
         self.toolbars()
         
         self.upadet_position_read()
+        
+        self.obraz.snap_img()
 
     def closeEvent(self, event):
     
-        if self.map != None:
-            del self.map
-        
+
         reply = QMessageBox.question(self,"mesage","Czy napewno chcesz zamknac program?",
                                      QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
+        
+        
         
         if reply == QMessageBox.Yes:
             #self.manipulaor.close_connection()
             del self.manipulaor
             event.accept()
+            
+            if self.map != None:
+                del self.map
             
         else:
             event.ignore()
@@ -201,7 +206,9 @@ class MainWindow(QMainWindow):
         self.key_move(self.manipulaor.move_dwn,self.obraz.dawn,0,3)
   
     def key_move(self,fun_manipulator,fun_obraz,key_en,key_dis):
-    
+        
+        [k.setEnabled(False) for k in self.kierunkowe]
+        
         self.obraz.save_curent_viue()
     
         t = fun_manipulator(self.krok/10)
@@ -210,6 +217,8 @@ class MainWindow(QMainWindow):
         x,y,z = self.manipulaor.get_axes_positions()
         
         fun_obraz()
+        
+        [k.setEnabled(True) for k in self.kierunkowe]
 
         if t:
             self.kierunkowe[key_en].setEnabled(True)
@@ -328,9 +337,13 @@ class MainWindow(QMainWindow):
         self.ROI.append(ROI)
 
     def remove_ROI(self):
-
-        while self.ROI != []:
-            [r.kill() for r in self.ROI]
+        #zapytanei uzytkownika czy napewno chce to zrobic
+        reply = QMessageBox.question(self,"mesage","Czy napewno chcesz usunac wsystkie oznaczone ROI?",
+                                     QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
+                                     
+        if reply == QMessageBox.Yes:
+            while self.ROI != []:
+                [r.kill() for r in self.ROI]
 
     def remove_some_ROI(self, ROI):
         

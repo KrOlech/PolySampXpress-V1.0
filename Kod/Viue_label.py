@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from threading import Thread
 from time import sleep, time
 from roi_create import ROI_maping
+import Map as M
 
 
 class Obraz(ROI_maping):
@@ -37,6 +38,12 @@ class Obraz(ROI_maping):
     # rozmiar obszaru
     rozmiar = (1024, 768)
     
+    #skala mapy
+    skala = 4
+    
+    #maxymalna pozycja manipulatora w mm
+    manipulator_max = 50
+    
     # value that remember whot part of the sample have been seen save to map
     ofsetymax = 0
     ofsetxmax = 0
@@ -50,7 +57,8 @@ class Obraz(ROI_maping):
     # pixmap object reded from camera/file
     frame = True
 
-    map = []
+    map = np.zeros(100)
+    map.shape = (10,10,1)
     
     # construvtor
     def __init__(self, main_window, *args, **kwargs):
@@ -60,10 +68,10 @@ class Obraz(ROI_maping):
         
         self.h_cam.put_AutoExpoEnable(False)
 
+
 ###############################camera read##########################################
 
     def snap_img(self):
-        self.save_curent_viue()
         self.h_cam.Snap(1)
     
     @pyqtSlot()
@@ -86,8 +94,8 @@ class Obraz(ROI_maping):
             #        qimage_read_from_camera) self.image_opencv_2
 
             self.frame_2 = cv2.resize(img, self.rozmiar)
-            self.extend_map_camera()
-
+            self.save_curent_viue()
+            self.extend_map_exeqiute()
             # plt.imsave('img_frame_{}.png'.format(self.total), img)
 
     @staticmethod
@@ -214,8 +222,7 @@ class Obraz(ROI_maping):
             elif self.whot_to_drow == 'viue_muve':
 
                 self.all_Rectagles(qp)
-                self.move_viue()
-                self.extend_map()
+                self.snap_img()
 
             else:
                 # podstawowa obcja rysuje nowy prostokat
@@ -225,37 +232,10 @@ class Obraz(ROI_maping):
 
             self.loadImage(tym, num)
     
-    def extend_map(self):
-        if self.direction_change:
-            self.waite_for_manipulator()
 
-    # waiting for manipulator and snap ne frame
-    def waite_for_manipulator(self):
-        self.main_window.manipulaor.weaith_for_target()
-        self.snap_img()
-
-    # ches map change direction
-    def extend_map_camera(self):
-        print("extend_map")
-        if self.direction_change == 'dawn':
-            self.extend_map_dwn()
-        elif self.direction_change == 'up':
-            self.extend_map_up()
-        elif self.direction_change == 'right':
-            self.extend_map_right()
-        elif self.direction_change == 'left':
-            self.extend_map_left()
-        elif self.direction_change == 'multi':
-            self.extend_map_multi()
-        else:
-            pass
-        self.direction_change = ''
-    
     def chosen_rectagle(self, Painter):
         Painter.drawRect(self.rectagledrow(self.main_window.rectangles[self.ktury]))
       
-    def move_viue(self):        
-        self.loadImage()
 
 ####################################fukcje wywoływane przez guziki z gluwnego okna####################################
 
@@ -301,219 +281,85 @@ class Obraz(ROI_maping):
     def left(self):
         self.ofsety -= self.delta_pixeli
         self.whot_to_drow = 'viue_muve'
-        self.direction_change = 'left'
         self.update()
-    
+   
     def right(self):
         self.ofsety += self.delta_pixeli
         self.whot_to_drow = 'viue_muve'
-        self.direction_change = 'right'
         self.update()
 
     def dawn(self):
         self.ofsetx -= self.delta_pixeli
         self.whot_to_drow = 'viue_muve'
-        self.direction_change = 'dawn'
         self.update()
 
     def up(self):
         self.ofsetx += self.delta_pixeli
         self.whot_to_drow = 'viue_muve'
-        self.direction_change = 'up'
         self.update()
-
+        
 ###########################map extetion##############################
-
-    #metoda generujaca pusty
-    def map_size_update(self):
-
-        xm, ym, zm = self.map.shape
-
-        if self.ofsetx < self.ofsetxmin:
-            xm += abs(self.dxp)
-            self.ofsetxmin = self.ofsetx
-        elif self.ofsetx > self.ofsetxmax:
-            xm += abs(self.dxp)
-            self.ofsetxmax = self.ofsetx
-        else:
-            pass
-
-        if self.ofsety < self.ofsetymin:
-            ym += abs(self.dyp)
-            self.ofsetymin = self.ofsety
-        elif self.ofsety > self.ofsetymax:
-            ym += abs(self.dyp)
-            self.ofsetymax = self.ofsety
-        else:
-            pass
-
-        return np.ones((xm, ym, zm), dtype=np.uint8)
-
-    def inject_map(self):
-
-        xm, ym, zm = self.map.shape
-        try:
-            if self.dxp >= 0 and  self.dyp >= 0:
-                self.mape_impute_tab[:xm, :ym] = self.map
-
-            elif self.dxp<0 and  self.dyp >= 0:
-                self.mape_impute_tab[self.dxp:, :ym] = self.map
-
-            elif self.dxp>=0 and  self.dyp < 0:
-                self.mape_impute_tab[:xm, self.dyp:] = self.map
-
-            elif self.dxp<0 and  self.dyp < 0:
-                self.mape_impute_tab[self.dxp:, self.dyp:] = self.map
-        except Exception as e:
-            print(e)
-    #update map on center on click metod WIP
-    def mapupdate(self):
-    
-        self.save_curent_viue()
-
-        self.mape_impute_tab = self.map_size_update()
-
-        print(self.dxp, self.dyp)
-
-        self.inject_map()
-
-        self.whot_to_drow = 'viue_muve'
-        self.direction_change = 'multi'
-        self.update()
 
     # save first viue to the map
     def save_curent_viue(self):
         if self.first:
            
-            self.map = self.frame
+            x, y, z = self.frame_2.shape
             
+            map_size = int(x+self.manipulator_max*510/self.skala) #x size
+            map_size *= int(y+self.manipulator_max*510/self.skala) #y size
+            map_size *= 3 # RGB colors
+            
+            #stworzenie tablicy przechowujacej obraz mapy
+            self.map = np.zeros(map_size,dtype=np.uint8)
+            
+            #okreslenei ksztaltu tej tabliczy
+            self.map.shape = (int(x+50*510/self.skala),int(y+50*510/self.skala),3)
+            
+            #wykonanie fukcji wklejajacej aktualny podglond do mapy
+            self.extend_map_exeqiute()
+            
+            #zapisanie ze mapa juz jest zainiciowana i nie trzeba tego robic
             self.first = False
 
-    def reset_map(self):
-        pass
-
-
-    def extend_map_exeqiute(self, test_extend, ofset, borderofset, dx, dy, tx, ty, fx, fy):
-
-        x, y, z = self.frame_2.shape  # wymiary podglondu
-
-        xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
-
-        if test_extend:
-            tab = np.ones((xm + dx[0], ym+dy[0], zm), dtype=np.uint8)
-            borderofset = ofset
-            tab[dx[1]:xm + dx[1], dy[1]:ym+dy[1]] = self.map # Wkopoiowanie istniejocej mapy
-        else:
-            tab = self.map
-
+    # metoda zapisujaca do mapy aktualny podglond we wskazane miejsce na którym znajduje sie manipulaor
+    def extend_map_exeqiute(self):
+        
+        x, y, z = self.frame_2.shape
+        
+        xm,ym,zm, = self.main_window.manipulaor.get_axes_positions()
+        
+        #przeliczenie milimetrow na pixele i odwrucenie osi
+        ym,zm = int((50-ym)*510/self.skala),int((50-zm)*510/self.skala)
+        
+        #przeskalowanei podglondu
+        klatka = cv2.resize(self.frame_2,(int(x/self.skala),int(y/self.skala)))
+        
+        #wklejenie podglondu we własciwe miejsce na mapie
         try:
-            tab[tx[0]:tx[1], ty[0]:ty[1]] = self.frame_2[fx[0]:fx[1], fy[0]:fy[1]]
-            print(tx[0],tx[1], ty[0],ty[1])
-        except ValueError as e:
-            print(e)
-            print(tab[tx[0]:tx[1], ty[0]:ty[1]].shape, "map")
-            print(self.frame_2[fx[0]:fx[1], fy[0]:fy[1]].shape,"frame")
-        
-        
-        self.map = tab
-
-    def extend_map_right(self):
-
-        x, y, z = self.frame_2.shape  # wymiary podglondu
-
-        xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
-        
-        tx1 = self.ofsetx-self.ofsetxmax if self.ofsetx-self.ofsetxmax > 0 else self.ofsetx-self.ofsetxmax-768
-        tx2 = x+self.ofsetx-self.ofsetxmin if x+self.ofsetx-self.ofsetxmin > 0 else x+self.ofsetx-self.ofsetxmin-768
-        tx = (tx1,tx2)
-        
-        self.extend_map_exeqiute(self.ofsety > self.ofsetymax, self.ofsety+514, self.ofsetymax,
-                                 (0,0), (self.delta_pixeli,0),
-                                  tx,
-                                 (ym, ym+self.delta_pixeli),
-                                 (0, x),
-                                 (y-self.delta_pixeli, y))
-
-    def extend_map_dwn(self):
-       
-        x, y, z = self.frame_2.shape  # wymiary podglondu
-        
-        ty1 = self.ofsety-self.ofsetymin if self.ofsety-self.ofsetymin > 0 else self.ofsety-self.ofsetymin-1028
-        ty2 = y + self.ofsety-self.ofsetymin if y + self.ofsety-self.ofsetymin > 0 else y + self.ofsety-self.ofsetymin-1024
-        ty = (ty1,ty2)
-
-        self.extend_map_exeqiute(self.ofsetx < self.ofsetxmin ,self.ofsetx+258, self.ofsetxmin,
-                                (self.delta_pixeli,self.delta_pixeli), (0,0),
-                                (0, self.delta_pixeli),
-                                ty,
-                                (0, self.delta_pixeli),
-                                (0, y))
-
-    def extend_map_left(self):
-
-        x, y, z = self.frame_2.shape  # wymiary podglondu
-
-        xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
-        
-        tx1 = self.ofsetx-self.ofsetxmax if self.ofsetx-self.ofsetxmax > 0 else self.ofsetx-self.ofsetxmax-768
-        tx2 = x+self.ofsetx-self.ofsetxmin if x+self.ofsetx-self.ofsetxmin > 0 else x+self.ofsetx-self.ofsetxmin-768
-        tx = (tx1,tx2)
-
-        self.extend_map_exeqiute(self.ofsety < self.ofsetymin, self.ofsety+514, self.ofsetymin,
-                                 (0,0),(self.delta_pixeli,self.delta_pixeli),
-                                 tx,
-                                 (0, self.delta_pixeli),
-                                 (0, x),
-                                 (0, self.delta_pixeli))
-
-    def extend_map_up(self):
-
-        x, y, z = self.frame_2.shape  # wymiary podglondu
-        
-        xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
-        
-        ty1 = self.ofsety-self.ofsetymin if self.ofsety-self.ofsetymin > 0 else self.ofsety-self.ofsetymin-1028
-        ty2 = y + self.ofsety-self.ofsetymin if y + self.ofsety-self.ofsetymin > 0 else y + self.ofsety-self.ofsetymin-1024
-        ty = (ty1,ty2)
-        
-        self.extend_map_exeqiute(self.ofsetx > self.ofsetxmax, self.ofsetx+258,  self.ofsetxmax,
-                                 (self.delta_pixeli,0), (0,0),
-                                 (xm, self.delta_pixeli+xm),
-                                 ty,
-                                 (x-self.delta_pixeli, x),
-                                 (0, y))
-
-    def extend_map_multi(self):
-
-        dy = abs(self.dyp)
-        dx = abs(self.dxp)
-
-        x, y, z = self.frame_2.shape  # wymiary podglondu
-
-        xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
-    
-        try:
-            if self.dyp > 0:
-                print('right')
-                self.mape_impute_tab[self.ofsetx - self.ofsetxmin: x + self.ofsetx - self.ofsetxmin, ym: ym + dy] = \
-                    self.frame_2[:, y - dy:]
-            else:
-                print('left')
-                self.mape_impute_tab[self.ofsetx - self.ofsetxmin: x + self.ofsetx - self.ofsetxmin, 0: dy] = \
-                    self.frame_2[:, 0:dy]
-
-            if self.dxp > 0:
-                print('up')
-                self.mape_impute_tab[xm: dx + xm, self.ofsety - self.ofsetymin: y + self.ofsety - self.ofsetymin] = \
-                    self.frame_2[x - dx:, :]
-            else:
-                print('dwn')
-                self.mape_impute_tab[0:dx, self.ofsety - self.ofsetymin: y + self.ofsety - self.ofsetymin] = \
-                    self.frame_2[0:dx, :]
-
-            self.map = self.mape_impute_tab
+            self.map[zm:zm+int(y/self.skala),ym:ym+int(x/self.skala)] = klatka
         except Exception as e:
             print(e)
+            print(self.map[ym:ym+int(x/self.skala),zm:zm+int(y/self.skala)].shape)
+            print(klatka.shape)
+
+        if self.main_window.map is None:
+            self.main_window.map = M.Map_window(self.map, self.main_window)
+        else:
+            self.main_window.map.new_image(self.map)
+            
+    #wyczysczenie aktualnie zebranej mapy
+    def reset_map(self):
+        
+        #zapytanei uzytkownika czy napewno chce to zrobic
+        reply = QMessageBox.question(self,"mesage","Czy napewno chcesz usunac mape?",
+                                     QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
+        
+        
+        if reply == QMessageBox.Yes:
+            #jesli odpowie tak to ustawienie ze nie zebrano zadnej mapy i stworzenie jej na nowo nadpisuajc stara
+            self.first = True
+            self.save_curent_viue()
+            
     def get_map(self):
-        self.save_curent_viue()
         return self.map
