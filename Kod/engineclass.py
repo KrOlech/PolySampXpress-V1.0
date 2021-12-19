@@ -303,7 +303,7 @@ class manipulator:
     #metoda oczekujca az zostanie osiognieta zadana pozycja. jednoczesnie updatujaca napisy na glównym oknie
     def weaith_for_target(self):
         while not all(self.check_on_target().values()):
-            self.main.upadet_position_read()
+            self.main._upadet_position_read()
             self.x, self.y, self.z = self.get_axes_positions('xyz')
 
   ########################metody odbierajace wysłąne poleca ruchu################

@@ -320,7 +320,7 @@ class podglond_roi(QWidget):
 ##################################Fine moving#########################################
 ######################################################################################
 
-##########################dwutrybowe przyciski kierunkowe############################
+##########################dwutrybowe przyciski _kierunkowe############################
     def top_booton(self):
         if self.move.isChecked():
             self.obiekt_oznaczony.move_top_line(self.incrise.isChecked())

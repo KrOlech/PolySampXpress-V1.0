@@ -62,7 +62,7 @@ class ROI_maping(QLabel):
     # edit trybe
     edit_trybe = False
     edited_roi = None
-    move_to_point = False
+    move_to_point = True
 
     dxp, dyp = False, False
 
