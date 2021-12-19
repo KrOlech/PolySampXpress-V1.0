@@ -117,20 +117,20 @@ class podglond_roi(QWidget):
         self.pole_layout.addWidget(self.pole_label)
         self.pole_layout.addWidget(self.poleL)
         
-        self.secenduary_layout = QVBoxLayout()
-        self.secenduary_layout.addWidget(self.name_lable)
-        self.secenduary_layout.addLayout(self.label_layout)
-        self.secenduary_layout.addLayout(self.pole_layout)
-        self.secenduary_layout.addLayout(self.buton_layout)
+        self.secondary_layout = QVBoxLayout()
+        self.secondary_layout.addWidget(self.name_lable)
+        self.secondary_layout.addLayout(self.label_layout)
+        self.secondary_layout.addLayout(self.pole_layout)
+        self.secondary_layout.addLayout(self.buton_layout)
         
         
 
         self.main_layout = QVBoxLayout()
         self.main_layout.addWidget(self.podglond)
-        self.main_layout.addLayout(self.secenduary_layout)
+        self.main_layout.addLayout(self.secondary_layout)
 
-        self.kierunkowelayout = QGridLayout()
-        self.main_layout.addLayout(self.kierunkowelayout)
+        self.kierunkowe_layout = QGridLayout()
+        self.main_layout.addLayout(self.kierunkowe_layout)
 
         self.setLayout(self.main_layout)
         
@@ -148,13 +148,13 @@ class podglond_roi(QWidget):
 
     #metocda tworzoca przycisk o zadanych parametrach
     @staticmethod
-    def boton(fun, text, clicable = False):
-        booton = QPushButton()
-        booton.setMaximumWidth(50)
-        booton.setText(text)
-        booton.setCheckable(clicable)
-        booton.clicked.connect(fun)
-        return booton
+    def buton(fun, text, clicable = False):
+        buton = QPushButton()
+        buton.setMaximumWidth(50)
+        buton.setText(text)
+        buton.setCheckable(clicable)
+        buton.clicked.connect(fun)
+        return buton
 
 ######################################################################################
 ##################################boton config########################################
@@ -211,26 +211,26 @@ class podglond_roi(QWidget):
             # dodanie do leyatów przyciskó kierunkowych
             it = [3, 2, 4, 3]
             jt = [2, 3, 3, 4]
-            [self.kierunkowelayout.addWidget(value, j, i) for j, i, value in zip(jt, it, self.kierunkowe)]
+            [self.kierunkowe_layout.addWidget(value, j, i) for j, i, value in zip(jt, it, self.kierunkowe)]
 
             #Return to main bootons
-            self.t =self.boton(self.retyurn_to_normalbutons,"return")
-            self.kierunkowelayout.addWidget(self.t, 2, 2)
+            self.t = self.buton(self.retyurn_to_normalbutons, "return")
+            self.kierunkowe_layout.addWidget(self.t, 2, 2)
             self.kierunkowe.append(self.t)
 
             #przelaczanie pomiedzy ruszaniem obszarem a jego rozszerzaniem
-            self.move = self.boton(self.TogleMove,"move",True)
-            self.kierunkowelayout.addWidget(self.move, 2, 4)
+            self.move = self.buton(self.TogleMove, "move", True)
+            self.kierunkowe_layout.addWidget(self.move, 2, 4)
             self.kierunkowe.append(self.move)
             
             #przelaczanie pomiedzy ruszaniem obszarem a jego rozszerzaniem
-            self.incrise = self.boton(self.Togleincrise,"+",True)
-            self.kierunkowelayout.addWidget(self.incrise, 4, 4)
+            self.incrise = self.buton(self.Togleincrise, "+", True)
+            self.kierunkowe_layout.addWidget(self.incrise, 4, 4)
             self.kierunkowe.append(self.incrise)
 
     def remove_kierunkowe(self):
         #removing main bootons
-        [self.kierunkowelayout.removeWidget(b) for b in self.kierunkowe]
+        [self.kierunkowe_layout.removeWidget(b) for b in self.kierunkowe]
         self.kierunkowe = 0
         self.move = 0
         self.t = 0
