@@ -105,19 +105,6 @@ class Obraz(ROI_maping):
         elif nevent == tcam.TOUPCAM_EVENT_STILLIMAGE:
             ctx.snap_image_event.emit()
 
-    @staticmethod
-    def  convertqtmagetomat(incomingimage):
-        '''  Converts a QImage into an opencv MAT format  '''
-        incomingimage = incomingimage.convertToFormat(4)
-
-        width = incomingimage.width()
-        height = incomingimage.height()
-
-        ptr = incomingimage.bits()
-        ptr.setsize(incomingimage.byteCount())
-        arr = np.array(ptr).reshape(height, width, 4)  #  Copies the data
-        return arr 
-
     @pyqtSlot()
     def eventImageSignal(self):
 
