@@ -49,7 +49,7 @@ class MainWindow(QMainWindow):
         self.slider_create()
 
         #stworzenie i dodanie przycisków do wszelkich zastosowan
-        self._Multipurpos_butons()
+        self._multipurpos_butons()
 
         #stworzenie i dodanie obszaru skrolowania
         self._Scroll_arrea()
@@ -232,15 +232,15 @@ class MainWindow(QMainWindow):
 ##########################multipurpus buttons#########################################
 ######################################################################################
 
-    def _Multipurpos_butons(self):
+    def _multipurpos_butons(self):
 
         #przyciski multipurpus
         self.przyciski = [QPushButton() for _ in range(9)]
         [button.setMaximumWidth(100) for button in self.przyciski] 
         
-        nazwy = ["schow next", "dell all", "schow all", "schow privius", "map", "hide all","move to","stop","map clear"]
+        nazwy = ["show next", "dell all", "show all", "show privius", "map", "hide all","move to","stop","map clear"]
         
-        [swich.setText(name) for name, swich in zip(nazwy, self.przyciski)]
+        [switch.setText(name) for name, switch in zip(nazwy, self.przyciski)]
         
         self.przyciski[2].clicked.connect(self.obraz.narysujcaloscs)
         self.przyciski[5].clicked.connect(self.obraz.schowajcalosc)
@@ -250,7 +250,7 @@ class MainWindow(QMainWindow):
 
         self.przyciski[1].clicked.connect(self.remove_ROI)
 
-        self.przyciski[4].clicked.connect(self.schow_map)
+        self.przyciski[4].clicked.connect(self.show_map)
         
         self.przyciski[6].setCheckable(True)
         self.przyciski[6].clicked.connect(self.togle_move_on_pres)
@@ -264,7 +264,7 @@ class MainWindow(QMainWindow):
         jt = [5, 5, 5, 6, 6, 6, 7, 7, 7]
         [self.przyciskilayout.addWidget(w, j, i) for w, i, j in zip(self.przyciski, it, jt)]
 
-    def schow_map(self):
+    def show_map(self):
         if self.map is None:
             self.map = M.Map_window(self.obraz.get_map(), self)
             self.map.show()
