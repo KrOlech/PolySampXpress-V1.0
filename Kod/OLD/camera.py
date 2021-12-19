@@ -53,7 +53,7 @@ class camera(QLabel):
     @staticmethod
     def cameraCallback(nEvent, ctx):
         if nEvent == toupcam.TOUPCAM_EVENT_IMAGE:
-            ctx.eventImage.emit()
+            ctx.eventimage.emit()
         elif nEvent == toupcam.TOUPCAM_EVENT_STILLIMAGE:
             ctx.snap_image_event.emit()        
             

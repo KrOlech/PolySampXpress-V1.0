@@ -19,8 +19,8 @@ import Map as M
 class Obraz(ROI_maping):
     # Klaza Obraz dziedziczy z QLabel, pozwala na lepszą obsługę eventu mouseMoveEvent
 
-# signals for camera action
-    eventImage = pyqtSignal()
+    # signals for camera action
+    eventimage = pyqtSignal()
     snap_image_event = pyqtSignal()	
 
     h_cam = None
@@ -38,10 +38,10 @@ class Obraz(ROI_maping):
     # rozmiar obszaru
     rozmiar = (1024, 768)
     
-    #skala mapy
+    # skala mapy
     skala = 4
     
-    #maxymalna pozycja manipulatora w mm
+    # maxymalna pozycja manipulatora w mm
     manipulator_max = 50
     
     # value that remember whot part of the sample have been seen save to map
@@ -51,25 +51,26 @@ class Obraz(ROI_maping):
     ofsetymin = 0
     ofsetxmin = 0
     
-    # boolean alowing to snap first schown image as a map prive
+    # boolean alowing to snap first shown image as a map prive
     first = True
 
     # pixmap object reded from camera/file
     frame = True
 
     map = np.zeros(100)
-    map.shape = (10,10,1)
+    map.shape = (10, 10, 1)
     
     # construvtor
     def __init__(self, main_window, *args, **kwargs):
         super(Obraz, self).__init__(main_window, *args, **kwargs)
         
-        self.initCamera() # inicializacja camery
+        self.initCamera()  # inicializacja camery
         
         self.h_cam.put_AutoExpoEnable(False)
 
 
 ###############################camera read##########################################
+
 
     def snap_img(self):
         self.h_cam.Snap(1)
@@ -86,12 +87,9 @@ class Obraz(ROI_maping):
             img = self.bytes_to_array(still_img_buf)
             
             qimage_read_from_camera = QImage(still_img_buf,
-                                      self.w, self.h,
-                                      (self.w * 24 + 31) // 32 * 4,
-                                      QImage.Format_RGB888)
-                     
-            #self.image_opencv_2 = self.convertQImageToMat(
-            #        qimage_read_from_camera) self.image_opencv_2
+                                          self.w, self.h,
+                                          (self.w * 24 + 31) // 32 * 4,
+                                          QImage.Format_RGB888)
 
             self.frame_2 = cv2.resize(img, self.rozmiar)
             self.save_curent_viue()
@@ -101,12 +99,12 @@ class Obraz(ROI_maping):
     @staticmethod
     def cameracallback(nevent, ctx):
         if nevent == tcam.TOUPCAM_EVENT_IMAGE:
-            ctx.eventImage.emit()
+            ctx.eventimage.emit()
         elif nevent == tcam.TOUPCAM_EVENT_STILLIMAGE:
             ctx.snap_image_event.emit()
 
     @pyqtSlot()
-    def eventImageSignal(self):
+    def eventimagesignal(self):
 
         if self.h_cam is not None:
 
@@ -138,17 +136,17 @@ class Obraz(ROI_maping):
         a = tcam.Toupcam.EnumV2()
 
         if len(a) <= 0:
-            QMessageBox.warning(self, '',"error during camera initialisation", QMessageBox.Ok)
+            QMessageBox.warning(self, '', "error during camera initialisation", QMessageBox.Ok)
 
         else:
             self.camname = a[0].displayname
 
-            #create and conect custom pyqt5 signa
-            self.eventImage.connect(self.eventImageSignal)
+            # create and conect custom pyqt5 signa
+            self.eventimage.connect(self.eventimagesignal)
 
             self.snap_image_event.connect(self.snap_image_event_signal)
 
-            #trying opening camera
+            # trying opening camera
             try:
                 self.h_cam = tcam.Toupcam.Open(a[0].id)
 
@@ -156,14 +154,14 @@ class Obraz(ROI_maping):
                 QMessageBox.warning(self, '', 'failed to open camera', QMessageBox.Ok)
 
             else:
-                #creating bufer for image hold
+                # creating bufer for image hold
                 self.w, self.h = self.h_cam.get_Size()
                 bufsize = ((self.w * 24 + 31) // 32 * 4) * self.h
                 self.buf = bytes(bufsize)
 
                 try:
                     if sys.platform == 'win32':
-                        self.h_cam.put_Option(tcam.TOUPCAM_OPTION_BYTEORDER, 0) # QImage.Format_RGB888
+                        self.h_cam.put_Option(tcam.TOUPCAM_OPTION_BYTEORDER, 0)  # QImage.Format_RGB888
 
                     self.h_cam.StartPullModeWithCallback(self.cameracallback, self)
                 except tcam.HRESULTException:
@@ -194,13 +192,13 @@ class Obraz(ROI_maping):
             tym = True
             num = False
             
-            if self.whot_to_drow == 'all_rectagls':  #pokazuje wsystkie prostkoaty
+            if self.whot_to_drow == 'all_rectagls':  # pokazuje wsystkie prostkoaty
                 self.all_Rectagles(qp)
 
-            elif self.whot_to_drow == 'no_rectagle':  #howa wszystkie prostokaty
+            elif self.whot_to_drow == 'no_rectagle':  # howa wszystkie prostokaty
                 tym = False
         
-            elif self.whot_to_drow =='One_rectagle':  #rysuje wybrany prostokat
+            elif self.whot_to_drow =='One_rectagle':  # rysuje wybrany prostokat
                 
                 self.chosen_rectagle(qp)
                 tym = False
@@ -218,7 +216,6 @@ class Obraz(ROI_maping):
                 # rysowanie prostokonta na bierzoco jak podglond do ruchu myszka
 
             self.loadImage(tym, num)
-    
 
     def chosen_rectagle(self, Painter):
         Painter.drawRect(self.rectagledrow(self.main_window.rectangles[self.ktury]))
@@ -233,13 +230,13 @@ class Obraz(ROI_maping):
         self.iloscklikniec = True
         self.update()
     
-    def schowajcalosc(self): #schowanie wsystkich prostokontów
+    def schowajcalosc(self):  # schowanie wsystkich prostokontów
 
         self.whot_to_drow = 'no_rectagle'
         self.iloscklikniec = True
         self.update()
             
-    def next(self):#narysowanie nastempnego prostokata
+    def next(self):  # narysowanie nastempnego prostokata
     
         self.whot_to_drow = 'One_rectagle'
         self.iloscklikniec = True
@@ -251,12 +248,12 @@ class Obraz(ROI_maping):
             
         self.update()
        
-    def last(self):#narysowanie poprzedniego prostokonta
+    def last(self):  # narysowanie poprzedniego prostokonta
     
         self.whot_to_drow = 'One_rectagle'
         self.iloscklikniec = True
         
-        if self.ktury == 0 :
+        if self.ktury == 0:
             self.ktury = len(self.main_window.rectangles)-1
         else:
             self.ktury -= 1
@@ -293,20 +290,20 @@ class Obraz(ROI_maping):
            
             x, y, z = self.frame_2.shape
             
-            map_size = int(x+self.manipulator_max*510/self.skala) #x size
-            map_size *= int(y+self.manipulator_max*510/self.skala) #y size
-            map_size *= 3 # RGB colors
+            map_size = int(x+self.manipulator_max*510/self.skala)  # x size
+            map_size *= int(y+self.manipulator_max*510/self.skala)  # y size
+            map_size *= 3  # RGB colors
             
-            #stworzenie tablicy przechowujacej obraz mapy
+            # stworzenie tablicy przechowujacej obraz mapy
             self.map = np.zeros(map_size,dtype=np.uint8)
             
-            #okreslenei ksztaltu tej tabliczy
+            # okreslenei ksztaltu tej tabliczy
             self.map.shape = (int(x+50*510/self.skala),int(y+50*510/self.skala),3)
             
-            #wykonanie fukcji wklejajacej aktualny podglond do mapy
+            # wykonanie fukcji wklejajacej aktualny podglond do mapy
             self.extend_map_exeqiute()
             
-            #zapisanie ze mapa juz jest zainiciowana i nie trzeba tego robic
+            # zapisanie ze mapa juz jest zainiciowana i nie trzeba tego robic
             self.first = False
 
     # metoda zapisujaca do mapy aktualny podglond we wskazane miejsce na którym znajduje sie manipulaor
@@ -314,10 +311,10 @@ class Obraz(ROI_maping):
         
         x, y, z = self.frame_2.shape
         
-        xm,ym,zm, = self.main_window.manipulaor.get_axes_positions()
+        xm, ym, zm, = self.main_window.manipulaor.get_axes_positions()
         
-        #przeliczenie milimetrow na pixele i odwrucenie osi
-        ym,zm = int((50-ym)*510/self.skala),int((50-zm)*510/self.skala)
+        # przeliczenie milimetrow na pixele i odwrucenie osi
+        ym, zm = int((50-ym)*510/self.skala), int((50-zm)*510/self.skala)
         
         #przeskalowanei podglondu
         klatka = cv2.resize(self.frame_2,(int(x/self.skala),int(y/self.skala)))
@@ -335,16 +332,16 @@ class Obraz(ROI_maping):
         else:
             self.main_window.map.new_image(self.map)
             
-    #wyczysczenie aktualnie zebranej mapy
+    # wyczysczenie aktualnie zebranej mapy
     def reset_map(self):
         
-        #zapytanei uzytkownika czy napewno chce to zrobic
-        reply = QMessageBox.question(self,"mesage","Czy napewno chcesz usunac mape?",
-                                     QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
+        # zapytanei uzytkownika czy napewno chce to zrobic
+        reply = QMessageBox.question(self, "mesage", "Czy napewno chcesz usunac mape?",
+                                     QMessageBox.Yes|QMessageBox.No, QMessageBox.Yes)
         
         
         if reply == QMessageBox.Yes:
-            #jesli odpowie tak to ustawienie ze nie zebrano zadnej mapy i stworzenie jej na nowo nadpisuajc stara
+            # jesli odpowie tak to ustawienie ze nie zebrano zadnej mapy i stworzenie jej na nowo nadpisuajc stara
             self.first = True
             self.save_curent_viue()
             
