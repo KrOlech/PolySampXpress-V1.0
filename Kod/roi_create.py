@@ -68,7 +68,7 @@ class ROI_maping(QLabel):
 
 
     #hold copy of image reded from camera
-    C_image = np.zeros(1)
+    c_image = np.zeros(1)
 
     #hold resazi copy of image
     frame = cv2.resize(c_image, self.rozmiar)
@@ -101,10 +101,10 @@ class ROI_maping(QLabel):
     #wagranie obrazu
     def loadImage(self, drow_deskription = False, drow_single_rectagle = False):#przestac to wyoływac co update
         
-        self.C_image = self.image_opencv
+        self.c_image = self.image_opencv
 
         # wgranie obrazu do labela
-        self.setPhoto(self.C_image, drow_deskription, drow_single_rectagle)
+        self.setPhoto(self.c_image, drow_deskription, drow_single_rectagle)
     
     # wstawienie obrazu do labela
     def setPhoto(self, image, drow_deskription, drow_single_rectagle):
