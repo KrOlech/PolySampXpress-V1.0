@@ -11,7 +11,7 @@ class manipulator:
         self.c848 = self.load_drivers()
         print(self.c848)
 
-        self.conect()
+        self.controller_id = self.connect()
         
         self.conectioncheck()
         
@@ -26,18 +26,19 @@ class manipulator:
 
         self.x, self.y, self.z = self.get_axes_positions('xyz')
 
-    def conect(self):
-        self.controller_id = self.conncect_to_controller()
+    def connect(self):
+        if not self.is_connected():
+            return self.conncect_to_controller()
         return self.is_connected()
 
 
-    def get_szAxes(self,axes = 'XYZ'):
+    def get_szaxes(self,axes = 'XYZ'):
         '''
         Takes string defining axes as parameter (axes defined in XYZ string)
         return char pointer to string with axes, usually char *const szAxes parameter in c848 dll functions.
         '''
-        axes_ABC = self._get_axes(axes)
-        return ctypes.c_char_p(axes_ABC.encode('utf-8'))
+        axes_abs = self._get_axes(axes)
+        return ctypes.c_char_p(axes_abs.encode('utf-8'))
 
     def set_referencing_mode(self, axes='xyz', on=True):
         '''
@@ -46,7 +47,7 @@ class manipulator:
         check = False
         c_id = self._convert_id(self.controller_id)
         for c in axes:
-            axis = self.get_szAxes(c)
+            axis = self.get_szaxes(c)
             bool_array = self._create_bool_array(size=1, values=on)
             check = self.c848.C848_RON(c_id, axis, bool_array)
 
@@ -65,7 +66,8 @@ class manipulator:
                 
         return position_dict
 
-    def split_axes_positions(self,position_dict):
+    @staticmethod
+    def split_axes_positions(position_dict):
         '''
         reads dictionary with posiotions and converts it to tuple with axes string and list of positions
         '''
@@ -114,7 +116,7 @@ class manipulator:
             return None
         
         c_id = self._convert_id(self.controller_id)
-        sz_axes = self.get_szAxes(axes)
+        sz_axes = self.get_szaxes(axes)
         c_double_array = self._create_double_array(len(axes), positions)
         success = self.c848.C848_POS(c_id, sz_axes, c_double_array)
         
@@ -130,7 +132,8 @@ class manipulator:
 
         print('is connected:', self.is_connected())
 
-    def load_drivers(self, filename='C848_DLL.dll'):
+    @staticmethod
+    def load_drivers(filename='C848_DLL.dll'):
         return ctypes.CDLL(r'C:\Users\external\PycharmProjects\Inzynierka\silniki_sterowanie\C848_DLL.dll')
 
     #work in progres
@@ -178,7 +181,7 @@ class manipulator:
         moves given axes to reference points and sets references
         '''
         c_id = self._convert_id(self.controller_id)
-        sz_axes = self._get_szAxes(axes)
+        sz_axes = self._get_szaxes(axes)
         success = self.c848.C848_REF(c_id, sz_axes)
         return bool(success)
 
@@ -194,13 +197,13 @@ class manipulator:
         abc_list = [axes_map[ax] for ax in list(axes.lower())]
         return ''.join(abc_list)
 
-    def _get_szAxes(self, axes='XYZ'):
+    def _get_szaxes(self, axes='XYZ'):
         '''
         Takes string defining axes as parameter (axes defined in XYZ string)
         return char pointer to string with axes, usually char *const szAxes parameter in c848 dll functions.
         '''
-        axes_ABC = self._get_axes(axes)
-        return ctypes.c_char_p(axes_ABC.encode('utf-8'))
+        axes_abc = self._get_axes(axes)
+        return ctypes.c_char_p(axes_abc.encode('utf-8'))
 
     @staticmethod
     def _convert_id(controller_id):
@@ -247,7 +250,7 @@ class manipulator:
             return None
 
         c_id = self._convert_id(self.controller_id)
-        sz_axes = self._get_szAxes(axes)
+        sz_axes = self._get_szaxes(axes)
         c_double_array = self._create_double_array(len(axes), positions)
         success = self.c848.C848_MOV(c_id, sz_axes, c_double_array)
 
@@ -262,7 +265,7 @@ class manipulator:
         if manipulator in move returns False
         '''
         c_id = self._convert_id(self.controller_id)
-        sz_axes = self._get_szAxes(axes)
+        sz_axes = self._get_szaxes(axes)
         c_double_array = self._create_double_array(size=len(axes))
         if self.c848.C848_qPOS(c_id, sz_axes, c_double_array):
             return c_double_array[:len(axes)]
@@ -286,7 +289,7 @@ class manipulator:
         c_id = self._convert_id(self.controller_id)
         status = {}
         for c in axes:
-            axis = self._get_szAxes(c)
+            axis = self._get_szaxes(c)
             bool_array = self._create_bool_array(size=1)
             check = self.c848.C848_qONT(c_id, axis, bool_array)
             
