@@ -8,9 +8,6 @@ import Main_window as m
 
 def main():
     app = QApplication(sys.argv) #stworzenie aplikacji
-
-    #loading = bw.Loading_window()
-    #loading.onButtonClick()
     
     window = m.MainWindow() #stworzenie okna
     window.show() #pokazanie okna

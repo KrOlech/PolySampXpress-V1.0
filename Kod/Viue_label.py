@@ -99,22 +99,22 @@ class Obraz(ROI_maping):
             # plt.imsave('img_frame_{}.png'.format(self.total), img)
 
     @staticmethod
-    def cameraCallback(nEvent, ctx):
-        if nEvent == tcam.TOUPCAM_EVENT_IMAGE:
+    def cameracallback(nevent, ctx):
+        if nevent == tcam.TOUPCAM_EVENT_IMAGE:
             ctx.eventImage.emit()
-        elif nEvent == tcam.TOUPCAM_EVENT_STILLIMAGE:
+        elif nevent == tcam.TOUPCAM_EVENT_STILLIMAGE:
             ctx.snap_image_event.emit()
 
     @staticmethod
-    def  convertQImageToMat(incomingImage):
+    def  convertqtmagetomat(incomingimage):
         '''  Converts a QImage into an opencv MAT format  '''
-        incomingImage = incomingImage.convertToFormat(4)
+        incomingimage = incomingimage.convertToFormat(4)
 
-        width = incomingImage.width()
-        height = incomingImage.height()
+        width = incomingimage.width()
+        height = incomingimage.height()
 
-        ptr = incomingImage.bits()
-        ptr.setsize(incomingImage.byteCount())
+        ptr = incomingimage.bits()
+        ptr.setsize(incomingimage.byteCount())
         arr = np.array(ptr).reshape(height, width, 4)  #  Copies the data
         return arr 
 
@@ -151,7 +151,7 @@ class Obraz(ROI_maping):
         a = tcam.Toupcam.EnumV2()
 
         if len(a) <= 0:
-            QMessageBox.warning(self, '',"erore during camera inicialisation", QMessageBox.Ok)
+            QMessageBox.warning(self, '',"error during camera initialisation", QMessageBox.Ok)
 
         else:
             self.camname = a[0].displayname
@@ -178,7 +178,7 @@ class Obraz(ROI_maping):
                     if sys.platform == 'win32':
                         self.h_cam.put_Option(tcam.TOUPCAM_OPTION_BYTEORDER, 0) # QImage.Format_RGB888
 
-                    self.h_cam.StartPullModeWithCallback(self.cameraCallback, self)
+                    self.h_cam.StartPullModeWithCallback(self.cameracallback, self)
                 except tcam.HRESULTException:
                     QMessageBox.warning(self, '', 'failed to start camera', QMessageBox.Ok)		
 
