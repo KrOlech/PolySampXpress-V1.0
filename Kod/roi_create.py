@@ -66,17 +66,6 @@ class ROI_maping(QLabel):
 
     dxp, dyp = False, False
 
-
-    #hold copy of image reded from camera
-    c_image = np.zeros(1)
-
-    #hold resazi copy of image
-    frame = cv2.resize(c_image, self.rozmiar)
-
-    _imgfromframe = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0], QImage.Format_RGB888)
-
-    _pixmapdromframe = QPixmap.fromImage(self._imgfromframe)
-
     def __init__(self, main_window, *args, **kwargs):
         super(ROI_maping, self).__init__(*args, **kwargs)
         
