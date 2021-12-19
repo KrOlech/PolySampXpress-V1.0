@@ -5,7 +5,7 @@ import Viue_label as obs
 import Map as M
 from engineclass import manipulator
 from time import sleep
-from slider import slider
+from slider import Slider
 from setingswindows import axissetingwindow
 
 
@@ -235,6 +235,7 @@ class MainWindow(QMainWindow):
     def _multipurpos_butons(self):
 
         #przyciski multipurpus
+        #przyciski multipurpus
         self.przyciski = [QPushButton() for _ in range(9)]
         [button.setMaximumWidth(100) for button in self.przyciski] 
         
@@ -362,7 +363,7 @@ class MainWindow(QMainWindow):
 
     def slider_create(self):
         x = self.manipulaor.get_axes_positions('x')[0]
-        self.slide = slider(self,x-5,x+5,x,Qt.Horizontal)
+        self.slide = Slider(self, x - 5, x + 5, x, Qt.Horizontal)
 
         self.sliderleyout.addWidget(self.slide)
 
