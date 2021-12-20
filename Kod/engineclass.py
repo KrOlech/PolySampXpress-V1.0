@@ -11,26 +11,23 @@ class manipulator:
         self.c848 = self.load_drivers()
         print(self.c848)
 
-        self.controller_id = self.connect()
+        self.controller_id = self.conncect_to_controller()
         
         self.conectioncheck()
         
         try:
             self.set_abs_positions_from_file()
         except Exception:
-            self.set_referencing_mode()
-            self.get_axes_positions()
-            self.reference_axes()
+            self.center()
         
         self.print_curent_position()
 
         self.x, self.y, self.z = self.get_axes_positions('xyz')
 
-    def connect(self):
-        if not self.is_connected():
-            return self.conncect_to_controller()
-        return self.is_connected()
-
+    def center(self):
+        self.set_referencing_mode()
+        self.get_axes_positions()
+        self.reference_axes()
 
     def get_szaxes(self,axes = 'XYZ'):
         '''
