@@ -9,16 +9,13 @@ class simple_obraz(QLabel):
     def __init__(self, img, Rectagle, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
 
-        #Roi cords for comunication purpuse
-        self.Rectagle = Rectagle
-
-        #kalibrate reded cords
-        Rectagl = [r/a for r, a in zip(self.Rectagle,self.kalibracja)]
-
        #wgraj obiekt
-        self.wgraj(img, Rectagl)
+        self.wgraj(img, Rectagle)
 
     def wgraj(self, img, Rect):
+    
+        #kalibrate reded cords
+        Rect = [r/a for r, a in zip(Rect, self.kalibracja)]
     
         #wgranie obrazu
         self._img = img
@@ -62,6 +59,8 @@ class podglond_roi(QWidget):
     def __init__(self, text, img, obiekt_oznaczony, *args, **kwargs):
 
         super(QWidget, self).__init__(*args, **kwargs)
+        
+        self.img = img
 
         # wskaznik do obiekt clasy obszar oznaczony
         self.obiekt_oznaczony = obiekt_oznaczony
@@ -72,7 +71,7 @@ class podglond_roi(QWidget):
         ######################################################################################
 
         #custom label for viusalkizastion porpos
-        self.podglond = simple_obraz(img,obiekt_oznaczony.get_wzgledny_rectagle())
+        self.podglond = simple_obraz(self.img,obiekt_oznaczony.get_wzgledny_rectagle())
         
         self.name_lable = QLineEdit(text)
         self.name_lable.textChanged.connect(self.newname)
@@ -252,6 +251,8 @@ class podglond_roi(QWidget):
     #metoda updatujaca na bierzoco kordynaty wyswietlane na obiekcie
     def update_cords(self):
     
+        self.podglond.wgraj(self.img,self.obiekt_oznaczony.get_wzgledny_rectagle())
+        
         x, x1, y, y1 = self.obiekt_oznaczony.get_niezalezne_pixele()
         
         
@@ -293,7 +294,9 @@ class podglond_roi(QWidget):
             self.butons[0].setStyleSheet("background-color : lightgrey")
             self.obiekt_oznaczony.end_edit()
 
-    #swiching to fine edit bootns
+    def new_image(self, img):
+        self.podglond.wgraj(img,self.obiekt_oznaczony.get_wzgledny_rectagle())
+        #swiching to fine edit bootns
     def fine_edit(self):
         self.remove_main_bootons()
 
