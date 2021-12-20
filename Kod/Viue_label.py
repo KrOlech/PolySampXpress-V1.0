@@ -305,15 +305,16 @@ class Obraz(ROI_maping):
            
             x, y, z = self.frame_2.shape
             
-            map_size = int(x+self.manipulator_max*510/self.skala)  # x size
-            map_size *= int(y+self.manipulator_max*510/self.skala)  # y size
+            map_size = int(x+self.manipulator_max*self.delta_pixeli/self.skala)  # x size
+            map_size *= int(y+self.manipulator_max*self.delta_pixeli/self.skala)  # y size
             map_size *= 3  # RGB colors
             
             # stworzenie tablicy przechowujacej obraz mapy
             self.map = np.zeros(map_size,dtype=np.uint8)
             
             # okreslenei ksztaltu tej tabliczy
-            self.map.shape = (int(x+50*510/self.skala),int(y+50*510/self.skala),3)
+            self.map.shape = (int(x+self.manipulator_max*self.delta_pixeli/self.skala),
+                              int(y+self.manipulator_max*self.delta_pixeli/self.skala), 3)
             
             # wykonanie fukcji wklejajacej aktualny podglond do mapy
             self.extend_map_exeqiute()

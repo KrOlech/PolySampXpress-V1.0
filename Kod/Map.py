@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5 import QtGui
 from PyQt5.QtGui import *
-from PyQt5.QtCore import Qt, QEvent
+from PyQt5.QtCore import Qt
 import cv2
 from roi_create import ROI_maping
 
@@ -23,13 +23,13 @@ class Map(ROI_maping):
         super(Map, self).__init__(main_window, *args, **kwargs)
 
         # zapisanie nowego obrazu
-        self.image_opencv =  cv2.resize(img,self.rozmiar)
+        self.image_opencv = cv2.resize(img, self.rozmiar)
         
         img = self.image_opencv
         
-        self.resize(self.rozmiar[0],self.rozmiar[1])
+        self.resize(self.rozmiar[0], self.rozmiar[1])
 
-        self.img = QImage(img, img.shape[1],img.shape[0],img.strides[0],QImage.Format_RGB888)
+        self.img = QImage(img, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGB888)
 
         #QImage(cvImg.data, width, height, bytesPerLine, QImage.Format_RGB888)
         self.img = QPixmap.fromImage(self.img)
@@ -40,9 +40,9 @@ class Map(ROI_maping):
     def new_image(self, img):
 
         #zapisanie nowego obrazu
-        self.image_opencv =  cv2.resize(img,self.rozmiar)
+        self.image_opencv =  cv2.resize(img, self.rozmiar)
 
-        self.img = QImage(img, img.shape[1],img.shape[0],img.strides[0],QImage.Format_RGB888)
+        self.img = QImage(img, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGB888)
         #QImage(cvImg.data, width, height, bytesPerLine, QImage.Format_RGB888)
         self.img = QPixmap.fromImage(self.img)
 
@@ -52,8 +52,6 @@ class Map_window(QWidget):
 
     # rozmiar obszaru
     rozmiar = (1024, 768)
-    
-
 
     def __init__(self, map, main_window, *args, **kwargs):
         super(Map_window, self).__init__(*args, **kwargs)
