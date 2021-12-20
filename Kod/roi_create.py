@@ -104,13 +104,13 @@ class ROI_maping(QLabel):
         self.frame = cv2.resize(image, self.rozmiar)
 
         if drow_deskription:
-            for i, rectangle in enumerate(self.main_window.rectangles):
+            for i, rectangle in enumerate(self.main_window.ROI):
                 rx, ry = rectangle.gettextloc(self.ofsetx, self.ofsety, self.scall)
                 cv2.putText(frame, str(rectangle.getName()), (rx, ry), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
         if drow_single_rectagle:
-            rx, ry = self.main_window.rectangles[self.ktury].gettextloc(self.ofsetx, self.ofsety, self.scall)
-            cv2.putText(frame, str(self.main_window.rectangles[self.ktury].getName()), (rx, ry), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            rx, ry = self.main_window.ROI[self.ktury].gettextloc(self.ofsetx, self.ofsety, self.scall)
+            cv2.putText(frame, str(self.main_window.ROI[self.ktury].getName()), (rx, ry), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         
         # conwersja z open Cv image na QImage
         self._imgfromframe = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0], QImage.Format_RGB888)
@@ -129,8 +129,8 @@ class ROI_maping(QLabel):
             self.edited_roi.pres_cords(e, self.ofsetx,self.ofsety)
            
         elif self.move_to_point:
-            x1 = int(e.x()/self.skalx)
-            y1 = int(e.y()/self.skaly)
+            x1 = e.x()
+            y1 = e.y()
             ccx, ccy = self.rozmiar[0] / 2, self.rozmiar[1] / 2
             self.dxp, self.dyp = int(y1-ccy), int(x1-ccx)
             dx, dy = (x1-ccx)/self.delta_pixeli, (y1-ccy)/self.delta_pixeli
@@ -141,8 +141,8 @@ class ROI_maping(QLabel):
 
         else:
             # zapis pozycji klikniecia
-            self.x1 = int(e.x()/self.skalx)
-            self.y1 = int(e.y()/self.skaly)
+            self.x1 = e.x()
+            self.y1 = e.y()
 
             # zapisanie pozycji pierwszego klikniecia jako obiekt klasy qpoint
             self.begin = e.pos()# QPoint(self.x1,self.y1)#e.pos()
@@ -160,8 +160,8 @@ class ROI_maping(QLabel):
         
         else:    
             # zapisanie wspułrzedne klikniecia
-            self.x2 = int(e.x()/self.skalx)
-            self.y2 = int(e.y()/self.skaly)
+            self.x2 = e.x()
+            self.y2 = e.y()
 
             # zapisanie pozycji klikniecia jako obiekt klasy qpoint
             self.end = e.pos()# QPoint(self.x2,self.y2)
@@ -169,7 +169,7 @@ class ROI_maping(QLabel):
             # dopisanie nowego prostokata do listy
             tym = self.rectaglecreate()
 
-            self.main_window.rectangles.append(tym)
+            self.main_window.ROI.append(tym)
 
             # implementacja iteratora wyswietlanego prostokata
             self.ktury += 1
@@ -217,6 +217,7 @@ class ROI_maping(QLabel):
     def end_edit(self):
         self.edit_trybe = False
         self.edited_roi = None
+        return self.frame_2
 
 
 #############################create rectagle###############################################
@@ -242,12 +243,12 @@ class ROI_maping(QLabel):
         self.main_window.add_ROI(ROI)
         return ROI
     
-    def rmv_rectagle(self, ROI):
+    def rmv_rectagle(self, roi):
         
-        if ROI in  self.main_window.rectangles:
-            self.main_window.rectangles.remove(ROI)
+        if roi in  self.main_window.ROI:
+            self.main_window.ROI.remove(roi)
         
-        self.main_window.remove_some_ROI(ROI)
+        self.main_window.remove_some_ROI(roi)
             
         self.whot_to_drow = 'all_rectagls'
         
@@ -268,7 +269,7 @@ class ROI_maping(QLabel):
             
         finally:
             # kolro i tlo
-            br = QBrush(QColor(200, 20, 20, 255),Qt.CrossPattern)
+            br = QBrush(QColor(200, 10, 10, 200))
             
             # wgranie stylu
             qp.setBrush(br)
@@ -288,7 +289,7 @@ class ROI_maping(QLabel):
             
 
     def all_Rectagles(self, Painter):
-        for rectangle in self.main_window.rectangles: # wyrysowanie poprzednich prostokotów
+        for rectangle in self.main_window.ROI: # wyrysowanie poprzednich prostokotów
             Painter.drawRect(self.rectagledrow(rectangle))
        
 
