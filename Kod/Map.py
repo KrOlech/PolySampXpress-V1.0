@@ -7,6 +7,17 @@ from roi_create import ROI_maping
 
 
 class Map(ROI_maping):
+    
+    #skale umozliwiajace konwersje na poprawny rozmiar ROI
+    skaly =  1024/((50*510)+1024)
+    skalx = 768/((50*510)+768)
+
+    # wartosci owsetu aktualnego podgloadu
+    #ofsety = 768*2
+    #ofsetx = 1024
+    
+    move_to_point = False
+
 
     def __init__(self, img, main_window, *args, **kwargs):
         super(Map, self).__init__(main_window, *args, **kwargs)
@@ -41,6 +52,8 @@ class Map_window(QWidget):
 
     # rozmiar obszaru
     rozmiar = (1024, 768)
+    
+
 
     def __init__(self, map, main_window, *args, **kwargs):
         super(Map_window, self).__init__(*args, **kwargs)
