@@ -19,6 +19,9 @@ class MainWindow(QMainWindow):
 
     #zmiena przechowujaca okno mapy
     map = None
+    
+    #ostatni numer nadany ROI'owi
+    last_name = 0
 
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
@@ -49,7 +52,7 @@ class MainWindow(QMainWindow):
         self._createleyouts()
 
         #stworzenie przycisków do przemiesczania podglondu
-        self._Direction_buttons()
+        self._direction_buttons()
         
         #X axis slieder
         self._slider_create()
@@ -70,6 +73,8 @@ class MainWindow(QMainWindow):
         self._upadet_position_read()
         
         self.obraz.snap_img()
+        
+        self.obraz.update_ofsets()
 
     def closeEvent(self, event):
         '''
@@ -110,7 +115,7 @@ class MainWindow(QMainWindow):
         action_6 = self._qactiontoolbar("Snap img", lambda x: self.obraz.snap_img())
         toolbar.addAction(action_6)
         #wysrodkowanie manipulatora
-        action_7 = self._qactiontoolbar("center", lambda x: self.manipulaor.move_axes_to_abs_woe())
+        action_7 = self._qactiontoolbar("center", lambda x: self.manipulaor.center())
         toolbar.addAction(action_7)
 
         #ywołanei okna akcji
@@ -257,7 +262,7 @@ class MainWindow(QMainWindow):
         self._conect_function_to_butons()
 
         #dodanie do leyatów przyciskó kierunkowych
-        self._direction_buttons()
+        self._add_buton_to_leyout()
 
         #ddoanie i stworzenie odczytu pozycji manipulatora
         self._add_position_label_to_layout()
@@ -286,7 +291,7 @@ class MainWindow(QMainWindow):
         '''
         self._key_move(self.manipulaor.move_dwn, self.obraz.dawn, 0, 3)
   
-    def _key_move(self,fun_manipulator,fun_obraz,key_num):
+    def _key_move(self,fun_manipulator,fun_obraz, key_en, key_dis):
         '''
         Prywatna metoda wykonujaca przemiesczenie.
         :param fun_manipulator: Fukcja kierunkowa wykonywana przez manipulator
@@ -364,7 +369,7 @@ class MainWindow(QMainWindow):
 
         [switch.setText(name) for name, switch in zip(nazwy, self.przyciski)]
 
-    def _add_buton_to_leyout(self):
+    def _add_direction_buton_to_leyout(self):
         '''
         Prywatna metoda doajaca przyciski wielozadaniowe do leyoutu
         '''
@@ -386,7 +391,7 @@ class MainWindow(QMainWindow):
         self._conect_function_to_multipurpos_butons()
 
         #dodanie przycisków
-        self._add_buton_to_leyout()
+        self._add_direction_buton_to_leyout()
 
     def show_map(self):
         '''
