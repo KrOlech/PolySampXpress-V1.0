@@ -183,7 +183,7 @@ class Obraz(ROI_maping):
             
         finally:
             # kolro i tlo
-            br = QBrush(QColor(200, 10, 10, 200))
+            br = QBrush(QColor(200, 20, 20, 255),Qt.CrossPattern)
             
             # wgranie stylu
             qp.setBrush(br)
@@ -218,7 +218,7 @@ class Obraz(ROI_maping):
             self.loadImage(tym, num)
 
     def chosen_rectagle(self, Painter):
-        Painter.drawRect(self.rectagledrow(self.main_window.rectangles[self.ktury]))
+        Painter.drawRect(self.rectagledrow(self.main_window.ROI[self.ktury]))
       
 
 ####################################fukcje wywoływane przez guziki z gluwnego okna####################################
@@ -237,28 +237,34 @@ class Obraz(ROI_maping):
         self.update()
             
     def next(self):  # narysowanie nastempnego prostokata
-    
-        self.whot_to_drow = 'One_rectagle'
-        self.iloscklikniec = True
         
-        if self.ktury < len(self.main_window.rectangles)-1:
-            self.ktury += 1
-        else:
-            self.ktury = 0
+        if len(self.main_window.ROI) > 0:
+        
+            self.whot_to_drow = 'One_rectagle'
+            self.iloscklikniec = True
             
-        self.update()
+            if self.ktury < len(self.main_window.ROI)-1:
+                self.ktury += 1
+            else:
+                self.ktury = 0
+                
+            self.update()
+        else:
+            pass
        
     def last(self):  # narysowanie poprzedniego prostokonta
-    
-        self.whot_to_drow = 'One_rectagle'
-        self.iloscklikniec = True
-        
-        if self.ktury == 0:
-            self.ktury = len(self.main_window.rectangles)-1
+        if len(self.main_window.ROI) > 0:
+            self.whot_to_drow = 'One_rectagle'
+            self.iloscklikniec = True
+            
+            if self.ktury == 0:
+                self.ktury = len(self.main_window.ROI)-1
+            else:
+                self.ktury -= 1
+            
+            self.update()
         else:
-            self.ktury -= 1
-        
-        self.update()
+            pass
 
 ###########################przesuwanie podgladu##############################    
 
@@ -281,7 +287,16 @@ class Obraz(ROI_maping):
         self.ofsetx += self.delta_pixeli
         self.whot_to_drow = 'viue_muve'
         self.update()
+ 
+
+    def update_ofsets(self):
+        xm, ym, zm, = self.main_window.manipulaor.get_axes_positions()
         
+        ym, zm = int((50-ym)*510), int((50-zm)*510)
+ 
+        self.ofsetx = ym
+        self.ofsety = zm
+ 
 ###########################map extetion##############################
 
     # save first viue to the map
@@ -347,3 +362,8 @@ class Obraz(ROI_maping):
             
     def get_map(self):
         return self.map
+        
+        
+    def mapupdate(self):
+        self.whot_to_drow = 'viue_muve'
+        self.update()
