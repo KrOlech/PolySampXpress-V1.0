@@ -530,4 +530,4 @@ class MainWindow(QMainWindow):
         :param value: wartosc liczbowa
         '''
 
-        self.krok = valu
+        self.krok = value

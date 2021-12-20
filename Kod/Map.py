@@ -9,7 +9,7 @@ from roi_create import ROI_maping
 class Map(ROI_maping):
     
     #skale umozliwiajace konwersje na poprawny rozmiar ROI
-    skaly =  1024/((50*510)+1024)
+    skaly = 1024/((50*510)+1024)
     skalx = 768/((50*510)+768)
 
     # wartosci owsetu aktualnego podgloadu
