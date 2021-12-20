@@ -45,9 +45,6 @@ class obszarzaznaczony():
     # konstruktor tworzocy obiekt ze wzglednych wspułrednych prubki w pixelach
     def __init__(self, obraz_obcet, xp0, yp0, xp1, yp1, image, py00=0, px00=0, s00=1, Name="defalaut"):
 
-        #wzgledny kwadrat wymagany do stworzenia podglondu
-        self.wzglednyRectagle = (xp0, yp0, xp1, yp1)
-
         #Nadrzedny obiekt (map lub kamera) w któyrym strworzono obiektr przekazanoy w celu komunikacji
         self.Obraz_obcet = obraz_obcet
 
@@ -64,7 +61,13 @@ class obszarzaznaczony():
         self.set_niezalezne_Prubki()
 
     def get_wzgledny_rectagle(self):
-        return self.wzglednyRectagle
+        x0 = (self.x0 - self.Obraz_obcet.ofsety)
+        y0 = (self.y0 - self.Obraz_obcet.ofsetx)
+
+        x1 = (self.x1 - self.Obraz_obcet.ofsety)
+        y1 = (self.y1 - self.Obraz_obcet.ofsetx)
+    
+        return (x0, y0, x1, y1)
         
     def get_niezalezne_pixele(self):
         return self.x0, self.x1, self.y0, self.y1
@@ -92,11 +95,11 @@ class obszarzaznaczony():
     def getrectangle(self, Rozmiar, py00, px00, sy, sx ,s00=1):
 
         #konwersja niezaleznych wspułrzednych prubki na zalezne dla obecnego ofsetu.
-        xp0 = (self.x0 - px00) * s00*sx
-        yp0 = (self.y0 - py00) * s00*sy
-        xp1 = (self.x1 - px00) * s00*sx
-        yp1 = (self.y1 - py00) * s00*sy
-
+        xp0 = int((self.x0 - px00) * s00*sx)
+        yp0 = int((self.y0 - py00) * s00*sy)
+        xp1 = int((self.x1 - px00) * s00*sx)
+        yp1 = int((self.y1 - py00) * s00*sy)
+        
         #sprawdzenie czy obszar nie wychodzi poza podglond
         if xp0 < 0:
             xp0 = 0
@@ -211,8 +214,13 @@ class obszarzaznaczony():
         self.Obraz_obcet.edit_roi(self)
         
     def end_edit(self):
-        self.Obraz_obcet.end_edit()
+        frame = self.Obraz_obcet.end_edit()
 
+        img = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0],QImage.Format_RGB888)  
+
+        self.image = QPixmap.fromImage(img)
+        
+        self.podglond.new_image(self.image)
 ###############################self edit##########################################
 
     def pres_cords(self, e, ofsetx, ofsety):
