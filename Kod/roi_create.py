@@ -62,8 +62,12 @@ class ROI_maping(QLabel):
     # edit trybe
     edit_trybe = False
     edited_roi = None
-    move_to_point = True
-
+    move_to_point = False
+    
+    #skale umozliwiajace wyswietlanei ROI na przeskalowanej mapie
+    skaly = 1
+    skalx = 1
+    
 
     def __init__(self, main_window, *args, **kwargs):
         super(ROI_maping, self).__init__(*args, **kwargs)
@@ -313,7 +317,7 @@ class ROI_maping(QLabel):
         #usuniecie wskaznika do ROI
         self.edited_roi = None
         #zwrucenie aktualnego podglondu w celu aktualizacji
-        return self.frame_2
+        return self.frame
 
 
 #############################create rectagle###############################################
@@ -343,7 +347,8 @@ class ROI_maping(QLabel):
                                 self.ofsetx,
                                 self.ofsety,
                                 self.scall,
-                                self.main_window.last_name
+                                self.main_window.last_name,
+                                self.skalx,self.skaly
                                 )
         #zapisanei ROI dao tablicy
         self.main_window.add_ROI(ROI)
