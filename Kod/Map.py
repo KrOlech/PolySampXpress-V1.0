@@ -4,22 +4,18 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt
 import cv2
 from roi_create import ROI_maping
-
+import Clasa as oC
 
 class Map(ROI_maping):
     
     #skale umozliwiajace konwersje na poprawny rozmiar ROI
-    skaly = 1024/((50*510)+1024)
-    skalx = 768/((50*510)+768)
+    skalx = 441/12670#1024/((50*510)+1024)* 1275/8858#*1179/1230#*1770/1745
+    skaly = 341/12750#768/((50*510)+768)*1267/1515# *1100/1280
 
     # wartosci owsetu aktualnego podgloadu
-    #ofsety = 768*2
-    #ofsetx = 1024
-
-    #okreslenie flagi zeby wstempnie zabezpiczeyc zeby nie wykonac neiwłąsciwego przemiesczenia ROI
-    move_to_point = False
-
-
+    #ofsety = 13682-17392#1271+16381#
+    #ofsetx = 12751-9801#13509-10559
+    
     def __init__(self, img, main_window, *args, **kwargs):
         super(Map, self).__init__(main_window, *args, **kwargs)
 
@@ -55,8 +51,29 @@ class Map(ROI_maping):
 
         #zapisanei obrazu
         self.img = QPixmap.fromImage(self.img)
-
-
+    '''
+    def rectaglecreate(self):
+        
+        Metoda tworzoca obiekt klasy ROI
+        :return: obiekt klasy roi stworzony na podstawie zapisanych dancyh
+                #ponisienie nr defaltowej nazwy
+        self.main_window.last_name += 1
+        
+        ROI = oC.obszarzaznaczony(
+                                self,
+                                self.x1, self.y1,
+                                self.x2, self.y2,
+                                self.frame,
+                                0,
+                                0,
+                                self.scall,
+                                self.main_window.last_name,
+                                self.skalx,self.skaly
+                                )
+        #zapisanei ROI dao tablicy
+        self.main_window.add_ROI(ROI)
+        return ROI
+    '''
 class Map_window(QWidget):
 
     # rozmiar obszaru
