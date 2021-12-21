@@ -43,7 +43,7 @@ class obszarzaznaczony():
     ####################################
 
     # konstruktor tworzocy obiekt ze wzglednych wspułrednych prubki w pixelach
-    def __init__(self, obraz_obcet, xp0, yp0, xp1, yp1, image, py00=0, px00=0, s00=1, Name="defalaut"):
+    def __init__(self, obraz_obcet, xp0, yp0, xp1, yp1, image, py00=0, px00=0, s00=1, Name="defalaut", sx = 1, sy = 1):
 
         #Nadrzedny obiekt (map lub kamera) w któyrym strworzono obiektr przekazanoy w celu komunikacji
         self.Obraz_obcet = obraz_obcet
@@ -52,14 +52,14 @@ class obszarzaznaczony():
         self.Name = Name
 
         #metoda tworzoca niezalezne wspulrdzede prubki w pixelach
-        self.set_niezalezne_pixele(xp0, yp0, xp1, yp1, px00, py00, s00)
+        self.set_niezalezne_pixele(xp0, yp0, xp1, yp1, px00, py00, s00,sx,sy)
 
         #metoda tworzoca widget umozliwiajacy interakcje z obiektem
         self.create_Roi_label(image, py00, px00, s00)
 
         #metoda tworzoca niezalerzne wspułredne prubki w mm
         self.set_niezalezne_Prubki()
-
+        
     def get_wzgledny_rectagle(self):
         x0 = (self.x0 - self.Obraz_obcet.ofsety)
         y0 = (self.y0 - self.Obraz_obcet.ofsetx)
@@ -83,13 +83,13 @@ class obszarzaznaczony():
         # worki in progres
 
     # metoda konwertujaca wzgledne wspułredne w pixelach na bezwgledne
-    def set_niezalezne_pixele(self, xp0, yp0, xp1, yp1, px00, py00, s00):
+    def set_niezalezne_pixele(self, xp0, yp0, xp1, yp1, px00, py00, s00,sx,sy):
 
-        self.x0 = (xp0 + px00)*s00
-        self.y0 = (yp0 + py00)*s00
+        self.x0 = int((xp0 + px00)*s00/sx)
+        self.y0 = int((yp0 + py00)*s00/sy)
 
-        self.x1 = (xp1 + px00)*s00
-        self.y1 = (yp1 + py00)*s00
+        self.x1 = int((xp1 + px00)*s00/sx)
+        self.y1 = int((yp1 + py00)*s00/sy)
 
     # metoda zwracajaca prostokoat qrect w układzei waktualnie wyswietlanym
     def getrectangle(self, Rozmiar, py00, px00, sy, sx ,s00=1):
