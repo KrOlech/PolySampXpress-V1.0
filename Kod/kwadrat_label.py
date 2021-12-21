@@ -76,12 +76,12 @@ class podglond_roi(QWidget):
         self.name_lable = QLineEdit(text)
         self.name_lable.textChanged.connect(self.newname)
         
-        self.x_label = QLabel("x:")
+        self.x_label = QLabel("x")
         
         self.x0_label = QLabel(str(x))
         self.x1_label = QLabel(str(x1))
         
-        self.y_label = QLabel("y:")
+        self.y_label = QLabel("y")
         
         self.y0_label = QLabel(str(y))
         self.y1_label = QLabel(str(y1))
@@ -103,14 +103,15 @@ class podglond_roi(QWidget):
         self.buton_layout = QHBoxLayout()
         
         self.label_layout = QHBoxLayout()
+
         self.label_layout.addWidget(self.x_label)
         self.label_layout.addWidget(self.x0_label)
         self.label_layout.addWidget(self.x1_label)
+        
         self.label_layout.addWidget(self.y_label)
         self.label_layout.addWidget(self.y0_label)
         self.label_layout.addWidget(self.y1_label)
-        self.label_layout.addWidget(self.z_label)
-        self.label_layout.addWidget(self.z0_label)
+
         
         self.pole_layout = QHBoxLayout()
         self.pole_layout.addWidget(self.pole_label)
@@ -295,7 +296,11 @@ class podglond_roi(QWidget):
             self.obiekt_oznaczony.end_edit()
 
     def new_image(self, img):
-        self.podglond.wgraj(img,self.obiekt_oznaczony.get_wzgledny_rectagle())
+        if type(img) == QPixmap:
+            self.podglond.wgraj(img,self.obiekt_oznaczony.get_wzgledny_rectagle())
+            self.img = img
+        else:
+            self.podglond.wgraj(self.img,self.obiekt_oznaczony.get_wzgledny_rectagle())
         #swiching to fine edit bootns
     def fine_edit(self):
         self.remove_main_bootons()
