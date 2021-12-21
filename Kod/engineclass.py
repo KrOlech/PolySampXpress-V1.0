@@ -28,6 +28,9 @@ class manipulator:
         self.set_referencing_mode()
         self.get_axes_positions()
         self.reference_axes()
+        self.weaith_for_target()
+        #self.x, self.y, self.z = self.get_axes_positions('xyz')
+        #self.main._upadet_position_read()
 
     def get_szaxes(self,axes = 'XYZ'):
         '''
@@ -73,7 +76,7 @@ class manipulator:
         for ax, position in position_dict.items():
             axes.append(ax)
             positions.append(position)
-
+            
         axes = ''.join(axes)
         return axes, positions
         
@@ -291,8 +294,8 @@ class manipulator:
             check = self.c848.C848_qONT(c_id, axis, bool_array)
             
             if check != 1:
-                QMessageBox.warning(self, '', 'something went terribly wrong', QMessageBox.Ok)
-                return
+                #QMessageBox.warning(self, '', 'something went terribly wrong', QMessageBox.Ok)
+                return {'':False}
             
             status[c] = bool_array[0]
         return status
@@ -300,8 +303,10 @@ class manipulator:
     #metoda oczekujca az zostanie osiognieta zadana pozycja. jednoczesnie updatujaca napisy na glównym oknie
     def weaith_for_target(self):
         while not all(self.check_on_target().values()):
-            self.main._upadet_position_read()
-            self.x, self.y, self.z = self.get_axes_positions('xyz')
+            pass
+            
+        self.x, self.y, self.z = self.get_axes_positions('xyz')
+        self.main._upadet_position_read()
 
   ########################metody odbierajace wysłąne poleca ruchu################
     def move_up(self,krok):
