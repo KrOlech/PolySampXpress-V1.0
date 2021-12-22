@@ -68,7 +68,12 @@ class ROI_maping(QLabel):
     skaly = 1
     skalx = 1
     
-
+    # maxymalna pozycja manipulatora w mm
+    manipulator_max = 50
+    
+    # skala mapy
+    skala = 4
+        
     def __init__(self, main_window, *args, **kwargs):
         super(ROI_maping, self).__init__(*args, **kwargs)
 
@@ -328,9 +333,12 @@ class ROI_maping(QLabel):
         :param prostokat: obiekt klasy ROI
         :return: obiekt klasy Qrectagle
         '''
-        x = prostokat.getrectangle(self.rozmiar, self.ofsetx, self.ofsety, self.skalx, self.skaly)
+        x = self.get_rectagle(prostokat)
         return x
 
+    def get_rectagle(self,prostokat):
+        return prostokat.getrectangle(self.rozmiar, self.ofsetx, self.ofsety, self.skalx, self.skaly)
+        
     def rectaglecreate(self):
         '''
         Metoda tworzoca obiekt klasy ROI
