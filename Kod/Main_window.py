@@ -399,7 +399,7 @@ class MainWindow(QMainWindow):
         '''
 
         if self.map is None:
-            self.map = Map_window(self.obraz.get_map(), self)
+            self.map = Map_window(self.obraz.get_map(), self, self.obraz.ofsetx, self.obraz.ofsetx,)
             self.map.show()
         else:
             self.map.new_image(self.obraz.get_map())
