@@ -1,434 +1,385 @@
-import numpy as np
-from PyQt5.QtWidgets import *
+# obraz Klasa dziedzicaca z Qlablel
 import cv2
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
-from PyQt5.QtGui import QPixmap, QImage
-import Clasa as oC
-import matplotlib.pyplot as plt
-from threading import Thread
 from time import sleep
+import kwadrat_label as kw
 
 
-class ROI_maping(QLabel):
+class obszarzaznaczony():
+    # stałe do konwersji z układu pixeli na układ prubki
+    a = 2
+    b = 0
 
-    # obiekt Klasy MainWindow podany jako argument przy tworzeniu obiektu klasy Obraz -
-    # pozwala na komunikację z oknem głównym
-    main_window = ' '
+    # wspułrzedne bezwzgledne w geometri próbki w pixelach
+    x0 = 0
+    y0 = 0
+    x1 = 1
+    y1 = 1
 
-    # aktualna pozycja myszki nad widgetem
-    x = 0
-    y = 0
+    # wspułrzedne bezwzgledne w geometri prubki w mm
+    xm0 = 0
+    ym0 = 0
+    xm1 = 0
+    ym1 = 0
+
+    # skala
+    s00 = 1
+
+    #bolean value holding values allowing recognision of edition
+    first_pres = False
+
+    kanta_top = False
+    kanta_botom = False
+    kanta_left = False
+    kanta_right = False
+    
+    left_top = False
+    right_top = False
+    left_botom = False
+    right_bootom = False
+    
+    move_all = False
+    ####################################
+
+    # konstruktor tworzocy obiekt ze wzglednych wspułrednych prubki w pixelach
+    def __init__(self, obraz_obcet, xp0, yp0, xp1, yp1, image, py00=0, px00=0, s00=1, Name="defalaut", sx = 1, sy = 1):
+
+        #Nadrzedny obiekt (map lub kamera) w któyrym strworzono obiektr przekazanoy w celu komunikacji
+        self.Obraz_obcet = obraz_obcet
+
+        #nazwa obiektu
+        self.Name = Name
+
+        #metoda tworzoca niezalezne wspulrdzede prubki w pixelach
+        self.set_niezalezne_pixele(xp0, yp0, xp1, yp1, px00, py00, s00,sx,sy)
+
+        #metoda tworzoca widget umozliwiajacy interakcje z obiektem
+        self.create_Roi_label(image, py00, px00, s00)
+
+        #metoda tworzoca niezalerzne wspułredne prubki w mm
+        self.set_niezalezne_Prubki()
         
-    # ostatnie 2 pozycje klikniec pozycja myszki nad widgetem
-    x1 = 0
-    y1 = 0
+    def get_wzgledny_rectagle(self):
+        x0 = (self.x0 - self.Obraz_obcet.ofsety)
+        y0 = (self.y0 - self.Obraz_obcet.ofsetx)
 
-    x2 = 0
-    y2 = 0
-
-    # skala okna wymagana do skalowania mapy
-    skalx = 1
-    skaly = 1
+        x1 = (self.x1 - self.Obraz_obcet.ofsety)
+        y1 = (self.y1 - self.Obraz_obcet.ofsetx)
+    
+        return (x0, y0, x1, y1)
         
-    # pukty poczotkowe i koncowe prostokonta
-    begin = QPoint()
-    end = QPoint()
-       
-    iloscklikniec = False
-    
-    # zmienne pozwalajace obejsc brak układu swichcaes
-    # 'no_rectagle' 'all_rectagls' 'One_rectagle' 'viue_muve' 'previu_rectagle'
-    whot_to_drow = 'all_rectagls'
-    
-    # iterator do wyswietlenia poprzedniego nastempego zaznaczenia
-    ktury = 0
+    def get_niezalezne_pixele(self):
+        return self.x0, self.x1, self.y0, self.y1
 
-    # wartosci owsetu aktualnego podgloadu
-    ofsetx = 0
-    ofsety = 0
-    
-    # rozmiar obszaru
-    rozmiar = (1024, 768)
-    
-    # calibration value
-    delta_pixeli = 510
-    
-    # scala
-    scall = 1
+    def kill(self):
+        self.end_edit()
+        self.Obraz_obcet.rmv_rectagle(self)  # trece
+        del self.podglond
 
-    # edit trybe
-    edit_trybe = False
-    edited_roi = None
-    move_to_point = False
-    
-    #skale umozliwiajace wyswietlanei ROI na przeskalowanej mapie
-    skaly = 1
-    skalx = 1
-    
-    # maxymalna pozycja manipulatora w mm
-    manipulator_max = 50
-    
-    # skala mapy
-    skala = 4
+    # metoda konwetujaca wspułrzedne bezwgledne w pixelach na wspułredne prubkki
+    def set_niezalezne_Prubki(self):
+        return
+        # worki in progres
+
+    # metoda konwertujaca wzgledne wspułredne w pixelach na bezwgledne
+    def set_niezalezne_pixele(self, xp0, yp0, xp1, yp1, px00, py00, s00,sx,sy):
+
+        self.x0 = int((xp0 + px00)*s00/sx)
+        self.y0 = int((yp0 + py00)*s00/sy)
+
+        self.x1 = int((xp1 + px00)*s00/sx)
+        self.y1 = int((yp1 + py00)*s00/sy)
+
+    # metoda zwracajaca prostokoat qrect w układzei waktualnie wyswietlanym
+    def getrectangle(self, Rozmiar, py00, px00, sy, sx ,s00=1):
+
+        #konwersja niezaleznych wspułrzednych prubki na zalezne dla obecnego ofsetu.
+        xp0 = int((self.x0 - px00) * s00*sx)
+        yp0 = int((self.y0 - py00) * s00*sy)
+        xp1 = int((self.x1 - px00) * s00*sx)
+        yp1 = int((self.y1 - py00) * s00*sy)
         
-    def __init__(self, main_window, *args, **kwargs):
-        super(ROI_maping, self).__init__(*args, **kwargs)
+        #sprawdzenie czy obszar nie wychodzi poza podglond
+        if xp0 < 0:
+            xp0 = 0
 
-        #wskaznik do glownego okna programu
-        self.main_window = main_window
+        if yp0 < 0:
+            yp0 = 0
 
-        #ustawienie bazowej szaty graficznej
-        palette = self.palette()
-        palette.setColor(QPalette.Window, QColor('white'))
-        self.setPalette(palette)
+        if xp1 > Rozmiar[0]:
+            xp1 = Rozmiar[0]
 
-        # wyłacza skalowanie okna
-        self.setScaledContents(False)
+        if yp1 > Rozmiar[1]:
+            yp1 = Rozmiar[1]
 
-        self.setMouseTracking(True)
-        # Domyślnie ustawione na False - gdy False
-        # mouseMoveEvent wywoływany jest tylko gdy któryś z przycisków myszki jest wciśnięty
-
-        # Tworzy białe tło
-        self.setAutoFillBackground(True)
+        poczatek = QPoint(xp0, yp0)
+        koniec = QPoint(xp1, yp1)
         
-####################################wgrywanie obrazu##################################
+        return QRect(poczatek, koniec)
 
+    def getrectangle_map(self, Rozmiar, py00, px00, sy, sx ,s00=1):
 
-    def loadImage(self, drow_deskription = False, drow_single_rectagle = False):#przestac to wyoływac co update
-        '''
-        metoda przekazujaca wskaznik do obrazu i opisy do metody setPhoto
-        :param drow_deskription: warotsc logiczna okreslajaca czy wypisywac opisy czy nie
-        :param drow_single_rectagle: wartosc logiczna okreslajaca czy wywietlic 1 czy wsystkie ROIe
-        '''
-
-        #kopiowanei wskaznika
-        self.c_image = self.image_opencv
-
-        #wywołanie metody
-        self.setPhoto(self.c_image, drow_deskription, drow_single_rectagle)
-    
-
-    def setPhoto(self, image, drow_deskription, drow_single_rectagle):
-        '''
-        Metoda dodajoca opisy do podglondu oraz wgrywajaca podglond do labela
-        '''
-
-        # scalowanie obrazu
-        frame = cv2.resize(image, self.rozmiar)
-
-        #scalowanie kopi obrazu
-        self.frame = cv2.resize(image, self.rozmiar)
-
-        #dodanie opisów w odpowiednich miescach
-        if drow_deskription:
-            for i, rectangle in enumerate(self.main_window.ROI):
-                rx, ry = rectangle.gettextloc(self.ofsetx, self.ofsety, self.scall)
-                cv2.putText(frame, str(rectangle.getName()), (rx, ry), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-
-        #dodanie opisuw pojedyczego Roia jesli ta obcja została wybrana
-        if drow_single_rectagle:
-            rx, ry = self.main_window.ROI[self.ktury].gettextloc(self.ofsetx, self.ofsety, self.scall)
-            cv2.putText(frame, str(self.main_window.ROI[self.ktury].getName()), (rx, ry), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        #konwersja niezaleznych wspułrzednych prubki na zalezne dla obecnego ofsetu.
+        xp0 = int((self.x0) * s00*sx)- px00
+        yp0 = int((self.y0) * s00*sy)- py00
+        xp1 = int((self.x1) * s00*sx)- px00
+        yp1 = int((self.y1) * s00*sy)- py00
         
-        # conwersja z open Cv image na QImage
-        self._imgfromframe = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0], QImage.Format_RGB888)
+        #sprawdzenie czy obszar nie wychodzi poza podglond
+        if xp0 < 0:
+            xp0 = 0
 
-        self._pixmapdromframe = QPixmap.fromImage(self._imgfromframe)
+        if yp0 < 0:
+            yp0 = 0
+
+        if xp1 > Rozmiar[0]:
+            xp1 = Rozmiar[0]
+
+        if yp1 > Rozmiar[1]:
+            yp1 = Rozmiar[1]
+
+        poczatek = QPoint(xp0, yp0)
+        koniec = QPoint(xp1, yp1)
         
-        # wgranie obrazu
-        self.setPixmap(self._pixmapdromframe)
-        #zablokwnie rozmiaru
-        self.setMaximumSize(self._pixmapdromframe.width(), self._pixmapdromframe.height())
+        return QRect(poczatek, koniec)
 
-###############################mous tracking##########################################
+    def setName(self, name):
+        self.Name = name
 
-    def mousePressEvent(self, e):
-        '''
-        Metoda nadpisajaca wbudowany event pyqt wykonywany w mommecie przycisniencia przycisku myszki
-        :param e: odczytana pozycja myszki
-        '''
+    def getName(self):
+        return self.Name
 
-        # Sprawdzenie trybu pracy
-        if self.edit_trybe:
-            #tryb edycji ROI'u
-            self.edited_roi.pres_cords(e, self.ofsetx, self.ofsety)
-           
-        elif self.move_to_point:
-            self._move_to_point_function(e)
+    #metoda zwracajaca najwyszy prawy naroznik obiektu
+    def gettop_corner(self, ox, oy, s00):
 
-        else: #podstawowa obcja umozliwiajaca oznaczenie ROI'u
-            self._save_first_pres(e)
-
-    def _save_first_pres(self, e):
-        '''
-        Prywatna metoda zapisujaca pkt pierwszego klikniecia
-        '''
-
-        # zapis pozycji klikniecia
-        self.x1 = e.x()
-        self.y1 = e.y()
-
-        # zapisanie pozycji pierwszego klikniecia jako obiekt klasy qpoint
-        self.begin = e.pos()  # QPoint(self.x1,self.y1)#e.pos()
-
-        #Zapisanie ze juz raz doszło do klikniecia
-        self.iloscklikniec = True
-
-        #podniesienie flagi ze nalezy narysowac podglond nowo zaznaczanego ROI'u
-        self.whot_to_drow = 'previu_rectagle'
-
-    def _move_to_point_function(self, e):
-        '''
-        Prywatna metoda konwerttujaca wspułrzedne w pixelach na mm i zadajaca manipulatorowi przemiecenie
-        w celu wycetrowania na wybranym pktcie
-        '''
-
-        x1, y1 = e.x(), e.y() #zapisanie pozycji klikniecia
-
-        #ccx - połowa rozmiaru x
-        #ccy połowa rozmiaru y
-        ccx, ccy = self.rozmiar[0] / 2, self.rozmiar[1] / 2
-
-        #odległosci któe nalezy przemiescic manipulator w pixelach
-        self.dxp, self.dyp = int(y1 - ccy), int(x1 - ccx)
-
-        # konwersja odległosci w pixelach na odległosci w mm
-        dx, dy = (x1 - ccx) / self.delta_pixeli, (y1 - ccy) / self.delta_pixeli
-
-        #zadanie przemiesczenia manipulatorowi
-        self.main_window.manipulaor.move_axes_to_abs_woe_ofset('yz', [dx, dy])
-
-        #updet ofsetów
-        self.ofsetx += self.dxp
-        self.ofsety += self.dyp
-
-        #update mapy
-        self.mapupdate()
-
-    def mouseReleaseEvent(self, e):
-        '''
-        Metoda przeciozajaca Pqt5 event umozliwiajaca obsluzednie momentu pusczenia przycisku myszki
-        :param e: pozycja myszki
-        '''
-
-        #wybranie odpowieniego trybu
-        if self.edit_trybe:
-            #przekazanie pozycji w celu edycji
-            self.edited_roi.relise_cords(e, self.ofsetx, self.ofsety)
-        
-        elif self.move_to_point:
-            #ignorowanie eventu w ramach przesuwania manipiulatora
-            pass
-        
+        if self.x0 < self.x1 and self.y0 < self.y1:
+            xp0 = (self.x0 - oy) * s00
+            yp0 = (self.y0 - ox) * s00
+        elif self.x0 < self.x1 and self.y0 > self.y1:
+            xp0 = (self.x0 - oy) * s00
+            yp0 = (self.y1 - ox) * s00
+        elif self.x0 > self.x1 and self.y0 < self.y1:
+            xp0 = (self.x1 - oy) * s00
+            yp0 = (self.y0 - ox) * s00
         else:
-            #zapisanie pozycji puszczenia przycisku
-            self._save_relise_pres(e)
+            xp0 = (self.x1 - oy) * s00
+            yp0 = (self.y1 - ox) * s00
 
-    def _save_relise_pres(self,e):
-        '''
-        Zapisanei miejsca puszcenia przycisku myszki
-        '''
+        return xp0, yp0
 
-        # zapisanie wspułrzedne klikniecia
-        self.x2 = e.x()
-        self.y2 = e.y()
+    #metoda zwracajaca lokacje nazwy wyswietlanej na podglondzie
+    def gettextloc(self, ox, oy, s00=1):
 
-        # zapisanie pozycji klikniecia jako obiekt klasy qpoint
-        self.end = e.pos()  # QPoint(self.x2,self.y2)
+        xp0, yp0 = self.gettop_corner(ox, oy, s00)
 
-        # dopisanie nowego prostokata do listy
-        tym = self.rectaglecreate()
+        return xp0 - 20, yp0 - 10
 
-        self.main_window.ROI.append(tym)
+    def create_Roi_label(self, image, py00, px00, s00):
 
-        # implementacja iteratora wyswietlanego prostokata
-        self.ktury += 1
+        frame = image
 
-        #wyczsczenie licznika klikniec
-        self.iloscklikniec = False
+        img = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0],QImage.Format_RGB888)  
 
-        #podniesienie flagi w celu wyrysowania wsystkich ROI
-        self.whot_to_drow = 'all_rectagls'
+        self.image = QPixmap.fromImage(img)
 
-        self.update()
+        self.podglond = kw.podglond_roi(str(self.getName()),self.get_image(),self)
 
-    def mouseMoveEvent(self, e):
-        '''
-        Metoda przeciozajaca Pqt5 event umozliwiajaca obsluzednie momentu przesuniecia myszki
-        :param e: pozycja myszki
-        '''
-
-        if self.edit_trybe:
-            # tryb edycji ROI'u
-            self.edited_roi.move_cords(e, self.ofsetx, self.ofsety)
-            
-        elif self.move_to_point:
-            # ignorowanie eventu w ramach przesuwania manipiulatora
-            pass
-
-        elif self.iloscklikniec:
-            # paramtery umozliwiajace rysowanei podglondu tworzonego ROI
-            self._creat_roi_sample(e)
-
-    def _creat_roi_sample(self,e):
-
-        self.x2 = int(e.x() / self.skalx)
-        self.y2 = int(e.y() / self.skaly)
-
-        # konwersja pozycji myszki na stringi
-        textx = f'{self.x2}'
-        texty = f'{self.y2}'
-
-        # zapis aktualnej pozycji myszki w celu wyswietlenia podglondu
-        self.end = e.pos()  # QPoint(self.x2,self.y2)
-
-        #podniesienie odpoiwiedniej flagi
-        self.whot_to_drow = 'previu_rectagle'
-
-        self.update()
-
-
-###############################ROI edit##########################################
-
-    def mapupdate(self):
-        '''
-        Abstrakcyjna metoda updatujaca mape
-        '''
-        pass
-
-    def edit_roi(self, roi):
-        '''
-        Metoda wywoływana przez ROI w celu samoedycji
-        :param roi: Roi wyołujacy edycje
-        '''
-        #podnisienie odpowiedniej flagi
-        self.edit_trybe = True
-        move_to_point = False
-
-        #zapisanie wskaznika do edytowanego ROI'u
-        self.edited_roi = roi
+    def get_image(self):
+        return self.image
     
+    def get_podglond(self):
+        return self.podglond
+
+############edycja obiektu za pomoca strzalek####################
+    def move_top_line(self, mode):
+        if mode:
+            self.y0 +=10
+        else:
+            self.y0 -=10
+
+    def move_dwn_line(self, mode):
+        if mode:
+            self.y1 -=10
+        else:
+            self.y1 +=10
+
+    def move_lft_line(self, mode):
+        if mode:
+            self.x0 +=10
+        else:
+            self.x0 -=10
+
+    def move_rig_line(self, mode):
+        if mode:
+            self.x1 -=10
+        else:
+            self.x1 +=10
+
+    def move_top(self):
+        self.y0 -=10
+        self.y1 -=10
+
+    def move_dwn(self):#left
+
+        self.y0 +=10
+        self.y1 +=10
+
+    def move_lft(self):
+        self.x0 -=10
+        self.x1 -=10
+
+    def move_rig(self):
+
+        self.x0 +=10
+        self.x1 +=10
+
+################odbieranie iw ysyłanie flagi edycji###########
+
+    def edit(self):
+        self.Obraz_obcet.edit_roi(self)
+        
     def end_edit(self):
-        '''
-        Metoda konconca edycje ROi
-        :return:
-        '''
-        #opusczenie odpowieniej flagi
-        self.edit_trybe = False
-        #usuniecie wskaznika do ROI
-        self.edited_roi = None
-        #zwrucenie aktualnego podglondu w celu aktualizacji
-        return self.frame
+        frame = self.Obraz_obcet.end_edit()
 
+        img = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0],QImage.Format_RGB888)  
 
-#############################create rectagle###############################################
-
-    def rectagledrow(self,prostokat):
-        '''
-        Metoda zwracajaca Qrectagle w celu wyrysowani go na podglodzie
-        :param prostokat: obiekt klasy ROI
-        :return: obiekt klasy Qrectagle
-        '''
-        x = self.get_rectagle(prostokat)
-        return x
-
-    def get_rectagle(self,prostokat):
-        return prostokat.getrectangle(self.rozmiar, self.ofsetx, self.ofsety, self.skalx, self.skaly)
+        self.image = QPixmap.fromImage(img)
         
-    def rectaglecreate(self):
-        '''
-        Metoda tworzoca obiekt klasy ROI
-        :return: obiekt klasy roi stworzony na podstawie zapisanych dancyh
-        '''
-        #ponisienie nr defaltowej nazwy
-        self.main_window.last_name += 1
-        
-        ROI = oC.obszarzaznaczony(
-                                self,
-                                self.x1, self.y1,
-                                self.x2, self.y2,
-                                self.frame,
-                                self.ofsetx,
-                                self.ofsety,
-                                self.scall,
-                                self.main_window.last_name,
-                                self.skalx,self.skaly
-                                )
-        #zapisanei ROI dao tablicy
-        self.main_window.add_ROI(ROI)
-        return ROI
+        self.podglond.new_image(self.image)
+###############################self edit##########################################
+
+    def pres_cords(self, e, ofsetx, ofsety):
+
+        #reseting previus paramiters
+        self.first_pres = True
     
-    def rmv_rectagle(self, roi):
-        '''
-        Metoda usywajhaca ROI
-        :param roi: Roi do usuniecia
-        :return:
-        '''
-
-        #jesli ROI jest w tablicy to go usuwamy
-        if roi in self.main_window.ROI:
-            self.main_window.ROI.remove(roi)
-
-        #wywolanei metody sprotajacej po ROI w mainwidow
-        self.main_window.remove_some_ROI(roi)
-
-        #podniesienie odpoiwedniej flagi
-        self.whot_to_drow = 'all_rectagls'
+        self.kanta_top = False
+        self.kanta_botom = False
+        self.kanta_left = False
+        self.kanta_right = False
         
-        self.update()
-
-#############################Paint Event###############################################
-
-    def paintEvent(self, event):
-        '''
-        Metoda przeciozajaca PyQt5 event obslugujaca wyswietlanie ROI i podglondu
-        '''
+        self.move_all = False
         
-        # inicializacja paintera
-        qp = QPainter(self)
+        wopszaru = 10
+    
+        self.px0 , self.py0 = e.x() + ofsety, e.y()+ofsetx
+
+        #recognising neret eage eages
+        if self.x0-wopszaru<self.px0<self.x0+wopszaru and self.y0-wopszaru<self.py0<self.y1+wopszaru:
+            self.kanta_right = True
         
-        try:
-            # rysowanie obrazu
-            qp.drawPixmap(self.rect(), self._pixmapdromframe)
-        except AttributeError:
-            pass
+        if self.x1-wopszaru<self.px0<self.x1+wopszaru and self.y0-wopszaru<self.py0<self.y1+wopszaru:
+            self.kanta_left = True
             
-        finally:
-            # kolro i tlo
-            br = QBrush(QColor(200, 10, 10, 200))
+        if self.y0-wopszaru<self.py0<self.y0+wopszaru and self.x0-wopszaru<self.px0<self.x1+wopszaru:
+            self.kanta_top = True
             
-            # wgranie stylu
-            qp.setBrush(br)
+        if self.y1-wopszaru<self.py0<self.y1+wopszaru and self.x0-wopszaru<self.px0<self.x1+wopszaru:
+            self.kanta_botom = True
+        
+        #checkig for corners
+        self.left_top = self.kanta_left and self.kanta_top
+        self.right_top = self.kanta_right and self.kanta_top
+        
+        self.left_botom = self.kanta_left and self.kanta_botom
+        self.right_bootom = self.kanta_right and self.kanta_botom
 
-            # variable for chusing if we drow numbers and rectagled
-            tym = True
-            num = False
+        #checking for center of the marked region
+        if self.y0+wopszaru<self.py0<self.y1-wopszaru and self.x0+wopszaru<self.px0<self.x1-wopszaru:
+            self.move_all = True
 
+        #update kordynat
+        self.podglond.update_cords()
 
-            if self.whot_to_drow == 'all_rectagls':
-                # pokazuje wsystkie prostkoaty
-                self.all_Rectagles(qp)
+    def relise_cords(self,e,ofsetx, ofsety):
 
-            else:
-                # podstawowa obcja rysuje nowy prostokat
-                self.all_Rectagles(qp)
-                qp.drawRect(QRect(self.begin, self.end))
-                # rysowanie prostokonta na bierzoco jak podglond do ruchu myszka
+        #reset pres caount
+        self.first_pres = False
 
-            #odswiezenie podglondu
-            self.loadImage(tym, num)
+        #read and ofset cords
+        self.px1 , self.py1 = e.x() + ofsety, e.y()+ofsetx
+
+        #chec for trybe
+        if self.move_all:
+            dx, dy = self.px1 - self.px0, self.py1 - self.py0
+            self.x0 += dx
+            self.x1 += dx
+            self.y0 += dy
+            self.y1 += dy
+        
+        elif self.left_top:
+            self.x1 = self.px1
+            self.y0 = self.py1
             
+        elif self.left_botom:
+            self.x1 = self.px1
+            self.y1 = self.py1
+            
+        elif self.right_bootom:
+            self.x0 = self.px1
+            self.y1 = self.py1
+            
+        elif self.right_top:
+            self.x0 = self.px1
+            self.y0 = self.py1
+            
+        elif self.kanta_botom:
+            self.y1 = self.py1
+        elif self.kanta_left:
+            self.x1 = self.px1
+        elif self.kanta_right:
+            self.x0 = self.px1
+        elif self.kanta_top:
+            self.y0 = self.py1
+            
+        self.podglond.update_cords()
+      
+    def move_cords(self, e, ofsetx, ofsety):
 
-    def all_Rectagles(self, Painter):
-        '''
-        Metoda rysujaca wsystkie ROI'e
-        :param Painter: Qt Painter
-        '''
-        for rectangle in self.main_window.ROI:
-            Painter.drawRect(self.rectagledrow(rectangle))
-       
+        #chec if maouse is presed
+        if self.first_pres:
 
+            #ofset reded cords
+            self.px1 , self.py1 = e.x() + ofsety, e.y()+ofsetx
+            
+            #chec for trybe
+            if self.move_all:
+                dx, dy = self.px1 - self.px0, self.py1 - self.py0
+                self.x0 += dx
+                self.x1 += dx
+                self.y0 += dy
+                self.y1 += dy
+                self.px0 , self.py0 = e.x() + ofsety, e.y()+ofsetx
+        
+            elif self.left_top:
+                #print("left_top")
+                self.x1 = self.px1
+                self.y0 = self.py1
+                
+            elif self.left_botom:
+                #print("left_botom")
+                self.x1 = self.px1
+                self.y1 = self.py1
+                
+            elif self.right_bootom:
+                #print("right_bootom")
+                self.x0 = self.px1
+                self.y1 = self.py1
+                
+            elif self.right_top:
+                #print("right_top")
+                self.x0 = self.px1
+                self.y0 = self.py1
+                
+            elif self.kanta_botom:
+                self.y1 = self.py1
+            elif self.kanta_left:
+                self.x1 = self.px1
+            elif self.kanta_right:
+                self.x0 = self.px1
+            elif self.kanta_top:
+                self.y0 = self.py1
+                
+            self.podglond.update_cords()
+                
