@@ -9,3 +9,5 @@ To do:
 6. x axis for img ajustments
 8. eror handling if inicialisation sequence failed
 10. color control
+
+w poziomie mapa po sklaowaniu 6631 6567
