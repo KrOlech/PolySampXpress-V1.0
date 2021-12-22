@@ -37,13 +37,7 @@ class Obraz(ROI_maping):
 
     # rozmiar obszaru
     rozmiar = (1024, 768)
-    
-    # skala mapy
-    skala = 4
-    
-    # maxymalna pozycja manipulatora w mm
-    manipulator_max = 50
-    
+            
     # value that remember whot part of the sample have been seen save to map
     ofsetymax = 0
     ofsetxmax = 0
@@ -344,7 +338,7 @@ class Obraz(ROI_maping):
             print(klatka.shape)
 
         if self.main_window.map is None:
-            self.main_window.map = M.Map_window(self.map, self.main_window)
+            self.main_window.map = M.Map_window(self.map, self.main_window, self.ofsetx, self.ofsety)
         else:
             self.main_window.map.new_image(self.map)
             
