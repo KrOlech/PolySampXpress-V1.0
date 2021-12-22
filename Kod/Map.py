@@ -9,8 +9,8 @@ import Clasa as oC
 class Map(ROI_maping):
     
     #skale umozliwiajace konwersje na poprawny rozmiar ROI
-    skalx = 441/12670#1024/((50*510)+1024)* 1275/8858#*1179/1230#*1770/1745
-    skaly = 341/12750#768/((50*510)+768)*1267/1515# *1100/1280
+    skalx = (441/12670+440/12671+468/13692)/3
+    skaly = (341/12750+338/12749+368/13520)/3
 
     # wartosci owsetu aktualnego podgloadu
     ofsety = -100#13682-17392#1271+16381#
