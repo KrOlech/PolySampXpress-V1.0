@@ -412,21 +412,12 @@ class MainWindow(QMainWindow):
         '''
 
         if self.przyciski[6].isChecked():
-             # setting background color to light-blue
-             self.przyciski[6].setStyleSheet("background-color : lightblue")
              
              if self.map is not None:
                 self.map.move_to_point = True
              self.obraz.move_to_point = True
 
-             
-
-        else:
-             # set background color back to light-grey
-             self.przyciski[6].setStyleSheet("background-color : lightgrey")
-
-
-             
+        else:  
              if self.map is not None:
                 self.map.move_to_point = False
              self.obraz.move_to_point = False
