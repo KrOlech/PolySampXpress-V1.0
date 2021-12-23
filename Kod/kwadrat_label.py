@@ -286,13 +286,9 @@ class podglond_roi(QWidget):
     def edit(self):
     
         if self.butons[0].isChecked():
-            # setting background color to light-blue
-            self.butons[0].setStyleSheet("background-color : lightblue")
             self.obiekt_oznaczony.edit()
 
         else:
-            # set background color back to light-grey
-            self.butons[0].setStyleSheet("background-color : lightgrey")
             self.obiekt_oznaczony.end_edit()
 
     def new_image(self, img):
@@ -365,26 +361,18 @@ class podglond_roi(QWidget):
     def TogleMove(self):
 
         if self.move.isChecked():
-             # setting background color to light-blue
-             self.move.setStyleSheet("background-color : lightblue")
              self.move.setText("shape")
 
         else:
-             # set background color back to light-grey
-             self.move.setStyleSheet("background-color : lightgrey")
              self.move.setText("move")
              
                         
     def Togleincrise(self):
      
         if self.incrise.isChecked():
-            # setting background color to light-blue
-            self.incrise.setStyleSheet("background-color : lightblue")
             self.incrise.setText("-")
 
         else:
-            # set background color back to light-grey
-            self.incrise.setStyleSheet("background-color : lightgrey")
             self.incrise.setText("+")
 
 ######################################################################################
