@@ -7,26 +7,16 @@ from roi_create import ROI_maping
 import Clasa as oC
 
 class Map(ROI_maping):
-    
-    #skale umozliwiajace konwersje na poprawny rozmiar ROI
-    skalx = (441/12670+440/12671+468/13692)/3
-    skaly = (341/12750+338/12749+368/13520)/3
 
-    # wartosci owsetu aktualnego podgloadu
-    ofsety = -100#13682-17392#1271+16381#
-    ofsetx = 105#12751-9801#13509-10559
     
     def __init__(self, img, main_window, ox, oy, *args, **kwargs):
         super(Map, self).__init__(main_window, *args, **kwargs)
+        
+        self.skalx = 1/self.skala#(441/12670+440/12671+468/13692)/3
+        self.skaly = 1/self.skala
 
         #skalowanei nowego obrazu
-        self.image_opencv = cv2.resize(img, self.rozmiar)
-
-        #zapisanie nowego obrazu
-        img = self.image_opencv
-
-        #ustawienie rozmiaru okna
-        self.resize(self.rozmiar[0], self.rozmiar[1])
+        self.image_opencv = img#cv2.resize(, self.rozmiar)
 
         #konwersja obrazu z openCV na Qimage
         self.img = QImage(img, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGB888)
@@ -37,8 +27,6 @@ class Map(ROI_maping):
         #seting pixmap
         self.setPixmap(self.img)
         
-        #self.ofsetx = -ox + int(self.rozmiar[0]+self.manipulator_max*self.delta_pixeli/2) #self.rozmiar[0]+
-        #self.ofsety = -oy + int(self.rozmiar[1]+self.manipulator_max*self.delta_pixeli/2) #
 
     def new_image(self, img):
         '''
@@ -47,7 +35,7 @@ class Map(ROI_maping):
         '''
 
         #skalowanie obrazu
-        self.image_opencv = cv2.resize(img, self.rozmiar)
+        #self.image_opencv = cv2.resize(img, self.rozmiar)
 
         #konwersja obrazu na Qimage
         self.img = QImage(img, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGB888)
@@ -55,46 +43,22 @@ class Map(ROI_maping):
         #zapisanei obrazu
         self.img = QPixmap.fromImage(self.img)
 
-    def rectaglecreate(self):
-        '''
-        Metoda tworzoca obiekt klasy ROI
-        :return: obiekt klasy roi stworzony na podstawie zapisanych dancyh
-        #ponisienie nr defaltowej nazwy
-        '''
-        self.main_window.last_name += 1
-
-        ROI = oC.obszarzaznaczony(
-                                self,
-                                self.x1, self.y1,
-                                self.x2, self.y2,
-                                self.frame,
-                                0,
-                                0,
-                                self.scall,
-                                self.main_window.last_name,
-                                self.skalx,self.skaly
-                                )
-        #zapisanei ROI dao tablicy
-        self.main_window.add_ROI(ROI)
-        return ROI
-
-    def get_rectagle(self,prostokat):
-        return prostokat.getrectangle_map(self.rozmiar, self.ofsetx, self.ofsety, self.skalx, self.skaly)
+    
 
 class Map_window(QWidget):
 
     # rozmiar obszaru
-    rozmiar = (1024, 768)
+    #rozmiar = (1024, 768)
 
     def __init__(self, map, main_window, ox, oy, *args, **kwargs):
         super(Map_window, self).__init__(*args, **kwargs)
 
-        self.setWindowTitle("Mapa Próbki")
+        self.setWindowTitle("Mapa Próbki"+ str(map.shape))
         self.setWindowIcon(QtGui.QIcon('icon.png'))
 
         #ustawienie rozmiaru
-        self.setGeometry(0, 0, 1024, 720)
-        self.resize(self.rozmiar[0],self.rozmiar[1])
+        #self.setGeometry(0, 0, 1024, 720)
+        #self.resize(self.rozmiar[0],self.rozmiar[1])
 
         #stworzenie leyoutu
         self.layout = QVBoxLayout()
