@@ -34,9 +34,6 @@ class Obraz(ROI_maping):
 
     # '' 'up' 'dawn' 'right' 'left' 'multi'
     direction_change = ''
-
-    # rozmiar obszaru
-    rozmiar = (1024, 768)
             
     # value that remember whot part of the sample have been seen save to map
     ofsetymax = 0
@@ -86,6 +83,7 @@ class Obraz(ROI_maping):
                                           QImage.Format_RGB888)
 
             self.frame_2 = cv2.resize(img, self.rozmiar)
+            self.image_opencv  = img
             self.save_curent_viue()
             self.extend_map_exeqiute()
             # plt.imsave('img_frame_{}.png'.format(self.total), img)
@@ -118,7 +116,7 @@ class Obraz(ROI_maping):
                 
                 self.image_opencv = self.bytes_to_array(self.buf)
                 
-                self.loadImage()
+                self.loadImage(True,False)
 
     #conwert Qpixmap to numpy tab
     def bytes_to_array(self, still_img_buf, dtype=np.uint8):
@@ -263,25 +261,29 @@ class Obraz(ROI_maping):
 ###########################przesuwanie podgladu##############################    
 
     def left(self):
-        self.ofsety -= self.delta_pixeli
-        self.whot_to_drow = 'viue_muve'
-        self.update()
+        self.ofsetx -= self.delta_pixeli
+        self._flagi_przemiesczenie()
    
     def right(self):
-        self.ofsety += self.delta_pixeli
-        self.whot_to_drow = 'viue_muve'
-        self.update()
+        self.ofsetx += self.delta_pixeli
+        self._flagi_przemiesczenie()
 
     def dawn(self):
-        self.ofsetx -= self.delta_pixeli
-        self.whot_to_drow = 'viue_muve'
-        self.update()
+        self.ofsety -= self.delta_pixeli
+        self._flagi_przemiesczenie()
 
     def up(self):
-        self.ofsetx += self.delta_pixeli
+        self.ofsety += self.delta_pixeli
+        self._flagi_przemiesczenie()
+ 
+    def _flagi_przemiesczenie(self):
+        if self.edit_trybe:
+            self.edited_roi.podglond.butons[0].toggle()
+            self.edited_roi.end_edit()
+            self.edit_trybe = False
+            
         self.whot_to_drow = 'viue_muve'
         self.update()
- 
 
     def update_ofsets(self):
         xm, ym, zm, = self.main_window.manipulaor.get_axes_positions()
@@ -299,16 +301,18 @@ class Obraz(ROI_maping):
            
             x, y, z = self.frame_2.shape
             
-            map_size = int(x+self.manipulator_max*self.delta_pixeli/self.skala)  # x size
-            map_size *= int(y+self.manipulator_max*self.delta_pixeli/self.skala)  # y size
+            map_size = int((x+self.manipulator_max*self.delta_pixeli)/self.skala)  # x size
+            map_size *= int((y+self.manipulator_max*self.delta_pixeli)/self.skala)  # y size
             map_size *= 3  # RGB colors
             
             # stworzenie tablicy przechowujacej obraz mapy
             self.map = np.zeros(map_size,dtype=np.uint8)
+            #print(self.map.shape,"przed reshapem")
             
             # okreslenei ksztaltu tej tabliczy
-            self.map.shape = (int(x+self.manipulator_max*self.delta_pixeli/self.skala),
-                              int(y+self.manipulator_max*self.delta_pixeli/self.skala), 3)
+            self.map.shape = (int((y+self.manipulator_max*self.delta_pixeli)/self.skala),
+                              int((x+self.manipulator_max*self.delta_pixeli)/self.skala), 3)
+            #print(self.map.shape,"poreshapem")
             
             # wykonanie fukcji wklejajacej aktualny podglond do mapy
             self.extend_map_exeqiute()
@@ -327,16 +331,16 @@ class Obraz(ROI_maping):
         ym, zm = int((50-ym)*510/self.skala), int((50-zm)*510/self.skala)
         
         #przeskalowanei podglondu
-        klatka = cv2.resize(self.frame_2, (int(x/self.skala), int(y/self.skala)))
-        
+        klatka = cv2.resize(self.frame_2, (int(y/self.skala),int(x/self.skala)))
+
         #wklejenie podglondu we własciwe miejsce na mapie
         try:
-            self.map[zm:zm+int(y/self.skala), ym:ym+int(x/self.skala)] = klatka
+            self.map[zm:zm+int(x/self.skala), ym:ym+int(y/self.skala)] = klatka
         except Exception as e:
             print(e)
-            print(self.map[ym:ym+int(x/self.skala), zm:zm+int(y/self.skala)].shape)
-            print(klatka.shape)
-
+            print(self.map[zm:zm+int(x/self.skala), ym:ym+int(y/self.skala)].shape)
+        
+        
         if self.main_window.map is None:
             self.main_window.map = M.Map_window(self.map, self.main_window, self.ofsetx, self.ofsety)
         else:
@@ -357,8 +361,7 @@ class Obraz(ROI_maping):
             
     def get_map(self):
         return self.map
-        
-        
+          
     def mapupdate(self):
         self.whot_to_drow = 'viue_muve'
         self.update()
