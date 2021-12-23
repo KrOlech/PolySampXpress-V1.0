@@ -2,7 +2,7 @@
 import cv2
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-
+from time import sleep
 import kwadrat_label as kw
 
 
@@ -43,7 +43,7 @@ class obszarzaznaczony():
     ####################################
 
     # konstruktor tworzocy obiekt ze wzglednych wspułrednych prubki w pixelach
-    def __init__(self, obraz_obcet, xp0, yp0, xp1, yp1, image, py00=0, px00=0, s00=1, Name="defalaut", sx = 1, sy = 1):
+    def __init__(self, obraz_obcet, xp0, yp0, xp1, yp1, image, px00=0, py00=0, s00=1, Name="defalaut", sx = 1, sy = 1):
 
         #Nadrzedny obiekt (map lub kamera) w któyrym strworzono obiektr przekazanoy w celu komunikacji
         self.Obraz_obcet = obraz_obcet
@@ -55,17 +55,17 @@ class obszarzaznaczony():
         self.set_niezalezne_pixele(xp0, yp0, xp1, yp1, px00, py00, s00,sx,sy)
 
         #metoda tworzoca widget umozliwiajacy interakcje z obiektem
-        self.create_Roi_label(image, py00, px00, s00)
+        self.create_Roi_label(image, px00, py00, s00)
 
         #metoda tworzoca niezalerzne wspułredne prubki w mm
         self.set_niezalezne_Prubki()
         
     def get_wzgledny_rectagle(self):
-        x0 = (self.x0 - self.Obraz_obcet.ofsety)
-        y0 = (self.y0 - self.Obraz_obcet.ofsetx)
+        x0 = (self.x0 - self.Obraz_obcet.ofsetx)
+        y0 = (self.y0 - self.Obraz_obcet.ofsety)
 
-        x1 = (self.x1 - self.Obraz_obcet.ofsety)
-        y1 = (self.y1 - self.Obraz_obcet.ofsetx)
+        x1 = (self.x1 - self.Obraz_obcet.ofsetx)
+        y1 = (self.y1 - self.Obraz_obcet.ofsety)
     
         return (x0, y0, x1, y1)
         
@@ -82,23 +82,45 @@ class obszarzaznaczony():
         return
         # worki in progres
 
+    def _niezalezne_to_zalezne(self,xp0, yp0, xp1, yp1, px00, py00, s00,sx,sy):
+    
+        x0 = int((xp0 + px00)*s00/sx)
+        y0 = int((yp0 + py00)*s00/sy)
+
+        x1 = int((xp1 + px00)*s00/sx)
+        y1 = int((yp1 + py00)*s00/sy)
+        
+        return x0,x1,y0,y1
+
     # metoda konwertujaca wzgledne wspułredne w pixelach na bezwgledne
-    def set_niezalezne_pixele(self, xp0, yp0, xp1, yp1, px00, py00, s00,sx,sy):
-
-        self.x0 = int((xp0 + px00)*s00/sx)
-        self.y0 = int((yp0 + py00)*s00/sy)
-
-        self.x1 = int((xp1 + px00)*s00/sx)
-        self.y1 = int((yp1 + py00)*s00/sy)
+    def set_niezalezne_pixele(self, xp0, yp0, xp1, yp1, px00, py00, s00 = 1,sx = 1,sy = 1):
+        
+        self.x0, self.x1, self.y0, self.y1 = self._niezalezne_to_zalezne(xp0, yp0,
+                                                                         xp1, yp1,
+                                                                         px00, py00,
+                                                                         s00, sx, sy)
 
     # metoda zwracajaca prostokoat qrect w układzei waktualnie wyswietlanym
-    def getrectangle(self, Rozmiar, py00, px00, sy, sx ,s00=1):
+    def getrectangle(self, Rozmiar, px00, py00, sy, sx ,s00=1):
+    
+        xp0, xp1, yp0, yp1 = self._niezalezne_to_zalezne(self.x0,self.y0,
+                                                         self.x1,self.y1,
+                                                         -px00, -py00,
+                                                         s00, 1/sx, 1/sy)
+
+
+        poczatek = QPoint(xp0, yp0)
+        koniec = QPoint(xp1, yp1)
+        #print(xp0, yp0,xp1, yp1,sx,sy,px00,py00,self.x0, self.y0,self.x1, self.y1) 
+        return QRect(poczatek, koniec)
+
+    def getrectangle_map(self, Rozmiar, px00, py00, sy, sx ,s00=1):
 
         #konwersja niezaleznych wspułrzednych prubki na zalezne dla obecnego ofsetu.
-        xp0 = int((self.x0 - px00) * s00*sx)
-        yp0 = int((self.y0 - py00) * s00*sy)
-        xp1 = int((self.x1 - px00) * s00*sx)
-        yp1 = int((self.y1 - py00) * s00*sy)
+        xp0 = int((self.x0) * s00*sx)- px00
+        yp0 = int((self.y0) * s00*sy)- py00
+        xp1 = int((self.x1) * s00*sx)- px00
+        yp1 = int((self.y1) * s00*sy)- py00
         
         #sprawdzenie czy obszar nie wychodzi poza podglond
         if xp0 < 0:
@@ -115,7 +137,7 @@ class obszarzaznaczony():
 
         poczatek = QPoint(xp0, yp0)
         koniec = QPoint(xp1, yp1)
-
+        
         return QRect(poczatek, koniec)
 
     def setName(self, name):
@@ -128,17 +150,17 @@ class obszarzaznaczony():
     def gettop_corner(self, ox, oy, s00):
 
         if self.x0 < self.x1 and self.y0 < self.y1:
-            xp0 = (self.x0 - oy) * s00
-            yp0 = (self.y0 - ox) * s00
+            xp0 = (self.x0 - ox) * s00
+            yp0 = (self.y0 - oy) * s00
         elif self.x0 < self.x1 and self.y0 > self.y1:
-            xp0 = (self.x0 - oy) * s00
-            yp0 = (self.y1 - ox) * s00
+            xp0 = (self.x0 - ox) * s00
+            yp0 = (self.y1 - oy) * s00
         elif self.x0 > self.x1 and self.y0 < self.y1:
-            xp0 = (self.x1 - oy) * s00
-            yp0 = (self.y0 - ox) * s00
+            xp0 = (self.x1 - ox) * s00
+            yp0 = (self.y0 - oy) * s00
         else:
-            xp0 = (self.x1 - oy) * s00
-            yp0 = (self.y1 - ox) * s00
+            xp0 = (self.x1 - ox) * s00
+            yp0 = (self.y1 - oy) * s00
 
         return xp0, yp0
 
@@ -149,7 +171,7 @@ class obszarzaznaczony():
 
         return xp0 - 20, yp0 - 10
 
-    def create_Roi_label(self, image, py00, px00, s00):
+    def create_Roi_label(self, image, px00, py00, s00):
 
         frame = image
 
@@ -237,7 +259,7 @@ class obszarzaznaczony():
         
         wopszaru = 10
     
-        self.px0 , self.py0 = e.x() + ofsety, e.y()+ofsetx
+        self.px0 , self.py0 = e.x() + ofsetx, e.y()+ofsety
 
         #recognising neret eage eages
         if self.x0-wopszaru<self.px0<self.x0+wopszaru and self.y0-wopszaru<self.py0<self.y1+wopszaru:
@@ -272,7 +294,7 @@ class obszarzaznaczony():
         self.first_pres = False
 
         #read and ofset cords
-        self.px1 , self.py1 = e.x() + ofsety, e.y()+ofsetx
+        self.px1 , self.py1 = e.x() + ofsetx, e.y()+ofsety
 
         #chec for trybe
         if self.move_all:
@@ -315,7 +337,7 @@ class obszarzaznaczony():
         if self.first_pres:
 
             #ofset reded cords
-            self.px1 , self.py1 = e.x() + ofsety, e.y()+ofsetx
+            self.px1 , self.py1 = e.x() + ofsetx, e.y()+ofsety
             
             #chec for trybe
             if self.move_all:
@@ -324,7 +346,7 @@ class obszarzaznaczony():
                 self.x1 += dx
                 self.y0 += dy
                 self.y1 += dy
-                self.px0 , self.py0 = e.x() + ofsety, e.y()+ofsetx
+                self.px0 , self.py0 = e.x() + ofsetx, e.y()+ofsety
         
             elif self.left_top:
                 #print("left_top")
