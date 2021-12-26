@@ -28,10 +28,6 @@ class ROI_maping(QLabel):
 
     x2 = 0
     y2 = 0
-
-    # skala okna wymagana do skalowania mapy
-    skalx = 1
-    skaly = 1
         
     # pukty poczotkowe i koncowe prostokonta
     begin = QPoint()
@@ -57,16 +53,12 @@ class ROI_maping(QLabel):
     delta_pixeli = 510
     
     # scala
-    scall = 1
+    scal = 1
 
     # edit trybe
     edit_trybe = False
     edited_roi = None
     move_to_point = False
-    
-    #skale umozliwiajace wyswietlanei ROI na przeskalowanej mapie
-    skaly = 1
-    skalx = 1
     
     # maxymalna pozycja manipulatora w mm
     manipulator_max = 50
@@ -114,13 +106,13 @@ class ROI_maping(QLabel):
         #dodanie opisów w odpowiednich miescach
         if drow_deskription:
             for i, rectangle in enumerate(self.main_window.ROI):
-                rx, ry = rectangle.gettextloc(self.ofsetx, self.ofsety, self.scall)
-                cv2.putText(frame, str(rectangle.getName()), (rx, ry), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                rx, ry = rectangle.gettextloc(self.ofsetx, self.ofsety)
+                cv2.putText(frame, str(rectangle.poierznazwe()), (rx, ry), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
         #dodanie opisuw pojedyczego Roia jesli ta obcja została wybrana
         if drow_single_rectagle:
-            rx, ry = self.main_window.ROI[self.ktury].gettextloc(self.ofsetx, self.ofsety, self.scall)
-            cv2.putText(frame, str(self.main_window.ROI[self.ktury].getName()), (rx, ry), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            rx, ry = self.main_window.ROI[self.ktury].gettextloc(self.ofsetx, self.ofsety)
+            cv2.putText(frame, str(self.main_window.ROI[self.ktury].poierznazwe()), (rx, ry), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         
         # conwersja z open Cv image na QImage
         self._imgfromframe = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0], QImage.Format_RGB888)
@@ -216,7 +208,7 @@ class ROI_maping(QLabel):
             #zapisanie pozycji puszczenia przycisku
             self._save_relise_pres(e)
 
-    def _save_relise_pres(self,e):
+    def _save_relise_pres(self, e):
         '''
         Zapisanei miejsca puszcenia przycisku myszki
         '''
@@ -262,10 +254,10 @@ class ROI_maping(QLabel):
             # paramtery umozliwiajace rysowanei podglondu tworzonego ROI
             self._creat_roi_sample(e)
 
-    def _creat_roi_sample(self,e):
+    def _creat_roi_sample(self, e):
 
-        self.x2 = int(e.x() / self.skalx)
-        self.y2 = int(e.y() / self.skaly)
+        self.x2 = int(e.x() * self.skal)
+        self.y2 = int(e.y() * self.skal)
 
         # konwersja pozycji myszki na stringi
         textx = f'{self.x2}'
@@ -321,7 +313,7 @@ class ROI_maping(QLabel):
         :param prostokat: obiekt klasy ROI
         :return: obiekt klasy Qrectagle
         '''
-        x = prostokat.getrectangle(self.rozmiar, self.ofsetx, self.ofsety, self.skalx, self.skaly)
+        x = prostokat.pobierz_prostokat(self.ofsetx, self.ofsety, self.skal)
         return x
         
     def rectaglecreate(self):
@@ -332,17 +324,8 @@ class ROI_maping(QLabel):
         #ponisienie nr defaltowej nazwy
         self.main_window.last_name += 1
         
-        ROI = oC.obszarzaznaczony(
-                                self,
-                                self.x1, self.y1,
-                                self.x2, self.y2,
-                                self.klatka,
-                                self.ofsetx,
-                                self.ofsety,
-                                self.scall,
-                                self.main_window.last_name,
-                                self.skalx,self.skaly
-                                )
+        ROI = oC.obszarzaznaczony(self, self.x1, self.y1, self.x2, self.y2, self.klatka, self.ofsetx, self.ofsety,
+                                  self.main_window.last_name, self.skal)
         #zapisanei ROI dao tablicy
         self.main_window.add_ROI(ROI)
         return ROI

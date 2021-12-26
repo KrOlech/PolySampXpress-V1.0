@@ -356,7 +356,7 @@ class Obraz_z_kamery(ROI_maping):
         self.extend_map_exeqiute()
 
         if self.main_window.map is None:
-            self.main_window.map = Map_window(self.map, self.main_window, self.ofsetx, self.ofsety)
+            self.main_window.map = Map_window(self.map, self.main_window)
         else:
             self.main_window.map.new_image(self.map)
 

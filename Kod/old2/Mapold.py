@@ -56,7 +56,7 @@ class Map(ROI_maping):
         self.skalx = x/self.orgx
         self.skaly = y/self.orgy
         
-        #print(self.skalx, self.skaly)
+        #print(self.skal, self.skaly)
 
 
 class Map_window(QWidget):

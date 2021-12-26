@@ -122,7 +122,7 @@ class Podglond_ROI(QWidget):
         ######################################################################################
 
         # widget zawierajacy podglad na oznaczony ROI
-        self.podglond = Prsty_Podglond(self.obraz, obiekt_oznaczony.get_wzgledny_rectagle())
+        self.podglond = Prsty_Podglond(self.obraz, obiekt_oznaczony.pobierz_wzgledny_rectagle())
 
         # widget zawierajacy nazwe ROI oraz umozliwiajacy jegj edycje
         self.name_lable = QLineEdit(tekst)
@@ -154,7 +154,7 @@ class Podglond_ROI(QWidget):
         '''
         dekonstruktor klasy usuwa on oznaczony obiekt oznaczony
         '''
-        self.obiekt_oznaczony.kill()
+        self.obiekt_oznaczony.__del__()
         self.obiekt_oznaczony = 0
 
     def _usun(self):
@@ -224,7 +224,7 @@ class Podglond_ROI(QWidget):
         prywatna metoda towrzoaca legende zawierajaca wspulrzedne ROI'u oraz jego pole
         '''
         # odczytanie wspulrzednych bezwzglednych ROI w celu wykonaniu opisu
-        x, x1, y, y1 = self.obiekt_oznaczony.get_niezalezne_pixele()
+        x, x1, y, y1 = self.obiekt_oznaczony.pobierz_niezalezne_pixele()
 
         #obliczenie pola ROI'u w pixelach
         p_pixele = self.pole(x, x1, y, y1)
@@ -363,7 +363,7 @@ class Podglond_ROI(QWidget):
         '''
         metoda nadajaca nowa nazwe na glównym widoku roiu
         '''
-        self.obiekt_oznaczony.setName(self.name_lable.text())
+        self.obiekt_oznaczony.ustawnazwe(self.name_lable.text())
 
 
     def odswierz_kordynaty(self):
@@ -373,7 +373,7 @@ class Podglond_ROI(QWidget):
     
         self.podglond._wwgraj(self.obraz)
         
-        x, x1, y, y1 = self.obiekt_oznaczony.get_niezalezne_pixele()
+        x, x1, y, y1 = self.obiekt_oznaczony.pobierz_niezalezne_pixele()
         
         
         self.x0_label.setText(str(x))
@@ -424,7 +424,7 @@ class Podglond_ROI(QWidget):
         if type(obraz) == QPixmap:
             self.obraz = obraz
 
-        self.podglond.nowy_podglond(self.obraz,  self.obiekt_oznaczony.get_wzgledny_rectagle())
+        self.podglond.nowy_podglond(self.obraz, self.obiekt_oznaczony.pobierz_wzgledny_rectagle())
 
     def fine_edit(self):
         '''

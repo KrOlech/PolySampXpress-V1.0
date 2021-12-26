@@ -1,31 +1,31 @@
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from PyQt5 import QtGui
-from PyQt5.QtGui import *
+from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import Qt
-import cv2
 from roi_create import ROI_maping
-import Clasa as oC
+
 
 class Map(ROI_maping):
-
+    '''
+    Obiekt dziedziczacy z ROI_maping bendacy odpowiedzialny za wyswietlenie mapy
+    '''
     
-    def __init__(self, img, main_window, ox, oy, *args, **kwargs):
+    def __init__(self, obraz, main_window, *args, **kwargs):
         super(Map, self).__init__(main_window, *args, **kwargs)
-        
-        self.skalx = 1/self.skala#(441/12670+440/12671+468/13692)/3
-        self.skaly = 1/self.skala
+
+        #skala obrazu
+        self.skal = 1/self.skala
 
         #skalowanei nowego obrazu
-        self.image_opencv = img#cv2.resize(, self.rozmiar)
+        self.image_opencv = obraz
 
         #konwersja obrazu z openCV na Qimage
-        self.img = QImage(img, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGB888)
+        self.obraz = QImage(obraz, obraz.shape[1], obraz.shape[0], obraz.strides[0], QImage.Format_RGB888)
 
-        #QImage(cvImg.data, width, height, bytesPerLine, QImage.Format_RGB888)
-        self.img = QPixmap.fromImage(self.img)
+        self.obraz = QPixmap.fromImage(self.obraz)
 
         #seting pixmap
-        self.setPixmap(self.img)
+        self.setPixmap(self.obraz)
         
 
     def new_image(self, img):
@@ -38,10 +38,10 @@ class Map(ROI_maping):
         #self.image_opencv = cv2.resize(obraz, self.rozmiar)
 
         #konwersja obrazu na Qimage
-        self.img = QImage(img, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGB888)
+        self.obraz = QImage(img, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGB888)
 
         #zapisanei obrazu
-        self.img = QPixmap.fromImage(self.img)
+        self.obraz = QPixmap.fromImage(self.obraz)
 
 
 class Map_window(QWidget):
@@ -63,7 +63,7 @@ class Map_window(QWidget):
         self.layout = QVBoxLayout()
 
         #map object
-        self.map = Map(map, main_window, ox, oy)
+        self.map = Map(map, main_window)
 
         #dodanie mapy do podglondu
         self.layout.addWidget(self.map, Qt.AlignCenter)

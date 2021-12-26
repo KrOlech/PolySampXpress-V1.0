@@ -1,15 +1,12 @@
-# obraz Klasa dziedzicaca z Qlablel
-import cv2
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from time import sleep
-import kwadrat_label as kw
+from PyQt5.QtCore import QPoint, QRect
+from PyQt5.QtGui import QImage, QPixmap
+from kwadrat_label import Podglond_ROI
 
 
 class obszarzaznaczony():
-    # stałe do konwersji z układu pixeli na układ prubki
-    a = 2
-    b = 0
+    '''
+    klasa przechowujaca wspulrzedne prubki w pixelach i mm oraz podglond
+    '''
 
     # wspułrzedne bezwzgledne w geometri próbki w pixelach
     x0 = 0
@@ -23,163 +20,191 @@ class obszarzaznaczony():
     xm1 = 0
     ym1 = 0
 
-    # skala
-    s00 = 1
+    #wartosci binarne przechowujace flagi do edycji
+    pierwsze_klikniecie = False
 
-    #bolean value holding values allowing recognision of edition
-    first_pres = False
-
-    kanta_top = False
-    kanta_botom = False
-    kanta_left = False
-    kanta_right = False
+    kanta_gura = False
+    kanta_dul = False
+    kanta_lewa = False
+    kanta_prawy = False
     
-    left_top = False
-    right_top = False
-    left_botom = False
-    right_bootom = False
+    lewa_gura = False
+    prawa_gura = False
+    lewy_dul = False
+    prawy_dul = False
     
-    move_all = False
+    przemiesc_wsystkie = False
     ####################################
 
     # konstruktor tworzocy obiekt ze wzglednych wspułrednych prubki w pixelach
-    def __init__(self, obraz_obcet, xp0, yp0, xp1, yp1, image, px00=0, py00=0, s00=1, Name="defalaut", sx = 1, sy = 1):
+    def __init__(self, obraz_obcet, xp0, yp0, xp1, yp1, image, px00=0, py00=0, nazwa="defalaut", s=1):
 
         #Nadrzedny obiekt (map lub kamera) w któyrym strworzono obiektr przekazanoy w celu komunikacji
         self.Obraz_obcet = obraz_obcet
 
         #nazwa obiektu
-        self.Name = Name
+        self.nazwa = nazwa
 
         #metoda tworzoca niezalezne wspulrdzede prubki w pixelach
-        self.set_niezalezne_pixele(xp0, yp0, xp1, yp1, px00, py00, s00,sx,sy)
+        self.x0, self.x1, self.y0, self.y1 = self._zalezne_to_niezalezne(xp0, yp0, xp1, yp1, px00, py00, s)
 
         #metoda tworzoca widget umozliwiajacy interakcje z obiektem
-        self.create_Roi_label(image, px00, py00, s00)
+        self.create_Roi_label(image)
 
         #metoda tworzoca niezalerzne wspułredne prubki w mm
-        self.set_niezalezne_Prubki()
-        
-    def get_wzgledny_rectagle(self):
+        self._set_niezalezne_prubki()
+
+    def __del__(self):
+        '''
+        dekonstruktor klasy obsluguje usuniecie podglondu i wyloczenie edycji
+        '''
+        self.end_edit()
+        self.Obraz_obcet.rmv_rectagle(self)
+        del self.podglond
+
+    def pobierz_wzgledny_rectagle(self):
+        '''
+        metoda zwracajaca aktualne wzgledne wspulrzedne roiu w pixelach
+        :return: x0, y0, x1, y1
+        '''
         x0 = (self.x0 - self.Obraz_obcet.ofsetx)
         y0 = (self.y0 - self.Obraz_obcet.ofsety)
 
         x1 = (self.x1 - self.Obraz_obcet.ofsetx)
         y1 = (self.y1 - self.Obraz_obcet.ofsety)
     
-        return (x0, y0, x1, y1)
+        return x0, y0, x1, y1
         
-    def get_niezalezne_pixele(self):
+    def pobierz_niezalezne_pixele(self):
+        '''
+        metoda zwracajaca niezalezne wspulrzedne w pixelach
+        :return: x0, x1, y0, y1
+        '''
         return self.x0, self.x1, self.y0, self.y1
 
-    def kill(self):
-        self.end_edit()
-        self.Obraz_obcet.rmv_rectagle(self)  # trece
-        del self.podglond
+    def _set_niezalezne_prubki(self):
+        '''
+        metoda konwetujaca wspułrzedne bezwgledne w pixelach na wspułredne prubkki
+        '''
+        self.xm0 = self.x0/510
+        self.ym0 = self.y0/510
+        self.xm1 = self.x1/510
+        self.ym1 = self.y1/510
 
-    # metoda konwetujaca wspułrzedne bezwgledne w pixelach na wspułredne prubkki
-    def set_niezalezne_Prubki(self):
-        return
-        # worki in progres
+    def _niezalezne_to_zalezne(self, px00, py00, s):
+        '''
+        metoda konwertujaca wspulrzedne niezalezne w pixelach na zalezne
+        :param px00: ofset x
+        :param py00: ofset y
+        :param s: skala
+        :return:  x0, x1, y0, y1
+        '''
+        return self._niezalezne_to_zalezne(self.x0, self.y0, self.x1, self.y1, -px00, -py00, s)
 
-    def _niezalezne_to_zalezne(self,xp0, yp0, xp1, yp1, px00, py00, s00,sx,sy):
+    def _zalezne_to_niezlezne(self, xp0, yp0, xp1, yp1, px00, py00, s):
+        '''
+
+        :param xp0:
+        :param yp0:
+        :param xp1:
+        :param yp1:
+        :param px00: ofset x
+        :param py00: ofset y
+        :param s: skala
+        :return:  x0, x1, y0, y1
+        '''
+        return self._niezalezne_to_zalezne(xp0, yp0, xp1, yp1, px00, py00, s)
+
+    def konwersja(self, xp0, yp0, xp1, yp1, px00, py00, s):
+        '''
+        metoda konwertujaca wspulrzedne
+        :param xp0:
+        :param yp0:
+        :param xp1:
+        :param yp1:
+        :param px00: ofset x
+        :param py00: ofset y
+        :param s: skala
+        :return: x0, x1, y0, y1
+        '''
     
-        x0 = int((xp0 + px00)*s00/sx)
-        y0 = int((yp0 + py00)*s00/sy)
+        x0 = int((xp0 + px00)/s)
+        y0 = int((yp0 + py00)/s)
 
-        x1 = int((xp1 + px00)*s00/sx)
-        y1 = int((yp1 + py00)*s00/sy)
+        x1 = int((xp1 + px00)/s)
+        y1 = int((yp1 + py00)/s)
         
-        return x0,x1,y0,y1
+        return x0, x1, y0, y1
 
-    # metoda konwertujaca wzgledne wspułredne w pixelach na bezwgledne
-    def set_niezalezne_pixele(self, xp0, yp0, xp1, yp1, px00, py00, s00 = 1,sx = 1,sy = 1):
-        
-        self.x0, self.x1, self.y0, self.y1 = self._niezalezne_to_zalezne(xp0, yp0,
-                                                                         xp1, yp1,
-                                                                         px00, py00,
-                                                                         s00, sx, sy)
-
-    # metoda zwracajaca prostokoat qrect w układzei waktualnie wyswietlanym
-    def getrectangle(self, Rozmiar, px00, py00, sy, sx ,s00=1):
+    def pobierz_prostokat(self, px00, py00, s):
+        '''
+        metoda zwracajaca prostokoat w układzei aktualnie wyswietlanym
+        :param px00: ofsetx
+        :param py00: ofsety
+        :param s: skala
+        :return: Qrectagle
+        '''
     
-        xp0, xp1, yp0, yp1 = self._niezalezne_to_zalezne(self.x0,self.y0,
-                                                         self.x1,self.y1,
-                                                         -px00, -py00,
-                                                         s00, 1/sx, 1/sy)
-
+        xp0, xp1, yp0, yp1 = self._niezalezne_to_zalezne(px00, py00, 1/s)
 
         poczatek = QPoint(xp0, yp0)
         koniec = QPoint(xp1, yp1)
-        #print(xp0, yp0,xp1, yp1,sx,sy,px00,py00,self.x0, self.y0,self.x1, self.y1) 
+
         return QRect(poczatek, koniec)
 
-    def getrectangle_map(self, Rozmiar, px00, py00, sy, sx ,s00=1):
+    def ustawnazwe(self, nazwa):
+        '''
+        metoda umozliwiajaca nazwanie obiektu
+        :param nazwa: string
+        '''
+        self.nazwa = nazwa
 
-        #konwersja niezaleznych wspułrzednych prubki na zalezne dla obecnego ofsetu.
-        xp0 = int((self.x0) * s00*sx)- px00
-        yp0 = int((self.y0) * s00*sy)- py00
-        xp1 = int((self.x1) * s00*sx)- px00
-        yp1 = int((self.y1) * s00*sy)- py00
-        
-        #sprawdzenie czy obszar nie wychodzi poza podglond
-        if xp0 < 0:
-            xp0 = 0
+    def poierznazwe(self):
+        '''
+        metoda zwracajaca nazwe obiektu
+        :return: string
+        '''
+        return self.nazwa
 
-        if yp0 < 0:
-            yp0 = 0
-
-        if xp1 > Rozmiar[0]:
-            xp1 = Rozmiar[0]
-
-        if yp1 > Rozmiar[1]:
-            yp1 = Rozmiar[1]
-
-        poczatek = QPoint(xp0, yp0)
-        koniec = QPoint(xp1, yp1)
-        
-        return QRect(poczatek, koniec)
-
-    def setName(self, name):
-        self.Name = name
-
-    def getName(self):
-        return self.Name
-
-    #metoda zwracajaca najwyszy prawy naroznik obiektu
-    def gettop_corner(self, ox, oy, s00):
+    def _gettop_corner(self, ox, oy):
+        '''
+        metoda zwracajaca najwyszy prawy naroznik obiektu
+        :param ox: ofset x
+        :param oy: ofset y
+        :return: x,y
+        '''
 
         if self.x0 < self.x1 and self.y0 < self.y1:
-            xp0 = (self.x0 - ox) * s00
-            yp0 = (self.y0 - oy) * s00
+            xp0 = (self.x0 - ox)
+            yp0 = (self.y0 - oy)
         elif self.x0 < self.x1 and self.y0 > self.y1:
-            xp0 = (self.x0 - ox) * s00
-            yp0 = (self.y1 - oy) * s00
+            xp0 = (self.x0 - ox)
+            yp0 = (self.y1 - oy)
         elif self.x0 > self.x1 and self.y0 < self.y1:
-            xp0 = (self.x1 - ox) * s00
-            yp0 = (self.y0 - oy) * s00
+            xp0 = (self.x1 - ox)
+            yp0 = (self.y0 - oy)
         else:
-            xp0 = (self.x1 - ox) * s00
-            yp0 = (self.y1 - oy) * s00
+            xp0 = (self.x1 - ox)
+            yp0 = (self.y1 - oy)
 
         return xp0, yp0
 
     #metoda zwracajaca lokacje nazwy wyswietlanej na podglondzie
-    def gettextloc(self, ox, oy, s00=1):
+    def gettextloc(self, ox, oy):
 
-        xp0, yp0 = self.gettop_corner(ox, oy, s00)
+        xp0, yp0 = self._gettop_corner(ox, oy)
 
         return xp0 - 20, yp0 - 10
 
-    def create_Roi_label(self, image, px00, py00, s00):
+    def create_Roi_label(self, image):
 
         frame = image
 
-        img = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0],QImage.Format_RGB888)  
+        img = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0], QImage.Format_RGB888)
 
         self.image = QPixmap.fromImage(img)
 
-        self.podglond = kw.Podglond_ROI(str(self.getName()), self.get_image(), self)
+        self.podglond = Podglond_ROI(str(self.poierznazwe()), self.get_image(), self)
 
     def get_image(self):
         return self.image
@@ -190,7 +215,7 @@ class obszarzaznaczony():
 ############edycja obiektu za pomoca strzalek####################
     def move_top_line(self, mode):
         if mode:
-            self.y0 +=10
+            self.y0 += 10
         else:
             self.y0 -=10
 
@@ -248,14 +273,14 @@ class obszarzaznaczony():
     def pres_cords(self, e, ofsetx, ofsety):
 
         #reseting previus paramiters
-        self.first_pres = True
+        self.pierwsze_klikniecie = True
     
-        self.kanta_top = False
-        self.kanta_botom = False
-        self.kanta_left = False
-        self.kanta_right = False
+        self.kanta_gura = False
+        self.kanta_dul = False
+        self.kanta_lewa = False
+        self.kanta_prawy = False
         
-        self.move_all = False
+        self.przemiesc_wsystkie = False
         
         wopszaru = 10
     
@@ -263,27 +288,27 @@ class obszarzaznaczony():
 
         #recognising neret eage eages
         if self.x0-wopszaru<self.px0<self.x0+wopszaru and self.y0-wopszaru<self.py0<self.y1+wopszaru:
-            self.kanta_right = True
+            self.kanta_prawy = True
         
         if self.x1-wopszaru<self.px0<self.x1+wopszaru and self.y0-wopszaru<self.py0<self.y1+wopszaru:
-            self.kanta_left = True
+            self.kanta_lewa = True
             
         if self.y0-wopszaru<self.py0<self.y0+wopszaru and self.x0-wopszaru<self.px0<self.x1+wopszaru:
-            self.kanta_top = True
+            self.kanta_gura = True
             
         if self.y1-wopszaru<self.py0<self.y1+wopszaru and self.x0-wopszaru<self.px0<self.x1+wopszaru:
-            self.kanta_botom = True
+            self.kanta_dul = True
         
         #checkig for corners
-        self.left_top = self.kanta_left and self.kanta_top
-        self.right_top = self.kanta_right and self.kanta_top
+        self.lewa_gura = self.kanta_lewa and self.kanta_gura
+        self.prawa_gura = self.kanta_prawy and self.kanta_gura
         
-        self.left_botom = self.kanta_left and self.kanta_botom
-        self.right_bootom = self.kanta_right and self.kanta_botom
+        self.lewy_dul = self.kanta_lewa and self.kanta_dul
+        self.prawy_dul = self.kanta_prawy and self.kanta_dul
 
         #checking for center of the marked region
         if self.y0+wopszaru<self.py0<self.y1-wopszaru and self.x0+wopszaru<self.px0<self.x1-wopszaru:
-            self.move_all = True
+            self.przemiesc_wsystkie = True
 
         #update kordynat
         self.podglond.odswierz_kordynaty()
@@ -291,42 +316,42 @@ class obszarzaznaczony():
     def relise_cords(self,e,ofsetx, ofsety):
 
         #reset pres caount
-        self.first_pres = False
+        self.pierwsze_klikniecie = False
 
         #read and ofset cords
         self.px1 , self.py1 = e.x() + ofsetx, e.y()+ofsety
 
         #chec for trybe
-        if self.move_all:
+        if self.przemiesc_wsystkie:
             dx, dy = self.px1 - self.px0, self.py1 - self.py0
             self.x0 += dx
             self.x1 += dx
             self.y0 += dy
             self.y1 += dy
         
-        elif self.left_top:
+        elif self.lewa_gura:
             self.x1 = self.px1
             self.y0 = self.py1
             
-        elif self.left_botom:
+        elif self.lewy_dul:
             self.x1 = self.px1
             self.y1 = self.py1
             
-        elif self.right_bootom:
+        elif self.prawy_dul:
             self.x0 = self.px1
             self.y1 = self.py1
             
-        elif self.right_top:
+        elif self.prawa_gura:
             self.x0 = self.px1
             self.y0 = self.py1
             
-        elif self.kanta_botom:
+        elif self.kanta_dul:
             self.y1 = self.py1
-        elif self.kanta_left:
+        elif self.kanta_lewa:
             self.x1 = self.px1
-        elif self.kanta_right:
+        elif self.kanta_prawy:
             self.x0 = self.px1
-        elif self.kanta_top:
+        elif self.kanta_gura:
             self.y0 = self.py1
 
         self.podglond.odswierz_kordynaty()
@@ -334,13 +359,13 @@ class obszarzaznaczony():
     def move_cords(self, e, ofsetx, ofsety):
 
         #chec if maouse is presed
-        if self.first_pres:
+        if self.pierwsze_klikniecie:
 
             #ofset reded cords
             self.px1 , self.py1 = e.x() + ofsetx, e.y()+ofsety
             
             #chec for trybe
-            if self.move_all:
+            if self.przemiesc_wsystkie:
                 dx, dy = self.px1 - self.px0, self.py1 - self.py0
                 self.x0 += dx
                 self.x1 += dx
@@ -348,33 +373,33 @@ class obszarzaznaczony():
                 self.y1 += dy
                 self.px0 , self.py0 = e.x() + ofsetx, e.y()+ofsety
         
-            elif self.left_top:
-                #print("left_top")
+            elif self.lewa_gura:
+                #print("lewa_gura")
                 self.x1 = self.px1
                 self.y0 = self.py1
                 
-            elif self.left_botom:
-                #print("left_botom")
+            elif self.lewy_dul:
+                #print("lewy_dul")
                 self.x1 = self.px1
                 self.y1 = self.py1
                 
-            elif self.right_bootom:
-                #print("right_bootom")
+            elif self.prawy_dul:
+                #print("prawy_dul")
                 self.x0 = self.px1
                 self.y1 = self.py1
                 
-            elif self.right_top:
-                #print("right_top")
+            elif self.prawa_gura:
+                #print("prawa_gura")
                 self.x0 = self.px1
                 self.y0 = self.py1
                 
-            elif self.kanta_botom:
+            elif self.kanta_dul:
                 self.y1 = self.py1
-            elif self.kanta_left:
+            elif self.kanta_lewa:
                 self.x1 = self.px1
-            elif self.kanta_right:
+            elif self.kanta_prawy:
                 self.x0 = self.px1
-            elif self.kanta_top:
+            elif self.kanta_gura:
                 self.y0 = self.py1
 
             self.podglond.odswierz_kordynaty()

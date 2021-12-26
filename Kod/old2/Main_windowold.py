@@ -327,7 +327,7 @@ class MainWindow(QMainWindow):
     def remove_ROI(self):
 
         while self.ROI != []:
-            [r.kill() for r in self.ROI]
+            [r.__del__() for r in self.ROI]
 
     def remove_some_ROI(self, ROI):
         
