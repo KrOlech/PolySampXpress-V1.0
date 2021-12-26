@@ -33,7 +33,7 @@ class MainWin(QWidget):
     @staticmethod
     def cameraCallback(nEvent, ctx):
         if nEvent == toupcam.TOUPCAM_EVENT_IMAGE:
-            ctx.eventimage.emit()
+            ctx.nowy_obraz_z_kamery.emit()
 
 # run in the UI thread
     @pyqtSlot()

@@ -12,7 +12,7 @@ import copy as copy
 import cv2 as cv2
 #import opencv.contrib
 
-
+# plt.imsave('img_frame_{}.png'.format(self.total), obraz)
 class camera(QLabel):
             
     eventImage = pyqtSignal()
@@ -53,9 +53,9 @@ class camera(QLabel):
     @staticmethod
     def cameraCallback(nEvent, ctx):
         if nEvent == toupcam.TOUPCAM_EVENT_IMAGE:
-            ctx.eventimage.emit()
+            ctx.nowy_obraz_z_kamery.emit()
         elif nEvent == toupcam.TOUPCAM_EVENT_STILLIMAGE:
-            ctx.snap_image_event.emit()        
+            ctx.nowy_wymuszony_obraz_z_kamery.emit()
             
 
     @staticmethod

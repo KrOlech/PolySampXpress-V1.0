@@ -1,7 +1,7 @@
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import *
-from Viue_label import Obraz
+from Viue_label import Obraz_z_kamery
 from Map import Map_window
 from slider import Slider
 from setingswindows import axissetingwindow
@@ -41,7 +41,7 @@ class MainWindow(QMainWindow):
         self.setMouseTracking(False)
 
         #stworzenie podglondu prubki i umiescenie go w leyaucie
-        self.obraz = Obraz(self)
+        self.obraz = Obraz_z_kamery(self)
 
         # linking to manipulator for movment
         self.manipulaor = manipulator
@@ -70,10 +70,10 @@ class MainWindow(QMainWindow):
         self._toolbars()
 
         self._upadet_position_read()
-        
-        self.obraz.snap_img()
-        
-        self.obraz.update_ofsets()
+
+        self.obraz.odczytaj_klatke()
+
+        self.obraz.odswierz_ofsets()
 
     def closeEvent(self, event):
         '''
@@ -111,7 +111,7 @@ class MainWindow(QMainWindow):
         toolbar = QToolBar("Funkcje")
         self.addToolBar(toolbar)
         #zapisanie podglondu
-        action_6 = self._qactiontoolbar("Snap obraz", lambda x: self.obraz.snap_img())
+        action_6 = self._qactiontoolbar("Snap obraz", lambda x: self.obraz.odczytaj_klatke())
         toolbar.addAction(action_6)
         #wysrodkowanie manipulatora
         action_7 = self._qactiontoolbar("center", lambda x: self.manipulaor.center())
@@ -270,25 +270,25 @@ class MainWindow(QMainWindow):
         '''
         metoda wyolujaca metode _key_move z parametrami do przemiczenia w gure
         '''
-        self._key_move(self.manipulaor.move_up, self.obraz.up, 3, 0)
+        self._key_move(self.manipulaor.move_up, self.obraz.gura, 3, 0)
 
     def _key_left(self):
         '''
         metoda wyolujaca metode _key_move z parametrami do przemiczenia w lewo
         '''
-        self._key_move(self.manipulaor.move_left, self.obraz.left, 2, 1)
+        self._key_move(self.manipulaor.move_left, self.obraz.lewo, 2, 1)
 
     def _key_right(self):
         '''
         metoda wyolujaca metode _key_move z parametrami do przemiczenia w prawo
         '''
-        self._key_move(self.manipulaor.move_right, self.obraz.right, 1, 2)
+        self._key_move(self.manipulaor.move_right, self.obraz.prawo, 1, 2)
    
     def _key_dwn(self):
         '''
         metoda wyolujaca metode _key_move z parametrami do przemiczenia w duł
         '''
-        self._key_move(self.manipulaor.move_dwn, self.obraz.dawn, 0, 3)
+        self._key_move(self.manipulaor.move_dwn, self.obraz.dul, 0, 3)
   
     def _key_move(self,fun_manipulator,fun_obraz, key_en, key_dis):
         '''
@@ -303,7 +303,7 @@ class MainWindow(QMainWindow):
         [k.setEnabled(False) for k in self._kierunkowe]
 
         #Zapisanei aktualnej mapy jesli nie została jesce stworzona
-        self.obraz.save_curent_viue()
+        self.obraz.zapisz_aktualny_podglond()
 
         #wykonanie kroku na manipolatorze
         t = fun_manipulator(self.krok/10)
@@ -340,13 +340,13 @@ class MainWindow(QMainWindow):
         Prywatna metoda przypinajaca fukcje do przycisków wielozadaniowych
         '''
 
-        self.przyciski[0].clicked.connect(self.obraz.next)
+        self.przyciski[0].clicked.connect(self.obraz.nastempny)
 
         self.przyciski[1].clicked.connect(self.remove_ROI)
 
         self.przyciski[2].clicked.connect(self.obraz.narysujcaloscs)
 
-        self.przyciski[3].clicked.connect(self.obraz.last)
+        self.przyciski[3].clicked.connect(self.obraz.poprzedni)
 
         self.przyciski[4].clicked.connect(self.show_map)
 
@@ -398,10 +398,10 @@ class MainWindow(QMainWindow):
         '''
 
         if self.map is None:
-            self.map = Map_window(self.obraz.get_map(), self, self.obraz.ofsetx, self.obraz.ofsetx,)
+            self.map = Map_window(self.obraz.ponbierz_map(), self, self.obraz.ofsetx, self.obraz.ofsetx, )
             self.map.show()
         else:
-            self.map.new_image(self.obraz.get_map())
+            self.map.new_image(self.obraz.ponbierz_map())
             self.map.show()
 
     def togle_move_on_pres(self):

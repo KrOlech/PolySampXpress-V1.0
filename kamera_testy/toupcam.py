@@ -33,8 +33,8 @@ TOUPCAM_FLAG_TRIGGER_EXTERNAL    = 0x00100000          # support external trigge
 TOUPCAM_FLAG_TRIGGER_SINGLE      = 0x00200000          # only support trigger single: one trigger, one image
 TOUPCAM_FLAG_BLACKLEVEL          = 0x00400000          # support set and get the black level
 TOUPCAM_FLAG_AUTO_FOCUS          = 0x00800000          # support auto focus
-TOUPCAM_FLAG_BUFFER              = 0x01000000          # frame buffer
-TOUPCAM_FLAG_DDR                 = 0x02000000          # use very large capacity DDR (Double Data Rate SDRAM) for frame buffer
+TOUPCAM_FLAG_BUFFER              = 0x01000000          # klatka buffer
+TOUPCAM_FLAG_DDR                 = 0x02000000          # use very large capacity DDR (Double Data Rate SDRAM) for klatka buffer
 TOUPCAM_FLAG_CG                  = 0x04000000          # support Conversion Gain mode: HCG, LCG
 TOUPCAM_FLAG_YUV411              = 0x08000000          # pixel format, yuv411
 TOUPCAM_FLAG_VUYY                = 0x10000000          # pixel format, yuv422, VUYY
@@ -57,7 +57,7 @@ TOUPCAM_EVENT_EXPOSURE           = 0x0001              # exposure time or gain c
 TOUPCAM_EVENT_TEMPTINT           = 0x0002              # white balance changed, Temp/Tint mode
 TOUPCAM_EVENT_CHROME             = 0x0003              # reversed, do not use it
 TOUPCAM_EVENT_IMAGE              = 0x0004              # live image arrived, use Toupcam_PullImage to get this image
-TOUPCAM_EVENT_STILLIMAGE         = 0x0005              # snap (still) frame arrived, use Toupcam_PullStillImage to get this frame
+TOUPCAM_EVENT_STILLIMAGE         = 0x0005              # snap (still) klatka arrived, use Toupcam_PullStillImage to get this klatka
 TOUPCAM_EVENT_WBGAIN             = 0x0006              # white balance changed, RGB Gain mode
 TOUPCAM_EVENT_TRIGGERFAIL        = 0x0007              # trigger failed
 TOUPCAM_EVENT_BLACK              = 0x0008              # black balance changed
@@ -67,7 +67,7 @@ TOUPCAM_EVENT_ROI                = 0x000b              # roi changed
 EVENT_LEVELRANGE                 = 0x000c              # level range changed
 TOUPCAM_EVENT_ERROR              = 0x0080              # generic error
 TOUPCAM_EVENT_DISCONNECTED       = 0x0081              # camera disconnected
-TOUPCAM_EVENT_NOFRAMETIMEOUT     = 0x0082              # no frame timeout error
+TOUPCAM_EVENT_NOFRAMETIMEOUT     = 0x0082              # no klatka timeout error
 TOUPCAM_EVENT_AFFEEDBACK         = 0x0083              # auto focus sensor board positon
 TOUPCAM_EVENT_AFPOSITION         = 0x0084              # auto focus information feedback
 TOUPCAM_EVENT_NOPACKETTIMEOUT    = 0x0085              # no packet timeout
@@ -76,7 +76,7 @@ TOUPCAM_EVENT_EXPO_STOP          = 0x4001              # exposure stop
 TOUPCAM_EVENT_TRIGGER_ALLOW      = 0x4002              # next trigger allow
 TOUPCAM_EVENT_FACTORY            = 0x8001              # restore factory settings
 
-TOUPCAM_OPTION_NOFRAME_TIMEOUT       = 0x01       # no frame timeout: 1 = enable; 0 = disable. default: disable
+TOUPCAM_OPTION_NOFRAME_TIMEOUT       = 0x01       # no klatka timeout: 1 = enable; 0 = disable. default: disable
 TOUPCAM_OPTION_THREAD_PRIORITY       = 0x02       # set the priority of the internal thread which grab data from the usb device. iValue: 0 = THREAD_PRIORITY_NORMAL; 1 = THREAD_PRIORITY_ABOVE_NORMAL; 2 = THREAD_PRIORITY_HIGHEST; default: 0; see: msdn SetThreadPriority
 TOUPCAM_OPTION_RAW                   = 0x04       # raw data mode, read the sensor "raw" data. This can be set only BEFORE Toupcam_StartXXX(). 0 = rgb, 1 = raw, default value: 0
 TOUPCAM_OPTION_HISTOGRAM             = 0x05       # 0 = only one, 1 = continue mode
@@ -96,7 +96,7 @@ TOUPCAM_OPTION_AUTOEXP_POLICY        = 0x10       # auto exposure policy:
                                                   #      2: Gain Only
                                                   #      3: Gain Preferred
                                                   #      default value: 1
-TOUPCAM_OPTION_FRAMERATE             = 0x11       # limit the frame rate, range=[0, 63], the default value 0 means no limit
+TOUPCAM_OPTION_FRAMERATE             = 0x11       # limit the klatka rate, range=[0, 63], the default value 0 means no limit
 TOUPCAM_OPTION_DEMOSAIC              = 0x12       # demosaic method for both video and still image: BILINEAR = 0, VNG(Variable Number of Gradients interpolation) = 1, PPG(Patterned Pixel Grouping interpolation) = 2, AHD(Adaptive Homogeneity-Directed interpolation) = 3, see https://en.wikipedia.org/wiki/Demosaicing, default value: 0
 TOUPCAM_OPTION_DEMOSAIC_VIDEO        = 0x13       # demosaic method for video
 TOUPCAM_OPTION_DEMOSAIC_STILL        = 0x14       # demosaic method for still image
@@ -117,7 +117,7 @@ TOUPCAM_OPTION_FFC                   = 0x1b       # flat field correction
                                                   #          ((val & 0xff00) >> 8): sequence
                                                   #          ((val & 0xff0000) >> 8): average number
 TOUPCAM_OPTION_DDR_DEPTH             = 0x1c       # the number of the frames that DDR can cache
-                                                  #     1: DDR cache only one frame
+                                                  #     1: DDR cache only one klatka
                                                   #     0: Auto:
                                                   #         ->one for video mode when auto exposure is enabled
                                                   #         ->full capacity for others
@@ -157,13 +157,13 @@ TOUPCAM_OPTION_TESTPATTERN           = 0x28       # test pattern:
 TOUPCAM_OPTION_AUTOEXP_THRESHOLD     = 0x29       # threshold of auto exposure, default value: 5, range = [2, 15]
 TOUPCAM_OPTION_BYTEORDER             = 0x2a       # Byte order, BGR or RGB: 0->RGB, 1->BGR, default value: 1(Win), 0(macOS, Linux, Android)
 TOUPCAM_OPTION_NOPACKET_TIMEOUT      = 0x2b       # no packet timeout: 0 = disable, positive value = timeout milliseconds. default: disable
-TOUPCAM_OPTION_MAX_PRECISE_FRAMERATE = 0x2c       # precise frame rate maximum value in 0.1 fps, such as 115 means 11.5 fps. E_NOTIMPL means not supported
-TOUPCAM_OPTION_PRECISE_FRAMERATE     = 0x2d       # precise frame rate current value in 0.1 fps, range:[1~maximum]
+TOUPCAM_OPTION_MAX_PRECISE_FRAMERATE = 0x2c       # precise klatka rate maximum value in 0.1 fps, such as 115 means 11.5 fps. E_NOTIMPL means not supported
+TOUPCAM_OPTION_PRECISE_FRAMERATE     = 0x2d       # precise klatka rate current value in 0.1 fps, range:[1~maximum]
 TOUPCAM_OPTION_BANDWIDTH             = 0x2e       # bandwidth, [1-100]%
-TOUPCAM_OPTION_RELOAD                = 0x2f       # reload the last frame in trigger mode
+TOUPCAM_OPTION_RELOAD                = 0x2f       # reload the last klatka in trigger mode
 TOUPCAM_OPTION_CALLBACK_THREAD       = 0x30       # dedicated thread for callback
-TOUPCAM_OPTION_FRAME_DEQUE_LENGTH    = 0x31       # frame buffer deque length, range: [2, 1024], default: 3
-TOUPCAM_OPTION_MIN_PRECISE_FRAMERATE = 0x32       # precise frame rate minimum value in 0.1 fps, such as 15 means 1.5 fps
+TOUPCAM_OPTION_FRAME_DEQUE_LENGTH    = 0x31       # klatka buffer deque length, range: [2, 1024], default: 3
+TOUPCAM_OPTION_MIN_PRECISE_FRAMERATE = 0x32       # precise klatka rate minimum value in 0.1 fps, such as 15 means 1.5 fps
 TOUPCAM_OPTION_SEQUENCER_ONOFF       = 0x33       # sequencer trigger: on/off
 TOUPCAM_OPTION_SEQUENCER_NUMBER      = 0x34       # sequencer trigger: number, range = [1, 255]
 TOUPCAM_OPTION_SEQUENCER_EXPOTIME    = 0x01000000 # sequencer trigger: exposure time, iOption = TOUPCAM_OPTION_SEQUENCER_EXPOTIME | index, iValue = exposure time
@@ -699,12 +699,12 @@ class Toupcam:
         self.__lib.Toupcam_get_RawFormat(self.__h, ctypes.byref(x), ctypes.byref(y))
         return (x.value, y.value)
 
-# 0: stop grab frame when frame buffer deque is full, until the frames in the queue are pulled away and the queue is not full
+# 0: stop grab klatka when klatka buffer deque is full, until the frames in the queue are pulled away and the queue is not full
 # 1: realtime
-#     use minimum frame buffer. When new frame arrive, drop all the pending frame regardless of whether the frame buffer is full.
-#     If DDR present, also limit the DDR frame buffer to only one frame.
+#     use minimum klatka buffer. When new klatka arrive, drop all the pending klatka regardless of whether the klatka buffer is full.
+#     If DDR present, also limit the DDR klatka buffer to only one klatka.
 # 2: soft realtime
-#     Drop the oldest frame when the queue is full and then enqueue the new frame
+#     Drop the oldest klatka when the queue is full and then enqueue the new klatka
 # default: 0
     def put_RealTime(self, val):
         self.__lib.Toupcam_put_RealTime(self.__h, val)
@@ -1014,8 +1014,8 @@ class Toupcam:
 
     def put_ABBAuxRect(self, X, Y, Width, Height):
         rc = __RECT()
-        rc.left = X
-        rc.right = X + Width
+        rc.lewo = X
+        rc.prawo = X + Width
         rc.top = Y
         rc.bottom = Y + Height
         self.__lib.Toupcam_put_ABBAuxRect(self.__h, ctypes.byref(rc))
@@ -1024,7 +1024,7 @@ class Toupcam:
     def get_ABBAuxRect(self):
         rc = __RECT()
         self.__lib.Toupcam_get_ABBAuxRect(self.__h, ctypes.byref(rc))
-        return (rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top)
+        return (rc.lewo, rc.top, rc.prawo - rc.lewo, rc.bottom - rc.top)
 
     def get_StillResolution(self, nResolutionIndex):
         x = ctypes.c_int(0)
@@ -1111,7 +1111,7 @@ class Toupcam:
         self.__lib.Toupcam_get_Roi(self.__h, ctypes.byref(x), ctypes.byref(y), ctypes.byref(w), ctypes.byref(h))
         return (x.value, y.value, w.value, h.value)
 
-# get the frame rate: framerate (fps) = Frame * 1000.0 / nTime
+# get the klatka rate: framerate (fps) = Frame * 1000.0 / nTime
 # Frame, Time, TotalFrame
     def get_FrameRate(self):
         x = ctypes.c_uint(0)

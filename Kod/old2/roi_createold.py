@@ -14,7 +14,7 @@ from time import sleep
 
 class ROI_maping(QLabel):
 
-    # obiekt Klasy MainWindow podany jako argument przy tworzeniu obiektu klasy Obraz -
+    # obiekt Klasy MainWindow podany jako argument przy tworzeniu obiektu klasy Obraz_z_kamery -
     # pozwala na komunikację z oknem głównym
     main_window = ' '
 

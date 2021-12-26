@@ -1,6 +1,6 @@
 def extend_map_exeqiute_old(self, test_extend, ofset, borderofset, dx, dy, tx, ty, fx, fy):
 
-        x, y, z = self.frame_2.shape  # wymiary podglondu
+        x, y, z = self.klatka_2.shape  # wymiary podglondu
 
         xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
 
@@ -12,19 +12,19 @@ def extend_map_exeqiute_old(self, test_extend, ofset, borderofset, dx, dy, tx, t
             tab = self.map
 
         try:
-            tab[tx[0]:tx[1], ty[0]:ty[1]] = self.frame_2[fx[0]:fx[1], fy[0]:fy[1]]
+            tab[tx[0]:tx[1], ty[0]:ty[1]] = self.klatka_2[fx[0]:fx[1], fy[0]:fy[1]]
             print(tx[0],tx[1], ty[0],ty[1])
         except ValueError as e:
             print(e)
             print(tab[tx[0]:tx[1], ty[0]:ty[1]].shape, "map")
-            print(self.frame_2[fx[0]:fx[1], fy[0]:fy[1]].shape,"frame")
+            print(self.klatka_2[fx[0]:fx[1], fy[0]:fy[1]].shape, "klatka")
         
         
         self.map = tab
 
     def extend_map_right(self):
 
-        x, y, z = self.frame_2.shape  # wymiary podglondu
+        x, y, z = self.klatka_2.shape  # wymiary podglondu
 
         xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
         
@@ -41,7 +41,7 @@ def extend_map_exeqiute_old(self, test_extend, ofset, borderofset, dx, dy, tx, t
 
     def extend_map_dwn(self):
        
-        x, y, z = self.frame_2.shape  # wymiary podglondu
+        x, y, z = self.klatka_2.shape  # wymiary podglondu
         
         ty1 = self.ofsety-self.ofsetymin if self.ofsety-self.ofsetymin > 0 else self.ofsety-self.ofsetymin-1028
         ty2 = y + self.ofsety-self.ofsetymin if y + self.ofsety-self.ofsetymin > 0 else y + self.ofsety-self.ofsetymin-1024
@@ -56,7 +56,7 @@ def extend_map_exeqiute_old(self, test_extend, ofset, borderofset, dx, dy, tx, t
 
     def extend_map_left(self):
 
-        x, y, z = self.frame_2.shape  # wymiary podglondu
+        x, y, z = self.klatka_2.shape  # wymiary podglondu
 
         xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
         
@@ -73,7 +73,7 @@ def extend_map_exeqiute_old(self, test_extend, ofset, borderofset, dx, dy, tx, t
 
     def extend_map_up(self):
 
-        x, y, z = self.frame_2.shape  # wymiary podglondu
+        x, y, z = self.klatka_2.shape  # wymiary podglondu
         
         xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
         
@@ -93,7 +93,7 @@ def extend_map_exeqiute_old(self, test_extend, ofset, borderofset, dx, dy, tx, t
         dy = abs(self.dyp)
         dx = abs(self.dxp)
 
-        x, y, z = self.frame_2.shape  # wymiary podglondu
+        x, y, z = self.klatka_2.shape  # wymiary podglondu
 
         xm, ym, zm = self.map.shape  # wymiary aktualnej mapy
     
@@ -101,20 +101,20 @@ def extend_map_exeqiute_old(self, test_extend, ofset, borderofset, dx, dy, tx, t
             if self.dyp > 0:
                 print('right')
                 self.mape_impute_tab[self.ofsetx - self.ofsetxmin: x + self.ofsetx - self.ofsetxmin, ym: ym + dy] = \
-                    self.frame_2[:, y - dy:]
+                    self.klatka_2[:, y - dy:]
             else:
                 print('left')
                 self.mape_impute_tab[self.ofsetx - self.ofsetxmin: x + self.ofsetx - self.ofsetxmin, 0: dy] = \
-                    self.frame_2[:, 0:dy]
+                    self.klatka_2[:, 0:dy]
 
             if self.dxp > 0:
                 print('up')
                 self.mape_impute_tab[xm: dx + xm, self.ofsety - self.ofsetymin: y + self.ofsety - self.ofsetymin] = \
-                    self.frame_2[x - dx:, :]
+                    self.klatka_2[x - dx:, :]
             else:
                 print('dwn')
                 self.mape_impute_tab[0:dx, self.ofsety - self.ofsetymin: y + self.ofsety - self.ofsetymin] = \
-                    self.frame_2[0:dx, :]
+                    self.klatka_2[0:dx, :]
 
             self.map = self.mape_impute_tab
         except Exception as e:
@@ -164,7 +164,7 @@ def extend_map_exeqiute_old(self, test_extend, ofset, borderofset, dx, dy, tx, t
     #update map on center on click metod WIP
     def mapupdate(self):
     
-        self.save_curent_viue()
+        self.zapisz_aktualny_podglond()
 
         self.mape_impute_tab = self.map_size_update()
 
@@ -173,23 +173,23 @@ def extend_map_exeqiute_old(self, test_extend, ofset, borderofset, dx, dy, tx, t
         self.inject_map()
 
         self.whot_to_drow = 'viue_muve'
-        self.direction_change = 'multi'
+        self.zmiana_kierunku = 'multi'
         self.update()
         
         
             # ches map change direction
     def extend_map_camera(self):
         print("extend_map")
-        if self.direction_change == 'dawn':
+        if self.zmiana_kierunku == 'dawn':
             self.extend_map_dwn()
-        elif self.direction_change == 'up':
+        elif self.zmiana_kierunku == 'up':
             self.extend_map_up()
-        elif self.direction_change == 'right':
+        elif self.zmiana_kierunku == 'right':
             self.extend_map_right()
-        elif self.direction_change == 'left':
+        elif self.zmiana_kierunku == 'left':
             self.extend_map_left()
-        elif self.direction_change == 'multi':
+        elif self.zmiana_kierunku == 'multi':
             self.extend_map_multi()
         else:
             pass
-        self.direction_change = ''
+        self.zmiana_kierunku = ''

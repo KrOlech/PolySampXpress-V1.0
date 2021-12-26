@@ -16,7 +16,7 @@ from roi_create import ROI_maping
 
 
 class Obraz(ROI_maping):
-    # Klaza Obraz dziedziczy z QLabel, pozwala na lepszą obsługę eventu mouseMoveEvent
+    # Klaza Obraz_z_kamery dziedziczy z QLabel, pozwala na lepszą obsługę eventu mouseMoveEvent
 
 # signals for camera action
     eventImage = pyqtSignal()
@@ -95,9 +95,9 @@ class Obraz(ROI_maping):
     @staticmethod
     def cameraCallback(nEvent, ctx):
         if nEvent == tcam.TOUPCAM_EVENT_IMAGE:
-            ctx.eventimage.emit()
+            ctx.nowy_obraz_z_kamery.emit()
         elif nEvent == tcam.TOUPCAM_EVENT_STILLIMAGE:
-            ctx.snap_image_event.emit()
+            ctx.nowy_wymuszony_obraz_z_kamery.emit()
 
     @staticmethod
     def  convertQImageToMat(incomingImage):
@@ -231,7 +231,7 @@ class Obraz(ROI_maping):
         if self.direction_change:
             self.waite_for_manipulator()
 
-    # waiting for manipulator and snap ne frame
+    # waiting for manipulator and snap ne klatka
     def waite_for_manipulator(self):
         self.main_window.manipulaor.weaith_for_target()
         self.snap_img()
@@ -412,7 +412,7 @@ class Obraz(ROI_maping):
         except ValueError as e:
             print(e)
             print(tab[tx[0]:tx[1], ty[0]:ty[1]].shape, "map")
-            print(self.frame_2[fx[0]:fx[1], fy[0]:fy[1]].shape,"frame")
+            print(self.frame_2[fx[0]:fx[1], fy[0]:fy[1]].shape,"klatka")
 
         self.map = tab
 

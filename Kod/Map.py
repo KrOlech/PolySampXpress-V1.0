@@ -43,7 +43,6 @@ class Map(ROI_maping):
         #zapisanei obrazu
         self.img = QPixmap.fromImage(self.img)
 
-    
 
 class Map_window(QWidget):
 

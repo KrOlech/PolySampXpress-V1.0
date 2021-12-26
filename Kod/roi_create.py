@@ -14,7 +14,7 @@ from time import sleep
 
 class ROI_maping(QLabel):
 
-    # obiekt Klasy MainWindow podany jako argument przy tworzeniu obiektu klasy Obraz -
+    # obiekt Klasy MainWindow podany jako argument przy tworzeniu obiektu klasy Obraz_z_kamery -
     # pozwala na komunikację z oknem głównym
     main_window = ' '
 
@@ -109,7 +109,7 @@ class ROI_maping(QLabel):
         frame = self.image_opencv.copy()#self.x0, self.y0,self.x1, self.y1, self.rozmiar)
 
         #scalowanie kopi obrazu
-        self.frame = self.image_opencv.copy()#cv2.resize(, self.rozmiar)
+        self.klatka = self.image_opencv.copy()#cv2.resize(, self.rozmiar)
 
         #dodanie opisów w odpowiednich miescach
         if drow_deskription:
@@ -310,7 +310,7 @@ class ROI_maping(QLabel):
         #usuniecie wskaznika do ROI
         self.edited_roi = None
         #zwrucenie aktualnego podglondu w celu aktualizacji
-        return self.frame
+        return self.klatka
 
 
 #############################create rectagle###############################################
@@ -336,7 +336,7 @@ class ROI_maping(QLabel):
                                 self,
                                 self.x1, self.y1,
                                 self.x2, self.y2,
-                                self.frame,
+                                self.klatka,
                                 self.ofsetx,
                                 self.ofsety,
                                 self.scall,

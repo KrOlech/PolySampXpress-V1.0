@@ -46,9 +46,9 @@ class Camera(QLabel):
     @staticmethod
     def cameraCallback(nEvent, ctx):
         if nEvent == toupcam.TOUPCAM_EVENT_IMAGE:
-            ctx.eventimage.emit()
+            ctx.nowy_obraz_z_kamery.emit()
         elif nEvent == toupcam.TOUPCAM_EVENT_STILLIMAGE:
-            ctx.snap_image_event.emit()        
+            ctx.nowy_wymuszony_obraz_z_kamery.emit()
             
 
                      
@@ -63,7 +63,7 @@ class Camera(QLabel):
                 print('pull image failed')
                 QMessageBox.warning(self, '', 'pull image failed', QMessageBox.Ok)
             else:
-             #   self.setWindowTitle('{}: {}'.format(self.camname, self.total))
+             #   self.setWindowTitle('{}: {}'.format(self.nazwa_kamery, self.total))
                 img = QImage(self.buf, self.w, self.h, (self.w * 24 + 31) // 32 * 4, QImage.Format_RGB888)
                 self.setPixmap(QPixmap.fromImage(img))
                 
@@ -97,7 +97,7 @@ class Camera(QLabel):
     #        self.cb.setEnabled(False)
         else:
             self.camname = a[0].displayname
-       #     self.setWindowTitle(self.camname)
+       #     self.setWindowTitle(self.nazwa_kamery)
             self.eventImage.connect(self.eventImageSignal)
             self.snap_image_event.connect(self.snap_image_event_signal)
 
@@ -141,12 +141,12 @@ class Camera(QLabel):
 
 
 class Obraz(QLabel):
-    # Klaza Obraz dziedziczy z QLabel, pozwala na lepszą obsługę eventu mouseMoveEvent
+    # Klaza Obraz_z_kamery dziedziczy z QLabel, pozwala na lepszą obsługę eventu mouseMoveEvent
 
     def __init__(self, main_window, *args, **kwargs):
         super(Obraz, self).__init__(*args, **kwargs)
 
-        # obiekt Klasy MainWindow podany jako argument przy tworzeniu obiektu klasy Obraz - pozwala na komunikację z oknem głównym
+        # obiekt Klasy MainWindow podany jako argument przy tworzeniu obiektu klasy Obraz_z_kamery - pozwala na komunikację z oknem głównym
         self.main_window = main_window
 
         #Tworzy białe tło
@@ -247,8 +247,8 @@ class MainWindow(QMainWindow):
 ######################################################################################
       
         # Musi być dodane self przed zmienną pozycję żeby zostały dodane jako atrybut obiektu MainWindow i można było aktualizować 
-        # QLabel znajdujący się na pierwszej pozycji listy w innych funkcjach lub obiekcie klasy Obraz. 
-        # Patrz definicja klasy Obraz, metoda mouseMoveEvent, zczytywanie pozycji przez następujący sposób: self.main_window.pozycje[0].setText(text), 
+        # QLabel znajdujący się na pierwszej pozycji listy w innych funkcjach lub obiekcie klasy Obraz_z_kamery.
+        # Patrz definicja klasy Obraz_z_kamery, metoda mouseMoveEvent, zczytywanie pozycji przez następujący sposób: self.main_window.pozycje[0].setText(text),
         # gdzie main_window to przekazany przy inicjalizowaniu obiekt MainWindow
         self.pozycje = [ #4
             QLabel('x: 0,  y: 0', self),
@@ -326,7 +326,7 @@ class MainWindow(QMainWindow):
                 j += 1
         
         
-        # Tworzenie instancji klasy Obraz
+        # Tworzenie instancji klasy Obraz_z_kamery
         self.obraz = Camera()
         mainlayout.addWidget(self.obraz)
         

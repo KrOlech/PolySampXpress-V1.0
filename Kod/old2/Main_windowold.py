@@ -34,7 +34,7 @@ class MainWindow(QMainWindow):
         self.setMouseTracking(False)
 
         #stworzenie podglondu prubki i umiescenie go w leyaucie
-        self.obraz = obs.Obraz(self)
+        self.obraz = obs.Obraz_z_kamery(self)
 
         # linking to manipulator for movment
         self.manipulaor = manipulator(self)
@@ -87,7 +87,7 @@ class MainWindow(QMainWindow):
     
         toolbar = QToolBar("Funkcje") #stworzenie toolbara
         self.addToolBar(toolbar)
-        action_6 = self.qactiontoolbar("Snap obraz",  lambda x: self.obraz.snap_img())
+        action_6 = self.qactiontoolbar("Snap obraz", lambda x: self.obraz.odczytaj_klatke())
         toolbar.addAction(action_6)
         
 
@@ -188,16 +188,16 @@ class MainWindow(QMainWindow):
         [self.kierunkowelayout.addWidget(value, 7, i) for i, value in zip(range(2,5,1), self.position_labele)]
   
     def key_up(self):
-        self.key_move(self.manipulaor.move_up,self.obraz.up,3,0)
+        self.key_move(self.manipulaor.move_up, self.obraz.gura, 3, 0)
 
     def key_left(self):
-        self.key_move(self.manipulaor.move_left, self.obraz.left,2,1)
+        self.key_move(self.manipulaor.move_left, self.obraz.lewo, 2, 1)
 
     def key_right(self):
-        self.key_move(self.manipulaor.move_right,self.obraz.right,1,2)
+        self.key_move(self.manipulaor.move_right, self.obraz.prawo, 1, 2)
    
     def key_dwn(self):
-        self.key_move(self.manipulaor.move_dwn,self.obraz.dawn,0,3)
+        self.key_move(self.manipulaor.move_dwn, self.obraz.dul, 0, 3)
   
     def key_move(self,fun_manipulator,fun_obraz,key_en,key_dis):
     
@@ -233,8 +233,8 @@ class MainWindow(QMainWindow):
         self.przyciski[2].clicked.connect(self.obraz.narysujcaloscs)
         self.przyciski[5].clicked.connect(self.obraz.schowajcalosc)
         
-        self.przyciski[0].clicked.connect(self.obraz.next)
-        self.przyciski[3].clicked.connect(self.obraz.last)
+        self.przyciski[0].clicked.connect(self.obraz.nastempny)
+        self.przyciski[3].clicked.connect(self.obraz.poprzedni)
 
         self.przyciski[1].clicked.connect(self.remove_ROI)
 
@@ -254,10 +254,10 @@ class MainWindow(QMainWindow):
 
     def schow_map(self):
         if self.map is None:
-            self.map = M.Map_window(self.obraz.get_map(), self)
+            self.map = M.Map_window(self.obraz.ponbierz_map(), self)
             self.map.show()
         else:
-            self.map.nowy_obraz(self.obraz.get_map())
+            self.map.nowy_obraz(self.obraz.ponbierz_map())
             self.map.show()
 
     def togle_move_on_pres(self):
