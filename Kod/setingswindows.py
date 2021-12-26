@@ -35,7 +35,7 @@ class axissetingwindow(QWidget):
         
     
     def printimputs(self):
-        self.mainwindow.slide.set_min_max(int(self.options[0].text()),int(self.options[1].text()))
+        self.mainwindow.slide.ustaw_min_max(int(self.options[0].text()), int(self.options[1].text()))
         self.mainwindow.setkrok(int(self.options[2].text()))
         self.hide()
     
