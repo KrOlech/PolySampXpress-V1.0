@@ -257,7 +257,7 @@ TOUPCAM_IOCONTROLTYPE_SET_UART_LINEMODE         = 0x2e
 TOUPCAM_LEVELRANGE_MANUAL                       = 0x0000 # manual
 TOUPCAM_LEVELRANGE_ONCE                         = 0x0001 # once
 TOUPCAM_LEVELRANGE_CONTINUE                     = 0x0002 # continue
-TOUPCAM_LEVELRANGE_ROI                          = 0xffff # update roi rect only
+TOUPCAM_LEVELRANGE_ROI                          = 0xffff # update roi _prostkat only
 
 class ToupcamResolution:
     def __init__(self, w, h):

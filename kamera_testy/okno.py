@@ -27,7 +27,7 @@ class Camera(QLabel):
       #  qtRectangle = self.frameGeometry()
       #  centerPoint = QDesktopWidget().availableGeometry().center()
        # qtRectangle.moveCenter(centerPoint)
-      #  self.move(qtRectangle.topLeft())
+      #  self.przemiesc(qtRectangle.topLeft())
         self.initUI()
         self.initCamera()
         
@@ -39,7 +39,7 @@ class Camera(QLabel):
      #   self.cb.stateChanged.connect(self.changeAutoExposure)
      #   self.label = QLabel(self)
         self.setScaledContents(True)
-     #   self.label.move(0, 30)
+     #   self.label.przemiesc(0, 30)
         self.resize(self.geometry().width(), self.geometry().height())
 
 # the vast majority of callbacks come from toupcam.dll/so/dylib internal threads, so we use qt signal to post this event to the UI thread  
@@ -207,7 +207,7 @@ class MainWindow(QMainWindow):
         action_3 = self.qactiontoolbar("AutoExposure_OFF",  lambda x: self.obraz.changeAutoExposure(False))
         action_4 = self.qactiontoolbar("Pause",  lambda x: self.obraz.pause(1))
         action_5 = self.qactiontoolbar("Unpause",  lambda x: self.obraz.pause(0))
-        action_6 = self.qactiontoolbar("Snap img",  lambda x: self.obraz.snap_img())
+        action_6 = self.qactiontoolbar("Snap obraz",  lambda x: self.obraz.snap_img())
        # action_6 = self.qactiontoolbar("Restart",  lambda x: self.obraz.restart())
 
 

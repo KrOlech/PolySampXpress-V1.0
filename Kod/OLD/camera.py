@@ -46,7 +46,7 @@ class camera(QLabel):
      #   self.cb.stateChanged.connect(self.changeAutoExposure)
      #   self.label = QLabel(self)
         self.setScaledContents(True)
-     #   self.label.move(0, 30)
+     #   self.label.przemiesc(0, 30)
         self.resize(self.geometry().width(), self.geometry().height())
 
 # the vast majority of callbacks come from toupcam.dll/so/dylib internal threads, so we use qt signal to post this event to the UI thread  

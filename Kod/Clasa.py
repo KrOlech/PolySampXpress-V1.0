@@ -179,7 +179,7 @@ class obszarzaznaczony():
 
         self.image = QPixmap.fromImage(img)
 
-        self.podglond = kw.podglond_roi(str(self.getName()),self.get_image(),self)
+        self.podglond = kw.Podglond_ROI(str(self.getName()), self.get_image(), self)
 
     def get_image(self):
         return self.image
@@ -241,8 +241,8 @@ class obszarzaznaczony():
         img = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0],QImage.Format_RGB888)  
 
         self.image = QPixmap.fromImage(img)
-        
-        self.podglond.new_image(self.image)
+
+        self.podglond.nowy_obraz(self.image)
 ###############################self edit##########################################
 
     def pres_cords(self, e, ofsetx, ofsety):
@@ -286,7 +286,7 @@ class obszarzaznaczony():
             self.move_all = True
 
         #update kordynat
-        self.podglond.update_cords()
+        self.podglond.odswierz_kordynaty()
 
     def relise_cords(self,e,ofsetx, ofsety):
 
@@ -328,8 +328,8 @@ class obszarzaznaczony():
             self.x0 = self.px1
         elif self.kanta_top:
             self.y0 = self.py1
-            
-        self.podglond.update_cords()
+
+        self.podglond.odswierz_kordynaty()
       
     def move_cords(self, e, ofsetx, ofsety):
 
@@ -376,6 +376,6 @@ class obszarzaznaczony():
                 self.x0 = self.px1
             elif self.kanta_top:
                 self.y0 = self.py1
-                
-            self.podglond.update_cords()
+
+            self.podglond.odswierz_kordynaty()
                 

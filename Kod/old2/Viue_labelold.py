@@ -90,7 +90,7 @@ class Obraz(ROI_maping):
             self.frame_2 = cv2.resize(img, self.rozmiar)
             self.extend_map_camera()
 
-            # plt.imsave('img_frame_{}.png'.format(self.total), img)
+            # plt.imsave('img_frame_{}.png'.format(self.total), obraz)
 
     @staticmethod
     def cameraCallback(nEvent, ctx):

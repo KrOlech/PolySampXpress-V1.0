@@ -35,7 +35,7 @@ class Map(ROI_maping):
         '''
 
         #skalowanie obrazu
-        #self.image_opencv = cv2.resize(img, self.rozmiar)
+        #self.image_opencv = cv2.resize(obraz, self.rozmiar)
 
         #konwersja obrazu na Qimage
         self.img = QImage(img, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGB888)

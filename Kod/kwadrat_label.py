@@ -1,274 +1,398 @@
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *  # QFileDialog ,QMainWindow,QToolBar ,QAction
-from PyQt5.QtCore import *
+from PyQt5.QtWidgets import QLabel, QWidget, QLineEdit, QHBoxLayout, QVBoxLayout, QGridLayout, QPushButton
+from PyQt5.QtCore import QRect, QPoint
+from PyQt5.QtGui import QPainter, QBrush, QColor, QPixmap
 
-class simple_obraz(QLabel):
 
-    kalibracja = [6.36, 6.72, 6.33, 6.53]
+class Prsty_Podglond(QLabel):
+    '''
+    Obiekt dziedziczacy z Qlabel specialnie przystosowany do wyswietlania
+    miniaturki podglondu obszaru oznaczonego
+    '''
 
-    def __init__(self, img, Rectagle, *args, **kwargs):
-        super(QWidget, self).__init__(*args, **kwargs)
 
-       #wgraj obiekt
-        self.wgraj(img, Rectagle)
+    def __init__(self, obraz, wspulrzedne, *args, **kwargs):
+        super(Prsty_Podglond, self).__init__(*args, **kwargs)
 
-    def wgraj(self, img, Rect):
-    
-        #kalibrate reded cords
-        Rect = [r/a for r, a in zip(Rect, self.kalibracja)]
-    
+        # zapisanie otrzymanych nie skalibrowanych wspulrzednych
+        self.wspulrzedne = wspulrzedne
+
+        #Metoda kalibrujaca prostokat
+        self._prostkat = self._stwurz_prostokat(wspulrzedne)
+
+        #Metoda wgrywajaca podlond
+        self._wwgraj(obraz)
+
+    def _stwurz_prostokat(self, wspulrzedne):
+        '''
+        Prywatna metoda kalibrujaca otrzymane wspulrzedne i zwracajaca
+        stworzony na ich podstawie prostokat
+        :param wspulrzedne: wspulrzedne ROI'u (x0,y0,x1,y1)
+        :return:QRectagle stworzony z przekazanych wspulrzednych
+        '''
+        skalibrowane_wspulrzedne = self._kalibracja_wspulrzednych(wspulrzedne)
+
+        poczatkowy_naroznik = QPoint(skalibrowane_wspulrzedne[0], skalibrowane_wspulrzedne[1])
+        koncowy_naroznik = QPoint(skalibrowane_wspulrzedne[2], skalibrowane_wspulrzedne[3])
+
+        return QRect(poczatkowy_naroznik, koncowy_naroznik)
+
+    def _kalibracja_wspulrzednych(self, rect):
+        '''
+        Prywatna metoda kalibrujaca prazekazane wspulrzedne Roi do przeskalowanego obrazu
+        :param rect: lista zawierajaca wsoulrzedne (x0,y0,x1,y1)
+        :return:skalibrowan lista wspulrzednych ROI
+        '''
+        # wielkosci umozliwiajace skalowanei ROI'u
+        kalibracja = [6.36, 6.72, 6.33, 6.53]
+
+        #kalibracja przekazanego Roi
+        return [r / a for r, a in zip(rect, kalibracja)]
+
+    def _wwgraj(self, obraz):
+        '''
+        Prywatna metoda wgrywajaca przekazaony obraz
+        :param obraz: obiekt klasy Qpixmap
+        :return:
+        '''
+        #zapisanie obrazu
+        self._obraz = obraz
+
         #wgranie obrazu
-        self._img = img
+        self.setPixmap(self._obraz)
 
-        #odczyt wymiarw zaczytanego obrazu
-        h0 = img.size().height()
-        w0 = img.size().width()
-        
-        self.rectangle = QRect(QPoint(Rect[0],Rect[1]),QPoint(Rect[2],Rect[3]))
-        
-        #wgranie obrazu
-        self.setPixmap(self._img)
-
-    #metod alowing calibration of podglond
     def update_rectagle(self, kalibracja):
+        '''
+        Metoda umozliwajaca wykonanie kalibracji wielkosci podglondu
+        :param kalibracja: tablica kalibracji
+        '''
 
-        Rect = [r/a for r,a in zip(self.Rectagle, kalibracja)]
+        #skalibrowanie podfladu
+        Rect = [r/a for r, a in zip(self.wspulrzedne, kalibracja)]
 
+        #nadpisanie kwadratu oznaczonego nowo skalibrowanym
         self.rectangle = QRect(QPoint(Rect[0], Rect[1]), QPoint(Rect[2], Rect[3]))
 
-    #overload metody paint event z Pyqt5
     def paintEvent(self, QPaintEvent):
+        '''
+        Metoda nadpisujaca wbudowana metode QPinter z PyQt5
+        wgrywajaca obraz oraz rysujaca na nim oznaczony ROI
+        :param QPaintEvent: obiekt klasy event
+        :return:
+        '''
+
         # inicializacja pintera
         qp = QPainter(self)
 
         # rysowanie obrazu
-        qp.drawPixmap(self.rect(), self._img)
+        qp.drawPixmap(self._prostkat, self._obraz)
 
-        # kolro i tlo
-        #br = QBrush(QColor(200, 20, 20, 255),Qt.CrossPattern)
-        br = QBrush(QColor(200, 10, 10, 200))
+        # stworzenie i wgranie stylu prostokata
+        qp.setBrush(QBrush(QColor(200, 10, 10, 200)))
 
-        # wgranie stylu
-        qp.setBrush(br)
-
+        # rysowanie prostokątu
         qp.drawRect(self.rectangle)
 
+    def nowy_podglond(self, obraz, wspulrzedne):
 
-class podglond_roi(QWidget):
+        self._wwgraj(obraz)
 
-    def __init__(self, text, img, obiekt_oznaczony, *args, **kwargs):
+        self.wspulrzedne = wspulrzedne
 
+        self._prostkat = self._stwurz_prostokat(wspulrzedne)
+
+class Podglond_ROI(QWidget):
+    '''
+    Obiekt przeciozajacy obiekt klasy QWidget
+    Przezentuje on oznaczony ROI oraz umozliwia interakcje z nim
+    nadanie mu nazwy edyche lub usuniecie
+    '''
+
+
+    def __init__(self, tekst, obraz, obiekt_oznaczony, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
-        
-        self.img = img
+
+        # obiekt klasy Qpiuxmap zawierajacy aktualny podglad na którym oznaczono ROI
+        self.obraz = obraz
 
         # wskaznik do obiekt clasy obszar oznaczony
         self.obiekt_oznaczony = obiekt_oznaczony
-        
-        x,x1,y,y1 = self.obiekt_oznaczony.get_niezalezne_pixele()
+
         ######################################################################################
         ##################################Przyciski i labele##################################
         ######################################################################################
 
-        #custom label for viusalkizastion porpos
-        self.podglond = simple_obraz(self.img,obiekt_oznaczony.get_wzgledny_rectagle())
-        
-        self.name_lable = QLineEdit(text)
-        self.name_lable.textChanged.connect(self.newname)
-        
-        self.x_label = QLabel("x")
-        
-        self.x0_label = QLabel(str(x))
-        self.x1_label = QLabel(str(x1))
-        
-        self.y_label = QLabel("y")
-        
-        self.y0_label = QLabel(str(y))
-        self.y1_label = QLabel(str(y1))
-        
-        self.z_label = QLabel("z:")
-        
-        self.z0_label = QLabel("25")
-        
-        
-        
-        p_pixele = self.pole(x,x1,y,y1)
-        
-        self.pole_label = QLabel("Pole obszaru:")
-        self.poleL = QLabel(str(p_pixele))
+        # widget zawierajacy podglad na oznaczony ROI
+        self.podglond = Prsty_Podglond(self.obraz, obiekt_oznaczony.get_wzgledny_rectagle())
+
+        # widget zawierajacy nazwe ROI oraz umozliwiajacy jegj edycje
+        self.name_lable = QLineEdit(tekst)
+        self.name_lable.textChanged.connect(self.nowa_nazwa)
+
+        # stworzenie opisu wspulrzednych ROI
+        self._stwurz_legende()
+
         ######################################################################################
         ##################################Leyout##############################################
         ###################################################################################### 
-        
-        self.buton_layout = QHBoxLayout()
-        
-        self.label_layout = QHBoxLayout()
 
-        self.label_layout.addWidget(self.x_label)
-        self.label_layout.addWidget(self.x0_label)
-        self.label_layout.addWidget(self.x1_label)
-        
-        self.label_layout.addWidget(self.y_label)
-        self.label_layout.addWidget(self.y0_label)
-        self.label_layout.addWidget(self.y1_label)
+        self._stworzenie_layoutow()
 
-        
-        self.pole_layout = QHBoxLayout()
-        self.pole_layout.addWidget(self.pole_label)
-        self.pole_layout.addWidget(self.poleL)
-        
-        self.secondary_layout = QVBoxLayout()
-        self.secondary_layout.addWidget(self.name_lable)
-        self.secondary_layout.addLayout(self.label_layout)
-        self.secondary_layout.addLayout(self.pole_layout)
-        self.secondary_layout.addLayout(self.buton_layout)
-        
-        
+        self._wstawienie_widgetow_do_layoutow()
 
-        self.main_layout = QVBoxLayout()
-        self.main_layout.addWidget(self.podglond)
-        self.main_layout.addLayout(self.secondary_layout)
+        self._polacz_layouty()
 
-        self.kierunkowe_layout = QGridLayout()
-        self.main_layout.addLayout(self.kierunkowe_layout)
+        # ustawienie głównego leyautu
+        self.setLayout(self._glowny_layout)
 
-        self.setLayout(self.main_layout)
-        
-        self.main_butons()
-        
-        self.set_size()
+        # stworzenie przycisków
+        self.glowne_przyciski()
+
+        # zablokowanie rozmiaru
+        self.zablokuj_rozmiar()
     
     def __del__(self):
+        '''
+        dekonstruktor klasy usuwa on oznaczony obiekt oznaczony
+        '''
+        self.obiekt_oznaczony.kill()
         self.obiekt_oznaczony = 0
 
-    #blokada rozmiaru
-    def set_size(self, x=180, y=225):
+    def _usun(self):
+        ''' Metoda umozliwiajaca usuniecie obiektu uzywajac przycisku'''
+        del self
+
+    def _stworzenie_layoutow(self):
+        '''
+        Prywatna  metoda tworzaca layaouty
+        '''
+
+        self._przyciski_layout = QHBoxLayout()
+
+        self._legenda_layout = QHBoxLayout()
+
+        self._pole_layout = QHBoxLayout()
+
+        self._kierunkowe_layout = QGridLayout()
+
+        self._glowny_layout = QVBoxLayout()
+
+        self._drugorzendny_layout = QVBoxLayout()
+
+    def _wstawienie_widgetow_do_layoutow(self):
+        '''
+        Prywatna  metoda wstawiajaca widgety do layoutów
+        '''
+        self._legenda_layout.addWidget(self.x_label)
+        self._legenda_layout.addWidget(self.x0_label)
+        self._legenda_layout.addWidget(self.x1_label)
+
+        self._legenda_layout.addWidget(self.y_label)
+        self._legenda_layout.addWidget(self.y0_label)
+        self._legenda_layout.addWidget(self.y1_label)
+
+        self._pole_layout.addWidget(self.pole_label)
+        self._pole_layout.addWidget(self.poleL)
+
+        self._drugorzendny_layout.addWidget(self.name_lable)
+
+        self._glowny_layout.addWidget(self.podglond)
+
+    def _polacz_layouty(self):
+        '''
+        Prywatna  metoda łącząca layouty
+        '''
+        self._drugorzendny_layout.addLayout(self._legenda_layout)
+        self._drugorzendny_layout.addLayout(self._pole_layout)
+        self._drugorzendny_layout.addLayout(self._przyciski_layout)
+
+        self._glowny_layout.addLayout(self._drugorzendny_layout)
+
+        self._glowny_layout.addLayout(self._kierunkowe_layout)
+
+    def zablokuj_rozmiar(self, x=180, y=225):
+        '''
+        metoda zablokowujaca rozmiar widgetu
+        w celu zachowania poprawnosci rozmiaru podglondu
+        :param x: szerokosc widgetu
+        :param y: wysokosc widgetu
+        '''
         self.setMaximumSize(x, y)
         self.setMinimumSize(x, y)
 
-    #metocda tworzoca przycisk o zadanych parametrach
+    def _stwurz_legende(self):
+        '''
+        prywatna metoda towrzoaca legende zawierajaca wspulrzedne ROI'u oraz jego pole
+        '''
+        # odczytanie wspulrzednych bezwzglednych ROI w celu wykonaniu opisu
+        x, x1, y, y1 = self.obiekt_oznaczony.get_niezalezne_pixele()
+
+        #obliczenie pola ROI'u w pixelach
+        p_pixele = self.pole(x, x1, y, y1)
+
+        self.pole_label = QLabel("Pole obszaru:")
+        self.poleL = QLabel(str(p_pixele))
+
+        self.x_label = QLabel("x")
+        self.x0_label = QLabel(str(x))
+        self.x1_label = QLabel(str(x1))
+
+        self.y_label = QLabel("y")
+        self.y0_label = QLabel(str(y))
+        self.y1_label = QLabel(str(y1))
+
     @staticmethod
-    def buton(fun, text, clicable = False):
-        buton = QPushButton()
-        buton.setMaximumWidth(50)
-        buton.setText(text)
-        buton.setCheckable(clicable)
-        buton.clicked.connect(fun)
-        return buton
+    def przycisk(fun, text, clicable = False):
+        '''
+        Statyczna metoda tworzaca przycisk o zadancyh paramterach
+        :param fun: fukcja wywoływana przy nacisnieciu przycisku
+        :param text: napis na przycisku
+        :param clicable: obcja umozliwiajaca zatrzymania stanu przycisku
+        :return:
+        '''
+
+        przycisk = QPushButton()
+        przycisk.setMaximumWidth(50)
+        przycisk.setText(text)
+        przycisk.setCheckable(clicable)
+        przycisk.clicked.connect(fun)
+        return przycisk
 
 ######################################################################################
 ##################################boton config########################################
 ######################################################################################
 
-    #metoda tworzoca glówne przyciski
-    def main_butons(self):
+    def glowne_przyciski(self):
+        '''
+        Metoda tworzaca glówne przyciski
+        '''
 
-        self.butons = [QPushButton() for _ in range(3)]
+        self.przyciski = [QPushButton() for _ in range(3)]
 
-        [self.buton_layout.addWidget(Value) for Value in self.butons]
+        [self._przyciski_layout.addWidget(wartosc) for wartosc in self.przyciski]
 
         nazwy = ["edit", "fine edit", "del"]
 
-        [swich.setText(name) for name, swich in zip(nazwy, self.butons)]
+        [przycisk.setText(nazwa) for nazwa, przycisk in zip(nazwy, self.przyciski)]
 
-        fun = [self.edit, self.fine_edit, self.dellite]
+        funkcjie = [self.edit, self.fine_edit, self._usun]
 
-        [b.clicked.connect(f) for b, f in zip(self.butons, fun)]
-        
-        self.butons[0].setCheckable(True)
+        [b.clicked.connect(f) for b, f in zip(self.przyciski, funkcjie)]
 
-    #metod removing clasic bootons an aplaying calibration bootons
-    def calibration_butons(self):
+        # ustawienie przycisku edycji jako przelocznika miedzy trybem normalnym a trybem edycji
+        self.przyciski[0].setCheckable(True)
 
-        self.butons = [QPushButton() for _ in range(8)]
+    def przyciski_kalibracyjne(self):
+        '''
+        Metoda umieszcajaca przyciski umozliwiajace kalibracje podglondu
+        '''
 
-        [self.buton_layout.addWidget(Value) for Value in self.butons]
+        self.przyciski = [QPushButton() for _ in range(8)]
+
+        [self._przyciski_layout.addWidget(wartosc) for wartosc in self.przyciski]
 
         nazwykalibracionmode = ['xp', "yp", "zp", 'sp', "xm", "ym", "zm", "sm"]
 
-        [swich.setText(name) for name, swich in zip(nazwy, self.butons)]
+        [swich.setText(name) for name, swich in zip(nazwykalibracionmode, self.przyciski)]
 
         self.x, self.y, self.z, self.s = 6.36, 6.72, 6.33, 6.53
 
         funkalibracionmode = [self.xp, self.yp, self.zp, self.sp, self.xm, self.ym, self.zm, self.sm]
-        [b.clicked.connect(f) for b, f in zip(self.butons, fun)]
+        [b.clicked.connect(f) for b, f in zip(self.przyciski, funkalibracionmode)]
 
-    def _Direction_buttons(self):
+    def _fine_edit_buttons(self):
+            '''
+            metoda tworzaca przyciski do edycji
+            '''
 
             self.kierunkowe = [QPushButton() for _ in range(4)]
 
             [button.setMaximumWidth(50) for button in self.kierunkowe]
 
-            # nadanie nazw przyciska
+            # nazwy dla przycisków
             nazwy = ['/\\', "<", ">", '\/']
             [swich.setText(name) for name, swich in zip(nazwy, self.kierunkowe)]
 
             # przypiecie fukcji do przycisków
-            fun = [self.top_booton,  self.lef_booton, self.rig_bootom, self.dwn_booton]
+            funkcje = [self.gurny_przycisk, self.lewy_przycisk, self.prawy_przycisk, self.dolny_przycisk]
 
-            [swich.clicked.connect(f) for f, swich in zip(fun, self.kierunkowe)]
+            [przycisk.clicked.connect(funkcja) for funkcja, przycisk in zip(funkcje, self.kierunkowe)]
 
             # dodanie do leyatów przyciskó kierunkowych
             it = [3, 2, 4, 3]
             jt = [2, 3, 3, 4]
-            [self.kierunkowe_layout.addWidget(value, j, i) for j, i, value in zip(jt, it, self.kierunkowe)]
+            [self._kierunkowe_layout.addWidget(value, j, i) for j, i, value in zip(jt, it, self.kierunkowe)]
 
-            #Return to main bootons
-            self.t = self.buton(self.retyurn_to_normalbutons, "return")
-            self.kierunkowe_layout.addWidget(self.t, 2, 2)
-            self.kierunkowe.append(self.t)
+            # Przywrucenie standardowych przycisków
+            self.powrut = self.przycisk(self.retyurn_to_normalbutons, "return")
+            self._kierunkowe_layout.addWidget(self.powrut, 2, 2)
+            self.kierunkowe.append(self.powrut)
 
             #przelaczanie pomiedzy ruszaniem obszarem a jego rozszerzaniem
-            self.move = self.buton(self.TogleMove, "move", True)
-            self.kierunkowe_layout.addWidget(self.move, 2, 4)
-            self.kierunkowe.append(self.move)
+            self.przemiesc = self.przycisk(self.przelacz_przemiesc, "przemiesc", True)
+            self._kierunkowe_layout.addWidget(self.przemiesc, 2, 4)
+            self.kierunkowe.append(self.przemiesc)
             
-            #przelaczanie pomiedzy ruszaniem obszarem a jego rozszerzaniem
-            self.incrise = self.buton(self.Togleincrise, "+", True)
-            self.kierunkowe_layout.addWidget(self.incrise, 4, 4)
-            self.kierunkowe.append(self.incrise)
+            #przelaczanie pomiedzy kierunkiem zmian
+            self.zwieksz = self.przycisk(self.przelacz_zwieksz, "+", True)
+            self._kierunkowe_layout.addWidget(self.zwieksz, 4, 4)
+            self.kierunkowe.append(self.zwieksz)
 
-    def remove_kierunkowe(self):
-        #removing main bootons
-        [self.kierunkowe_layout.removeWidget(b) for b in self.kierunkowe]
+    def usun_fine_edit(self):
+        '''
+        metoda usuwajaca przyciski do edycji
+        '''
+        [self._kierunkowe_layout.removeWidget(b) for b in self.kierunkowe]
         self.kierunkowe = 0
-        self.move = 0
-        self.t = 0
-        self.incrise = 0
+        self.przemiesc = 0
+        self.powrut = 0
+        self.zwieksz = 0
 
-    def remove_main_bootons(self):
-        #cliring standard bootons
-        [self.buton_layout.removeWidget(b) for b in self.butons]
-        self.butons = 0
+    def usun_glowne_przyciski(self):
+        '''
+        metoda usuwajaca glówne przyciski
+        :return:
+        '''
+        [self._przyciski_layout.removeWidget(b) for b in self.przyciski]
+        self.przyciski = 0
 
 ######################################################################################
 ##################################Obiekt oznaczony komunication#######################
 ######################################################################################
 
-    #live update nazwy obiektu
-    def newname(self):
+    def nowa_nazwa(self):
+        '''
+        metoda nadajaca nowa nazwe na glównym widoku roiu
+        '''
         self.obiekt_oznaczony.setName(self.name_lable.text())
 
-    #metoda updatujaca na bierzoco kordynaty wyswietlane na obiekcie
-    def update_cords(self):
+
+    def odswierz_kordynaty(self):
+        '''
+        metoda updatujaca na bierzoco kordynaty wyswietlane na obiekcie
+        '''
     
-        self.podglond.wgraj(self.img,self.obiekt_oznaczony.get_wzgledny_rectagle())
+        self.podglond._wwgraj(self.obraz)
         
         x, x1, y, y1 = self.obiekt_oznaczony.get_niezalezne_pixele()
         
         
         self.x0_label.setText(str(x))
         self.x1_label.setText(str(x1))
-        
 
-        
         self.y0_label.setText(str(y))
         self.y1_label.setText(str(y1))
         
         self.poleL.setText(str(self.pole(x, x1, y, y1)))
 
-    #fukcja liczaca pole obszaru oznaczonego
     def pole(self, x, x1, y, y1):
+        '''
+        fukcja liczaca pole obszaru oznaczonego
+        :param x: pierwsza wspulrzedna x
+        :param x1: druga wspulrzedna x
+        :param y: pierwsza wspulredna y
+        :param y1: druga wspulrzedna y
+        :return: pole
+        '''
     
         xm = min(x, x1)
         xM = max(x, x1)
@@ -279,104 +403,138 @@ class podglond_roi(QWidget):
         return abs(xM-xm)*abs(yM-ym)
         
 ######################################################################################
-##################################Boton function######################################
+##################################fukcje przyciskow ##################################
 ######################################################################################
 
-    #rising edit flag
     def edit(self):
-    
-        if self.butons[0].isChecked():
+        '''
+        Metoda przypisana do przycisku edycji wlaczajaca i wylaczajaca tryb edycji
+        '''
+        if self.przyciski[0].isChecked():
             self.obiekt_oznaczony.edit()
 
         else:
             self.obiekt_oznaczony.end_edit()
 
-    def new_image(self, img):
-        if type(img) == QPixmap:
-            self.podglond.wgraj(img,self.obiekt_oznaczony.get_wzgledny_rectagle())
-            self.img = img
-        else:
-            self.podglond.wgraj(self.img,self.obiekt_oznaczony.get_wzgledny_rectagle())
-        #swiching to fine edit bootns
+    def nowy_obraz(self, obraz):
+        '''
+        Metoda wgrywajaca nowy obraz i prostokat do podglondu
+        :param obraz: obraz odczytany po koncu edycji
+        '''
+        if type(obraz) == QPixmap:
+            self.obraz = obraz
+
+        self.podglond.nowy_podglond(self.obraz,  self.obiekt_oznaczony.get_wzgledny_rectagle())
+
     def fine_edit(self):
-        self.remove_main_bootons()
+        '''
+        metoda wywolywana po nacisnieciu przycisku fine edit właczajaca tryb edycji
+        z wykorzystaniem przycisków
+        :return:
+        '''
 
-        #creating direction botons
-        self._Direction_buttons()
+        self.usun_glowne_przyciski()
 
-        #poprawienie ksztaltu okna
-        self.set_size(180, 270+15)
+        self._fine_edit_buttons()
 
-    #deleting object
-    def dellite(self):
-        self.obiekt_oznaczony.kill()
-        self.obiekt_oznaczony = 0
+        #poprawienie ksztaltu widgetu
+        self.zablokuj_rozmiar(180, 270 + 15)
 
-    #metod removing fine bootons and seting main ones
     def retyurn_to_normalbutons(self):
+        '''
+        metoda usuwajaca przyciski do edycji i ustawiajaca przyciski standardowe
+        '''
 
-        self.remove_kierunkowe()
+        self.usun_fine_edit()
 
-        self.main_butons()
-        self.set_size()
-
-######################################################################################
-##################################Fine moving#########################################
-######################################################################################
+        self.glowne_przyciski()
+        self.zablokuj_rozmiar()
 
 ##########################dwutrybowe przyciski _kierunkowe############################
-    def top_booton(self):
-        if self.move.isChecked():
-            self.obiekt_oznaczony.move_top_line(self.incrise.isChecked())
+
+    def gurny_przycisk(self):
+        '''
+        metoda wykonywana podczas nacisniecia jednego z przycisków
+        posiada 2 tryby w zaleznosci od ustawienia przelocznika przemiesc
+        wywoluje odpowiednia metode obiektu oznaczonego w celu
+        edycji/przemiesczenia ROI'u
+        '''
+        if self.przemiesc.isChecked():
+            self.obiekt_oznaczony.move_top_line(self.zwieksz.isChecked())
         else:
             self.obiekt_oznaczony.move_top()
-            
-        self.update_cords()
 
-    def dwn_booton(self):
-        if self.move.isChecked():
-            self.obiekt_oznaczony.move_dwn_line(self.incrise.isChecked())
+        self.odswierz_kordynaty()
+
+    def dolny_przycisk(self):
+        '''
+        metoda wykonywana podczas nacisniecia jednego z przycisków
+        posiada 2 tryby w zaleznosci od ustawienia przelocznika przemiesc
+        wywoluje odpowiednia metode obiektu oznaczonego w celu
+        edycji/przemiesczenia ROI'u
+        '''
+        if self.przemiesc.isChecked():
+            self.obiekt_oznaczony.move_dwn_line(self.zwieksz.isChecked())
         else:
             self.obiekt_oznaczony.move_dwn()
+
+        self.odswierz_kordynaty()
             
-        self.update_cords()
-            
-    def lef_booton(self):
-        if self.move.isChecked():
-            self.obiekt_oznaczony.move_lft_line(self.incrise.isChecked())
+    def lewy_przycisk(self):
+        '''
+        metoda wykonywana podczas nacisniecia jednego z przycisków
+        posiada 2 tryby w zaleznosci od ustawienia przelocznika przemiesc
+        wywoluje odpowiednia metode obiektu oznaczonego w celu
+        edycji/przemiesczenia ROI'u
+        '''
+        if self.przemiesc.isChecked():
+            self.obiekt_oznaczony.move_lft_line(self.zwieksz.isChecked())
         else:
             self.obiekt_oznaczony.move_lft()
 
-        self.update_cords()
+        self.odswierz_kordynaty()
                 
-    def rig_bootom(self):
-        if self.move.isChecked():
-            self.obiekt_oznaczony.move_rig_line(self.incrise.isChecked())
+    def prawy_przycisk(self):
+        '''
+        metoda wykonywana podczas nacisniecia jednego z przycisków
+        posiada 2 tryby w zaleznosci od ustawienia przelocznika przemiesc
+        wywoluje odpowiednia metode obiektu oznaczonego w celu
+        edycji/przemiesczenia ROI'u
+        '''
+        if self.przemiesc.isChecked():
+            self.obiekt_oznaczony.move_rig_line(self.zwieksz.isChecked())
         else:
             self.obiekt_oznaczony.move_rig()
-            
-        self.update_cords()
+
+        self.odswierz_kordynaty()
 
 ######################################################################################
-    def TogleMove(self):
-
-        if self.move.isChecked():
-             self.move.setText("shape")
+    def przelacz_przemiesc(self):
+        '''
+        metoda wywolyuwana przy przeloczeniu przycisku przemiesc zmienia
+        napis na nim
+        '''
+        if self.przemiesc.isChecked():
+             self.przemiesc.setText("ksztalt")
 
         else:
-             self.move.setText("move")
+             self.przemiesc.setText("przemiesc")
              
                         
-    def Togleincrise(self):
+    def przelacz_zwieksz(self):
+        '''
+        metoda wywolyuwana przy przeloczeniu przycisku zwieksz zmienia
+        napis na nim
+        '''
      
-        if self.incrise.isChecked():
-            self.incrise.setText("-")
+        if self.zwieksz.isChecked():
+            self.zwieksz.setText("-")
 
         else:
-            self.incrise.setText("+")
+            self.zwieksz.setText("+")
 
 ######################################################################################
-##################################Kalibration#########################################
+##################################metody uzyte do kalibracji podglondu################
 ######################################################################################
 
     def xp(self):

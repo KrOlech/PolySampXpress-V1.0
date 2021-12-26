@@ -87,7 +87,7 @@ class MainWindow(QMainWindow):
     
         toolbar = QToolBar("Funkcje") #stworzenie toolbara
         self.addToolBar(toolbar)
-        action_6 = self.qactiontoolbar("Snap img",  lambda x: self.obraz.snap_img())
+        action_6 = self.qactiontoolbar("Snap obraz",  lambda x: self.obraz.snap_img())
         toolbar.addAction(action_6)
         
 
@@ -226,7 +226,7 @@ class MainWindow(QMainWindow):
         self.przyciski = [QPushButton() for _ in range(9)]
         [button.setMaximumWidth(100) for button in self.przyciski] 
         
-        nazwy = ["schow next", "dell all", "schow all", "schow privius", "map", "hide all","move to","stop","map clear"]
+        nazwy = ["schow next", "dell all", "schow all", "schow privius", "map", "hide all","przemiesc to","stop","map clear"]
         
         [swich.setText(name) for name, swich in zip(nazwy, self.przyciski)]
         
@@ -257,7 +257,7 @@ class MainWindow(QMainWindow):
             self.map = M.Map_window(self.obraz.get_map(), self)
             self.map.show()
         else:
-            self.map.new_image(self.obraz.get_map())
+            self.map.nowy_obraz(self.obraz.get_map())
             self.map.show()
 
     def togle_move_on_pres(self):
@@ -272,7 +272,7 @@ class MainWindow(QMainWindow):
              
 
         else:
-             # set background color back to light-grey
+             # set background color powrut to light-grey
              self.przyciski[6].setStyleSheet("background-color : lightgrey")
 
              if self.map is not None:

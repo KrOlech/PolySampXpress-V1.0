@@ -86,7 +86,7 @@ class Obraz(ROI_maping):
             self.image_opencv  = img
             self.save_curent_viue()
             self.extend_map_exeqiute()
-            # plt.imsave('img_frame_{}.png'.format(self.total), img)
+            # plt.imsave('img_frame_{}.png'.format(self.total), obraz)
 
     @staticmethod
     def cameracallback(nevent, ctx):
@@ -278,7 +278,7 @@ class Obraz(ROI_maping):
  
     def _flagi_przemiesczenie(self):
         if self.edit_trybe:
-            self.edited_roi.podglond.butons[0].toggle()
+            self.edited_roi.podglond.przyciski[0].toggle()
             self.edited_roi.end_edit()
             self.edit_trybe = False
             

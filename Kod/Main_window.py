@@ -112,7 +112,7 @@ class MainWindow(QMainWindow):
         toolbar = QToolBar("Funkcje")
         self.addToolBar(toolbar)
         #zapisanie podglondu
-        action_6 = self._qactiontoolbar("Snap img", lambda x: self.obraz.snap_img())
+        action_6 = self._qactiontoolbar("Snap obraz", lambda x: self.obraz.snap_img())
         toolbar.addAction(action_6)
         #wysrodkowanie manipulatora
         action_7 = self._qactiontoolbar("center", lambda x: self.manipulaor.center())
@@ -365,7 +365,7 @@ class MainWindow(QMainWindow):
         Przypisanie nazw do wielozadaniowych przycisków
         '''
 
-        nazwy = ["show next", "dell all", "show all", "show privius", "map", "hide all", "move to", "stop", "map clear"]
+        nazwy = ["show next", "dell all", "show all", "show privius", "map", "hide all", "przemiesc to", "stop", "map clear"]
 
         [switch.setText(name) for name, switch in zip(nazwy, self.przyciski)]
 

@@ -262,7 +262,7 @@ class manipulator:
 
         returns list of positions in order of given axes
         
-        if manipulator in move returns False
+        if manipulator in przemiesc returns False
         '''
         c_id = self._convert_id(self.controller_id)
         sz_axes = self._get_szaxes(axes)
