@@ -1,12 +1,12 @@
 import ctypes
 from time import sleep,time
 from PyQt5.QtWidgets import QMessageBox
+
 class manipulator:
 
+    main = None
 
-    def __init__(self,main):
-
-        self.main = main
+    def __init__(self):
 
         self.c848 = self.load_drivers()
         print(self.c848)
@@ -24,13 +24,14 @@ class manipulator:
 
         self.x, self.y, self.z = self.get_axes_positions('xyz')
 
+    def main_window(self,main):
+        self.main = main
+
     def center(self):
         self.set_referencing_mode()
         self.get_axes_positions()
         self.reference_axes()
         self.weaith_for_target()
-        #self.x, self.y, self.z = self.get_axes_positions('xyz')
-        #self.main._upadet_position_read()
 
     def get_szaxes(self,axes = 'XYZ'):
         '''
@@ -306,7 +307,9 @@ class manipulator:
             pass
             
         self.x, self.y, self.z = self.get_axes_positions('xyz')
-        self.main._upadet_position_read()
+
+        if not self.main is None:
+            self.main._upadet_position_read()
 
   ########################metody odbierajace wysłąne poleca ruchu################
     def move_up(self,krok):

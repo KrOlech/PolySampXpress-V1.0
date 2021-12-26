@@ -3,8 +3,6 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import *
 from Viue_label import Obraz
 from Map import Map_window
-from engineclass import manipulator
-from time import sleep
 from slider import Slider
 from setingswindows import axissetingwindow
 
@@ -23,7 +21,7 @@ class MainWindow(QMainWindow):
     #ostatni numer nadany ROI'owi
     last_name = 0
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, manipulator, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         '''
         Konstruktor glónego okna programu. Tworzy głowne okno nawiozuje poloczenie z kamera i manipulatorem.
@@ -46,8 +44,9 @@ class MainWindow(QMainWindow):
         self.obraz = Obraz(self)
 
         # linking to manipulator for movment
-        self.manipulaor = manipulator(self)
-                
+        self.manipulaor = manipulator
+        self.manipulaor.main_window(self)
+
         #creating leyaut conteeiners for Gui formation
         self._createleyouts()
 
