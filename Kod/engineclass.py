@@ -1,30 +1,31 @@
 import ctypes
-from time import sleep,time
+from time import sleep
 from PyQt5.QtWidgets import QMessageBox
 
 class manipulator:
-
+    '''
+    Klasa obslugujaca komunikacje z manipulatorem
+    '''
     main = None
 
     def __init__(self):
 
         self.c848 = self.load_drivers()
-        print(self.c848)
 
         self.controller_id = self.conncect_to_controller()
         
         self.conectioncheck()
-        
+
+        #pruba odczytania pozycji z pliku w razie nie powodzenia wycentrowanie.
         try:
             self.set_abs_positions_from_file()
         except Exception:
             self.center()
-        
-        self.print_curent_position()
 
+        #odczytanie pozycji manipulatora i zapisanie go
         self.x, self.y, self.z = self.get_axes_positions('xyz')
 
-    def main_window(self,main):
+    def main_window(self, main):
         self.main = main
 
     def center(self):
@@ -154,7 +155,7 @@ class manipulator:
             return controller_id
 
         else:
-            QMessageBox.warning(self, '', "erore unable to conect", QMessageBox.Ok)
+            QMessageBox.warning(self.main, '', "erore unable to conect", QMessageBox.Ok)
             return None
 
     #create erore mesage window if conection wos failed
@@ -162,7 +163,7 @@ class manipulator:
     def conectioncheck(self):
 
         if not self.is_connected():
-            QMessageBox.warning(self, '', "erore conection feiled", QMessageBox.Ok)
+            QMessageBox.warning(self.main, '', "erore conection feiled", QMessageBox.Ok)
 
     def is_connected(self):
         '''
@@ -247,7 +248,7 @@ class manipulator:
         axes that should be moved are given in parameter axes
         '''
         if len(axes) != len(positions):
-            QMessageBox.warning(self, '', 'number of axes and positions must be the same!', QMessageBox.Ok)
+            QMessageBox.warning(self.main, '', 'number of axes and positions must be the same!', QMessageBox.Ok)
             return None
 
         c_id = self._convert_id(self.controller_id)
