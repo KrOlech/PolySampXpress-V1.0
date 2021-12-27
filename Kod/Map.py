@@ -34,9 +34,6 @@ class Map(ROI_maping):
         :param img: open CV obraz
         '''
 
-        #skalowanie obrazu
-        #self.image_opencv = cv2.resize(obraz, self.rozmiar)
-
         #konwersja obrazu na Qimage
         self.obraz = QImage(img, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGB888)
 
@@ -45,24 +42,20 @@ class Map(ROI_maping):
 
 
 class Map_window(QWidget):
-
-    # rozmiar obszaru
-    #rozmiar = (1024, 768)
+    '''
+    obiekt dziedzicacy z Qwidget sluzacy do wyswietlenia mapy
+    '''
 
     def __init__(self, map, main_window, ox, oy, *args, **kwargs):
         super(Map_window, self).__init__(*args, **kwargs)
 
-        self.setWindowTitle("Mapa Próbki"+ str(map.shape))
+        self.setWindowTitle("Mapa Próbki")
         self.setWindowIcon(QtGui.QIcon('icon.png'))
-
-        #ustawienie rozmiaru
-        #self.setGeometry(0, 0, 1024, 720)
-        #self.resize(self.rozmiar[0],self.rozmiar[1])
 
         #stworzenie leyoutu
         self.layout = QVBoxLayout()
 
-        #map object
+        #map obiekt
         self.map = Map(map, main_window)
 
         #dodanie mapy do podglondu
