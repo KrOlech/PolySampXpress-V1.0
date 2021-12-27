@@ -267,8 +267,8 @@ class MainWindow(QMainWindow):
              self.przyciski[6].setStyleSheet("background-color : lightblue")
              
              if self.map is not None:
-                self.map.move_to_point = False
-             self.obraz.move_to_point = False
+                self.map.przemiesc_sie_do_pktu = False
+             self.obraz.przemiesc_sie_do_pktu = False
              
 
         else:
@@ -276,8 +276,8 @@ class MainWindow(QMainWindow):
              self.przyciski[6].setStyleSheet("background-color : lightgrey")
 
              if self.map is not None:
-                self.map.move_to_point = True
-             self.obraz.move_to_point = True
+                self.map.przemiesc_sie_do_pktu = True
+             self.obraz.przemiesc_sie_do_pktu = True
              
 
 ######################################################################################

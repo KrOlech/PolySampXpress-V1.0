@@ -200,7 +200,7 @@ class Obraz_z_kamery(ROI_maping):
         num = False
 
         if self.whot_to_drow == 'all_rectagls':  # pokazuje wsystkie prostkoaty
-            self.all_Rectagles(qp)
+            self.wsystkie_prostokaty(qp)
 
         elif self.whot_to_drow == 'no_rectagle':  # howa wszystkie prostokaty
             tym = False
@@ -213,17 +213,16 @@ class Obraz_z_kamery(ROI_maping):
 
         elif self.whot_to_drow == 'viue_muve': # rysuje wsystkie prostkoaty i obsluguje odswiezenie podglondu.
 
-            self.all_Rectagles(qp)
+            self.wsystkie_prostokaty(qp)
 
             self.odczytaj_klatke()
 
         else: # podstawowa obcja rysuje nowy prostokat
             # rysowanie prostokonta na bierzoco jak podglond do ruchu myszka
-            self.all_Rectagles(qp)
-            qp.drawRect(QRect(self.begin, self.end))
+            self.wsystkie_prostokaty(qp)
+            qp.drawRect(QRect(self.poczatek, self.koniec))
 
-
-        self.loadImage(tym, num)
+        self.zaladuj_obraz(tym, num)
 
     def _wybrany_prostokat(self, painter):
         '''
@@ -231,7 +230,7 @@ class Obraz_z_kamery(ROI_maping):
         :param painter:
         :return:
         '''
-        painter.drawRect(self.rectagledrow(self.main_window.ROI[self.ktury]))
+        painter.drawRect(self.narysuj_prostokat(self.main_window.ROI[self.ktury]))
 
 ####################################fukcje wywoływane przez guziki z gluwnego okna####################################
 
@@ -321,7 +320,7 @@ class Obraz_z_kamery(ROI_maping):
         metoda podnoszaca odpowiednia flage oraz wylacajaca tryb edycji jesli jest wloczony
         '''
 
-        if self.edit_trybe:
+        if self.edit_tryb:
             self.edited_roi.podglond.przyciski[0].toggle()
             self.edited_roi.zakoncz_edit()
             self.edit_trybe = False
@@ -423,6 +422,6 @@ class Obraz_z_kamery(ROI_maping):
     def ponbierz_map(self):
         return self.map
           
-    def mapupdate(self):
+    def _mapupdate(self):
         self.whot_to_drow = 'viue_muve'
         self.update()

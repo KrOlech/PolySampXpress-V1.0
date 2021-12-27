@@ -172,7 +172,7 @@ def extend_map_exeqiute_old(self, test_extend, ofset, borderofset, dx, dy, tx, t
 
         self.inject_map()
 
-        self.whot_to_drow = 'viue_muve'
+        self.co_narysowac = 'viue_muve'
         self.zmiana_kierunku = 'multi'
         self.update()
         

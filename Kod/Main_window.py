@@ -414,12 +414,12 @@ class MainWindow(QMainWindow):
              
              if self.map is not None:
                 self.map.move_to_point = True
-             self.obraz.move_to_point = True
+             self.obraz.przemiesc_sie_do_pktu = True
 
         else:  
              if self.map is not None:
                 self.map.move_to_point = False
-             self.obraz.move_to_point = False
+             self.obraz.przemiesc_sie_do_pktu = False
 
 ######################################################################################
 ##########################Scroll area#################################################

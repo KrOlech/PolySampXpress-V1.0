@@ -52,7 +52,7 @@ class Map(ROI_maping):
         #read curent window size
         x, y = self.height(), self.width()
 
-        #calculate scal for mouse reed
+        #calculate scala for mouse reed
         self.skalx = x/self.orgx
         self.skaly = y/self.orgy
         

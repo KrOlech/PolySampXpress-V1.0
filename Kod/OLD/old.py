@@ -10,9 +10,9 @@ def mouseMoveEvent(self, e):  # działąnia podczas ruchu myszki
         texty = f'{self.y2}'
 
         # zapis aktualnej pozycji myszki w celu wyswietlenia podglondu
-        self.end = e.pos()
+        self.koniec = e.pos()
 
-        self.whot_to_drow = 'previu_rectagle'
+        self.co_narysowac = 'previu_rectagle'
 
         self.update()
 
