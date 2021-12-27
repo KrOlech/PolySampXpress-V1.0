@@ -27,7 +27,7 @@ class Obraz_z_kamery(ROI_maping):
     # '' 'up' 'dawn' 'right' 'left' 'multi'
     zmiana_kierunku = ''
     
-    # boolean alowing to snap first shown image as a map prive
+    # boolean alowing to snap first shown obraz as a map prive
     first = True
 
     # pixmap object reded from camera/file
@@ -113,8 +113,8 @@ class Obraz_z_kamery(ROI_maping):
 
             #obsluzenie błedu na wypadek  bledu odczytu
             except tcam.HRESULTException:
-                print('pull image failed')
-                QMessageBox.warning(self, '', 'pull image failed', QMessageBox.Ok)
+                print('pull obraz failed')
+                QMessageBox.warning(self, '', 'pull obraz failed', QMessageBox.Ok)
 
             else:
 

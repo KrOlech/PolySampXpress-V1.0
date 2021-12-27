@@ -30,7 +30,7 @@ TOUPCAM_FLAG_TEC_ONOFF           = 0x00020000          # Thermoelectric Cooler c
 TOUPCAM_FLAG_ISP                 = 0x00040000          # ISP (Image Signal Processing) chip
 TOUPCAM_FLAG_TRIGGER_SOFTWARE    = 0x00080000          # support software trigger
 TOUPCAM_FLAG_TRIGGER_EXTERNAL    = 0x00100000          # support external trigger
-TOUPCAM_FLAG_TRIGGER_SINGLE      = 0x00200000          # only support trigger single: one trigger, one image
+TOUPCAM_FLAG_TRIGGER_SINGLE      = 0x00200000          # only support trigger single: one trigger, one obraz
 TOUPCAM_FLAG_BLACKLEVEL          = 0x00400000          # support set and get the black level
 TOUPCAM_FLAG_AUTO_FOCUS          = 0x00800000          # support auto focus
 TOUPCAM_FLAG_BUFFER              = 0x01000000          # klatka buffer
@@ -56,7 +56,7 @@ TOUPCAM_FLAG_EVENT_HARDWARE      = 0x0000040000000000  # hardware event, such as
 TOUPCAM_EVENT_EXPOSURE           = 0x0001              # exposure time or gain changed
 TOUPCAM_EVENT_TEMPTINT           = 0x0002              # white balance changed, Temp/Tint mode
 TOUPCAM_EVENT_CHROME             = 0x0003              # reversed, do not use it
-TOUPCAM_EVENT_IMAGE              = 0x0004              # live image arrived, use Toupcam_PullImage to get this image
+TOUPCAM_EVENT_IMAGE              = 0x0004              # live obraz arrived, use Toupcam_PullImage to get this obraz
 TOUPCAM_EVENT_STILLIMAGE         = 0x0005              # snap (still) klatka arrived, use Toupcam_PullStillImage to get this klatka
 TOUPCAM_EVENT_WBGAIN             = 0x0006              # white balance changed, RGB Gain mode
 TOUPCAM_EVENT_TRIGGERFAIL        = 0x0007              # trigger failed
@@ -97,12 +97,12 @@ TOUPCAM_OPTION_AUTOEXP_POLICY        = 0x10       # auto exposure policy:
                                                   #      3: Gain Preferred
                                                   #      default value: 1
 TOUPCAM_OPTION_FRAMERATE             = 0x11       # limit the klatka rate, range=[0, 63], the default value 0 means no limit
-TOUPCAM_OPTION_DEMOSAIC              = 0x12       # demosaic method for both video and still image: BILINEAR = 0, VNG(Variable Number of Gradients interpolation) = 1, PPG(Patterned Pixel Grouping interpolation) = 2, AHD(Adaptive Homogeneity-Directed interpolation) = 3, see https://en.wikipedia.org/wiki/Demosaicing, default value: 0
+TOUPCAM_OPTION_DEMOSAIC              = 0x12       # demosaic method for both video and still obraz: BILINEAR = 0, VNG(Variable Number of Gradients interpolation) = 1, PPG(Patterned Pixel Grouping interpolation) = 2, AHD(Adaptive Homogeneity-Directed interpolation) = 3, see https://en.wikipedia.org/wiki/Demosaicing, default value: 0
 TOUPCAM_OPTION_DEMOSAIC_VIDEO        = 0x13       # demosaic method for video
-TOUPCAM_OPTION_DEMOSAIC_STILL        = 0x14       # demosaic method for still image
+TOUPCAM_OPTION_DEMOSAIC_STILL        = 0x14       # demosaic method for still obraz
 TOUPCAM_OPTION_BLACKLEVEL            = 0x15       # black level
-TOUPCAM_OPTION_MULTITHREAD           = 0x16       # multithread image processing
-TOUPCAM_OPTION_BINNING               = 0x17       # binning, 0x01 (no binning), 0x02 (add, 2*2), 0x03 (add, 3*3), 0x04 (add, 4*4), 0x05 (add, 5*5), 0x06 (add, 6*6), 0x07 (add, 7*7), 0x08 (add, 8*8), 0x82 (average, 2*2), 0x83 (average, 3*3), 0x84 (average, 4*4), 0x85 (average, 5*5), 0x86 (average, 6*6), 0x87 (average, 7*7), 0x88 (average, 8*8). The final image size is rounded down to an even number, such as 640/3 to get 212
+TOUPCAM_OPTION_MULTITHREAD           = 0x16       # multithread obraz processing
+TOUPCAM_OPTION_BINNING               = 0x17       # binning, 0x01 (no binning), 0x02 (add, 2*2), 0x03 (add, 3*3), 0x04 (add, 4*4), 0x05 (add, 5*5), 0x06 (add, 6*6), 0x07 (add, 7*7), 0x08 (add, 8*8), 0x82 (average, 2*2), 0x83 (average, 3*3), 0x84 (average, 4*4), 0x85 (average, 5*5), 0x86 (average, 6*6), 0x87 (average, 7*7), 0x88 (average, 8*8). The final obraz size is rounded down to an even number, such as 640/3 to get 212
 TOUPCAM_OPTION_ROTATE                = 0x18       # rotate clockwise: 0, 90, 180, 270
 TOUPCAM_OPTION_CG                    = 0x19       # Conversion Gain mode: 0 = LCG, 1 = HCG, 2 = HDR
 TOUPCAM_OPTION_PIXEL_FORMAT          = 0x1a       # pixel format
@@ -613,11 +613,11 @@ class Toupcam:
     def Pause(self, bPause):
         self.__lib.Toupcam_Pause(self.__h, ctypes.c_int(1 if bPause else 0))
 
-# still image snap
+# still obraz snap
     def Snap(self, nResolutionIndex):
         self.__lib.Toupcam_Snap(self.__h, ctypes.c_uint(nResolutionIndex))
 
-# multiple still image snap
+# multiple still obraz snap
     def SnapN(self, nResolutionIndex, nNumber):
         self.__lib.Toupcam_SnapN(self.__h, ctypes.c_uint(nResolutionIndex), ctypes.c_uint(nNumber))
 

@@ -106,14 +106,14 @@ class ROI_maping(QLabel):
 
         if drow_deskription:
             for i, rectangle in enumerate(self.main_window.rectangles):
-                rX, rY = rectangle.gettextloc(self.ofsetx, self.ofsety)
-                cv2.putText(frame, str(rectangle.poierznazwe()), (rX, rY), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                rX, rY = rectangle.pobierz_lokacje_tekstu(self.ofsetx, self.ofsety)
+                cv2.putText(frame, str(rectangle.pobierz_nazwe()), (rX, rY), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
         if drow_single_rectagle:
-            rX,rY = self.main_window.rectangles[self.ktury].gettextloc(self.ofsetx, self.ofsety)
-            cv2.putText(frame, str(self.main_window.rectangles[self.ktury].poierznazwe()), (rX, rY), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            rX,rY = self.main_window.rectangles[self.ktury].pobierz_lokacje_tekstu(self.ofsetx, self.ofsety)
+            cv2.putText(frame, str(self.main_window.rectangles[self.ktury].pobierz_nazwe()), (rX, rY), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         
-        # conwersja z open Cv image na Qimage
+        # conwersja z open Cv obraz na Qimage
         self._imgfromframe = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0], QImage.Format_RGB888)
 
         self._pixmapdromframe = QPixmap.fromImage(self._imgfromframe)

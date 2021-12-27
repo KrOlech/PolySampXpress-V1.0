@@ -11,7 +11,7 @@ class Map(ROI_maping):
     def __init__(self, img, main_window, *args, **kwargs):
         super(Map, self).__init__(main_window, *args, **kwargs)
 
-        # shape of a new image
+        # shape of a new obraz
         x,y, z = img.shape
 
         # zapisanie rozmiaru obrazu w celu implementacji przyszłego skalaowania.
@@ -31,7 +31,7 @@ class Map(ROI_maping):
 
     def new_image(self, img):
 
-        #shape of a new image
+        #shape of a new obraz
         x,y, z = img.shape
 
         #zapisanie rozmiaru obrazu w celu implementacji przyszłego skalaowania.

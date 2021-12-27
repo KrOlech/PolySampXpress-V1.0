@@ -43,7 +43,7 @@ class MainWin(QWidget):
                 self.hcam.PullImageV2(self.buf, 24, None)
                 self.total += 1
             except toupcam.HRESULTException:
-                QMessageBox.warning(self, '', 'pull image failed', QMessageBox.Ok)
+                QMessageBox.warning(self, '', 'pull obraz failed', QMessageBox.Ok)
             else:
                 self.setWindowTitle('{}: {}'.format(self.camname, self.total))
                 img = QImage(self.buf, self.w, self.h, (self.w * 24 + 31) // 32 * 4, QImage.Format_RGB888)

@@ -49,7 +49,7 @@ class obszarzaznaczony():
         self.x0, self.x1, self.y0, self.y1 = self._zalezne_to_niezalezne(xp0, yp0, xp1, yp1, px00, py00, s)
 
         #metoda tworzoca widget umozliwiajacy interakcje z obiektem
-        self.create_Roi_label(image)
+        self._stwurz_podglond_ROI(image)
 
         #metoda tworzoca niezalerzne wspułredne prubki w mm
         self._set_niezalezne_prubki()
@@ -159,7 +159,7 @@ class obszarzaznaczony():
         '''
         self.nazwa = nazwa
 
-    def poierznazwe(self):
+    def pobierz_nazwe(self):
         '''
         metoda zwracajaca nazwe obiektu
         :return: string
@@ -189,25 +189,31 @@ class obszarzaznaczony():
 
         return xp0, yp0
 
-    #metoda zwracajaca lokacje nazwy wyswietlanej na podglondzie
-    def gettextloc(self, ox, oy):
-
+    def pobierz_lokacje_tekstu(self, ox, oy):
+        '''
+        metoda zwracajaca lokacje nazwy wyswietlanej na podglondzie
+        :param ox: ofset x
+        :param oy: ofset y
+        :return: x,y
+        '''
         xp0, yp0 = self._gettop_corner(ox, oy)
 
         return xp0 - 20, yp0 - 10
 
-    def create_Roi_label(self, image):
+    def _stwurz_podglond_ROI(self, obraz):
+        '''
+        Prywatna metoda tworzoca etykiete ROI'u wystwietlana na podglondzie
+        :param obraz: klatka z podglondu
+        '''
 
-        frame = image
+        obraz_qimage = QImage(obraz, obraz.shape[1], obraz.shape[0], obraz.strides[0], QImage.Format_RGB888)
 
-        img = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0], QImage.Format_RGB888)
+        self.obraz = QPixmap.fromImage(obraz_qimage)
 
-        self.image = QPixmap.fromImage(img)
-
-        self.podglond = Podglond_ROI(str(self.poierznazwe()), self.get_image(), self)
+        self.podglond = Podglond_ROI(str(self.pobierz_nazwe()), self.get_image(), self)
 
     def get_image(self):
-        return self.image
+        return self.obraz
     
     def get_podglond(self):
         return self.podglond
@@ -265,9 +271,9 @@ class obszarzaznaczony():
 
         img = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0],QImage.Format_RGB888)  
 
-        self.image = QPixmap.fromImage(img)
+        self.obraz = QPixmap.fromImage(img)
 
-        self.podglond.nowy_obraz(self.image)
+        self.podglond.nowy_obraz(self.obraz)
 ###############################self edit##########################################
 
     def pres_cords(self, e, ofsetx, ofsety):

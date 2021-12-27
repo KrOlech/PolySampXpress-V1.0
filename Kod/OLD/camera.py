@@ -81,8 +81,8 @@ class camera(QLabel):
                 self.hcam.PullImageV2(self.buf, 24, None)
                 self.total += 1
             except toupcam.HRESULTException:
-                print('pull image failed')
-                QMessageBox.warning(self, '', 'pull image failed', QMessageBox.Ok)
+                print('pull obraz failed')
+                QMessageBox.warning(self, '', 'pull obraz failed', QMessageBox.Ok)
             else:
                    
                 img = QImage(self.buf, self.w, self.h, (self.w * 24 + 31) // 32 * 4, QImage.Format_RGB888)
@@ -101,7 +101,7 @@ class camera(QLabel):
             bufsize = ((w * 24 + 31) // 32 * 4) * h
             still_img_buf = bytes(bufsize)
             self.hcam.PullStillImageV2(still_img_buf, 24, None)
-            print('saving image')
+            print('saving obraz')
         #    print(self.h_cam.get_ExpoTime())
             print(w, h)
             print()
@@ -137,7 +137,7 @@ class camera(QLabel):
                 QMessageBox.warning(self, '', 'failed to open camera', QMessageBox.Ok)
                 
             else:
-                #creating bufer for image hold
+                #creating bufer for obraz hold
                 self.w, self.h = self.hcam.get_Size()
                 bufsize = ((self.w * 24 + 31) // 32 * 4) * self.h
                 self.buf = bytes(bufsize)

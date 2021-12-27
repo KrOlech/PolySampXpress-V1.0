@@ -44,7 +44,7 @@ class Obraz(ROI_maping):
     ofsetymin = 0
     ofsetxmin = 0
     
-    # boolean alowing to snap first schown image as a map prive
+    # boolean alowing to snap first schown obraz as a map prive
     first = True
 
     # pixmap object reded from camera/file
@@ -122,8 +122,8 @@ class Obraz(ROI_maping):
                 self.total += 1
 
             except tcam.HRESULTException:
-                print('pull image failed')
-                QMessageBox.warning(self, '', 'pull image failed', QMessageBox.Ok)
+                print('pull obraz failed')
+                QMessageBox.warning(self, '', 'pull obraz failed', QMessageBox.Ok)
 
             else:
                 self.Qimage_read_from_camera = QImage(self.buf,
@@ -163,7 +163,7 @@ class Obraz(ROI_maping):
                 QMessageBox.warning(self, '', 'failed to open camera', QMessageBox.Ok)
 
             else:
-                #creating bufer for image hold
+                #creating bufer for obraz hold
                 self.w, self.h = self.h_cam.get_Size()
                 bufsize = ((self.w * 24 + 31) // 32 * 4) * self.h
                 self.buf = bytes(bufsize)

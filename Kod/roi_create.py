@@ -106,15 +106,15 @@ class ROI_maping(QLabel):
         #dodanie opisów w odpowiednich miescach
         if drow_deskription:
             for i, rectangle in enumerate(self.main_window.ROI):
-                rx, ry = rectangle.gettextloc(self.ofsetx, self.ofsety)
-                cv2.putText(frame, str(rectangle.poierznazwe()), (rx, ry), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                rx, ry = rectangle.pobierz_lokacje_tekstu(self.ofsetx, self.ofsety)
+                cv2.putText(frame, str(rectangle.pobierz_nazwe()), (rx, ry), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
         #dodanie opisuw pojedyczego Roia jesli ta obcja została wybrana
         if drow_single_rectagle:
-            rx, ry = self.main_window.ROI[self.ktury].gettextloc(self.ofsetx, self.ofsety)
-            cv2.putText(frame, str(self.main_window.ROI[self.ktury].poierznazwe()), (rx, ry), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            rx, ry = self.main_window.ROI[self.ktury].pobierz_lokacje_tekstu(self.ofsetx, self.ofsety)
+            cv2.putText(frame, str(self.main_window.ROI[self.ktury].pobierz_nazwe()), (rx, ry), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         
-        # conwersja z open Cv image na QImage
+        # conwersja z open Cv obraz na QImage
         self._imgfromframe = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0], QImage.Format_RGB888)
 
         self._pixmapdromframe = QPixmap.fromImage(self._imgfromframe)

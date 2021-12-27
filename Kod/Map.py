@@ -31,7 +31,7 @@ class Map(ROI_maping):
     def new_image(self, img):
         '''
         Metoda przyjmujaca nowy obraz open CV konwertujaca go na Qimage i zaposujaca
-        :param img: open CV image
+        :param img: open CV obraz
         '''
 
         #skalowanie obrazu
