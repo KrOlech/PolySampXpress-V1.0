@@ -323,7 +323,7 @@ class Obraz_z_kamery(ROI_maping):
 
         if self.edit_trybe:
             self.edited_roi.podglond.przyciski[0].toggle()
-            self.edited_roi.end_edit()
+            self.edited_roi.zakoncz_edit()
             self.edit_trybe = False
             
         self.whot_to_drow = 'viue_muve'

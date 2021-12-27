@@ -414,7 +414,7 @@ class Podglond_ROI(QWidget):
             self.obiekt_oznaczony.edit()
 
         else:
-            self.obiekt_oznaczony.end_edit()
+            self.obiekt_oznaczony.zakoncz_edit()
 
     def nowy_obraz(self, obraz):
         '''
@@ -460,9 +460,9 @@ class Podglond_ROI(QWidget):
         edycji/przemiesczenia ROI'u
         '''
         if self.przemiesc.isChecked():
-            self.obiekt_oznaczony.move_top_line(self.zwieksz.isChecked())
+            self.obiekt_oznaczony.przeksztalc_gorna_linie(self.zwieksz.isChecked())
         else:
-            self.obiekt_oznaczony.move_top()
+            self.obiekt_oznaczony.przesun_w_gore()
 
         self.odswierz_kordynaty()
 
@@ -474,9 +474,9 @@ class Podglond_ROI(QWidget):
         edycji/przemiesczenia ROI'u
         '''
         if self.przemiesc.isChecked():
-            self.obiekt_oznaczony.move_dwn_line(self.zwieksz.isChecked())
+            self.obiekt_oznaczony.przekstalc_dolna_linie(self.zwieksz.isChecked())
         else:
-            self.obiekt_oznaczony.move_dwn()
+            self.obiekt_oznaczony.przesun_w_dul()
 
         self.odswierz_kordynaty()
             
@@ -488,9 +488,9 @@ class Podglond_ROI(QWidget):
         edycji/przemiesczenia ROI'u
         '''
         if self.przemiesc.isChecked():
-            self.obiekt_oznaczony.move_lft_line(self.zwieksz.isChecked())
+            self.obiekt_oznaczony.przekstalc_lewa_linie(self.zwieksz.isChecked())
         else:
-            self.obiekt_oznaczony.move_lft()
+            self.obiekt_oznaczony.przesun_w_lewo()
 
         self.odswierz_kordynaty()
                 
@@ -502,9 +502,9 @@ class Podglond_ROI(QWidget):
         edycji/przemiesczenia ROI'u
         '''
         if self.przemiesc.isChecked():
-            self.obiekt_oznaczony.move_rig_line(self.zwieksz.isChecked())
+            self.obiekt_oznaczony.przekstalc_prawa_linie(self.zwieksz.isChecked())
         else:
-            self.obiekt_oznaczony.move_rig()
+            self.obiekt_oznaczony.przesun_w_prawo()
 
         self.odswierz_kordynaty()
 

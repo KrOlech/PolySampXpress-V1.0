@@ -6,7 +6,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtGui import QPixmap, QImage
-import Clasa as oC
+import obszaroznaczony_clasa as oC
 import matplotlib.pyplot as plt
 from threading import Thread
 from time import sleep
@@ -135,7 +135,7 @@ class ROI_maping(QLabel):
         # Sprawdzenie trybu pracy
         if self.edit_trybe:
             #tryb edycji ROI'u
-            self.edited_roi.pres_cords(e, self.ofsetx, self.ofsety)
+            self.edited_roi.wspulrzedne_nacisniecia(e, self.ofsetx, self.ofsety)
            
         elif self.move_to_point:
             self._move_to_point_function(e)
@@ -198,7 +198,7 @@ class ROI_maping(QLabel):
         #wybranie odpowieniego trybu
         if self.edit_trybe:
             #przekazanie pozycji w celu edycji
-            self.edited_roi.relise_cords(e, self.ofsetx, self.ofsety)
+            self.edited_roi.wspulrzedne_puszcenia(e, self.ofsetx, self.ofsety)
         
         elif self.move_to_point:
             #ignorowanie eventu w ramach przesuwania manipiulatora
@@ -292,7 +292,7 @@ class ROI_maping(QLabel):
         #zapisanie wskaznika do edytowanego ROI'u
         self.edited_roi = roi
     
-    def end_edit(self):
+    def zakoncz_edit(self):
         '''
         Metoda konconca edycje ROi
         :return:
@@ -324,7 +324,7 @@ class ROI_maping(QLabel):
         #ponisienie nr defaltowej nazwy
         self.main_window.last_name += 1
         
-        ROI = oC.obszarzaznaczony(self, self.x1, self.y1, self.x2, self.y2, self.klatka, self.ofsetx, self.ofsety,
+        ROI = oC.Obszarzaznaczony(self, self.x1, self.y1, self.x2, self.y2, self.klatka, self.ofsetx, self.ofsety,
                                   self.main_window.last_name, self.skal)
         #zapisanei ROI dao tablicy
         self.main_window.add_ROI(ROI)

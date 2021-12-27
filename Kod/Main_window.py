@@ -288,7 +288,7 @@ class MainWindow(QMainWindow):
         '''
         metoda wyolujaca metode _key_move z parametrami do przemiczenia w duł
         '''
-        self._key_move(self.manipulaor.move_dwn, self.obraz.dul, 0, 3)
+        self._key_move(self.manipulaor.przesun_w_dul, self.obraz.dul, 0, 3)
   
     def _key_move(self,fun_manipulator,fun_obraz, key_en, key_dis):
         '''
@@ -467,7 +467,7 @@ class MainWindow(QMainWindow):
             self.defalaut_lable = 0
 
         #dodanie podglondu ROI
-        self.vbox.addWidget(ROI.get_podglond())
+        self.vbox.addWidget(ROI.pobierz_podglond())
 
         #dodanie ROia do listy ROI
         self.ROI.append(ROI)
@@ -493,7 +493,7 @@ class MainWindow(QMainWindow):
         '''
 
         #usuniecie podglondu
-        self.vbox.removeWidget(ROI.get_podglond())
+        self.vbox.removeWidget(ROI.pobierz_podglond())
 
         #usuniecie ROI'a z listy
         if ROI in self.ROI:

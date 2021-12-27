@@ -197,7 +197,7 @@ class MainWindow(QMainWindow):
         self.key_move(self.manipulaor.move_right, self.obraz.prawo, 1, 2)
    
     def key_dwn(self):
-        self.key_move(self.manipulaor.move_dwn, self.obraz.dul, 0, 3)
+        self.key_move(self.manipulaor.przesun_w_dul, self.obraz.dul, 0, 3)
   
     def key_move(self,fun_manipulator,fun_obraz,key_en,key_dis):
     
@@ -318,7 +318,7 @@ class MainWindow(QMainWindow):
                 print(e)
             self.defalaut_lable = 0
         
-        test_obcjects = ROI.get_podglond()
+        test_obcjects = ROI.pobierz_podglond()
 
         self.vbox.addWidget(test_obcjects)
 
@@ -331,7 +331,7 @@ class MainWindow(QMainWindow):
 
     def remove_some_ROI(self, ROI):
         
-        self.vbox.removeWidget(ROI.get_podglond())
+        self.vbox.removeWidget(ROI.pobierz_podglond())
 
         if ROI in self.ROI:
             self.ROI.remove(ROI)

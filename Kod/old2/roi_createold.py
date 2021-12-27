@@ -127,7 +127,7 @@ class ROI_maping(QLabel):
     # działąnia podczas klikniecia myszki
     def mousePressEvent(self, e):
         if self.edit_trybe:
-            self.edited_roi.pres_cords(e, self.ofsetx,self.ofsety)
+            self.edited_roi.wspulrzedne_nacisniecia(e, self.ofsetx, self.ofsety)
            
         elif self.move_to_point:
             x1 = int(e.x()/self.skalx)
@@ -154,7 +154,7 @@ class ROI_maping(QLabel):
 
     def mouseReleaseEvent(self, e):
         if self.edit_trybe:
-            self.edited_roi.relise_cords(e, self.ofsetx, self.ofsety)
+            self.edited_roi.wspulrzedne_puszcenia(e, self.ofsetx, self.ofsety)
         
         elif self.move_to_point:
             pass
@@ -230,7 +230,7 @@ class ROI_maping(QLabel):
         
         self.main_window.last_name += 1
         
-        ROI = oC.obszarzaznaczony(self, self.x1, self.y1, self.x2, self.y2, cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB),
+        ROI = oC.Obszarzaznaczony(self, self.x1, self.y1, self.x2, self.y2, cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB),
                                   self.ofsetx, self.ofsety, self.scall, self.main_window.last_name)
         self.main_window.add_ROI(ROI)
         return ROI
