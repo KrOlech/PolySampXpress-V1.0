@@ -188,13 +188,13 @@ class MainWindow(QMainWindow):
         [self.kierunkowelayout.addWidget(value, 7, i) for i, value in zip(range(2,5,1), self.position_labele)]
   
     def key_up(self):
-        self.key_move(self.manipulaor.move_up, self.obraz.gura, 3, 0)
+        self.key_move(self.manipulaor.przesun_w_gore, self.obraz.gura, 3, 0)
 
     def key_left(self):
-        self.key_move(self.manipulaor.move_left, self.obraz.lewo, 2, 1)
+        self.key_move(self.manipulaor.przesun_w_lewo, self.obraz.lewo, 2, 1)
 
     def key_right(self):
-        self.key_move(self.manipulaor.move_right, self.obraz.prawo, 1, 2)
+        self.key_move(self.manipulaor.przesun_w_prawo, self.obraz.prawo, 1, 2)
    
     def key_dwn(self):
         self.key_move(self.manipulaor.przesun_w_dul, self.obraz.dul, 0, 3)
@@ -204,7 +204,7 @@ class MainWindow(QMainWindow):
         t = fun_manipulator(self.krok/10)
         
         self.upadet_position_read()
-        x,y,z = self.manipulaor.get_axes_positions()
+        x,y,z = self.manipulaor.pobierz_pozycje_osi()
         
         fun_obraz()
 
@@ -214,7 +214,8 @@ class MainWindow(QMainWindow):
             self.kierunkowe[key_dis].setEnabled(False)
 
     def upadet_position_read(self):
-        [label.setText(str(position)) for label, position in zip(self.position_labele,self.manipulaor.get_axes_positions())]
+        [label.setText(str(position)) for label, position in zip(self.position_labele,
+                                                                 self.manipulaor.pobierz_pozycje_osi())]
 
 ######################################################################################
 ##########################multipurpus buttons#########################################
@@ -345,7 +346,7 @@ class MainWindow(QMainWindow):
 ######################################################################################
 
     def slider_create(self):
-        x = self.manipulaor.get_axes_positions('x')[0]
+        x = self.manipulaor.pobierz_pozycje_osi('x')[0]
         self.slide = slider(self,x-5,x+5,x,Qt.Horizontal)
 
         self.sliderleyout.addWidget(self.slide)

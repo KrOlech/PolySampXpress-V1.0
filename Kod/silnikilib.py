@@ -268,9 +268,9 @@ if __name__ == '__main__':
 
     t = m.manipulator()
 
-    t.move_up()
+    t.przesun_w_gore()
 
-    t.print_curent_position()
+    t.wytpisz_aktualna_pozycje_manipulatora()
 
     del t
 

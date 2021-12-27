@@ -233,7 +233,7 @@ class Obraz(ROI_maping):
 
     # waiting for manipulator and snap ne klatka
     def waite_for_manipulator(self):
-        self.main_window.manipulaor.weaith_for_target()
+        self.main_window.manipulaor.poczekaj_na_osiogniecie_celu()
         self.snap_img()
 
     # ches map change direction

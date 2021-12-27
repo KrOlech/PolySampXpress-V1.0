@@ -332,7 +332,7 @@ class Obraz_z_kamery(ROI_maping):
         '''
         metoda obslugujaca owsety zadajaca im wartosci startowe w zaleznosci od pozycji startowej manipulatora
         '''
-        xm, ym, zm, = self.main_window.manipulaor.get_axes_positions()
+        xm, ym, zm, = self.main_window.manipulaor.pobierz_pozycje_osi()
         
         ym, zm = int((50-ym)*510), int((50-zm)*510)
  
@@ -388,7 +388,7 @@ class Obraz_z_kamery(ROI_maping):
 
         x, y, z = self.klatka_2.shape
         
-        xm, ym, zm, = self.main_window.manipulaor.get_axes_positions()
+        xm, ym, zm, = self.main_window.manipulaor.pobierz_pozycje_osi()
         
         # przeliczenie milimetrow na pixele i odwrucenie osi
         ym, zm = int((50-ym)*510/self.skala), int((50-zm)*510/self.skala)

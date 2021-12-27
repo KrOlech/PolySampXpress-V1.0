@@ -48,7 +48,7 @@ class Slider(QSlider):
     
     def zmiana(self, wartosc):
         self.value = self.konwersja(wartosc)
-        self.mainwindow.manipulaor.move_x(self.konwersja(wartosc))
+        self.mainwindow.manipulaor.przesun_x(self.konwersja(wartosc))
     
     def ustaw_min_max(self, min, max):
         self.max, self.min = int(max), int(min)

@@ -270,19 +270,19 @@ class MainWindow(QMainWindow):
         '''
         metoda wyolujaca metode _key_move z parametrami do przemiczenia w gure
         '''
-        self._key_move(self.manipulaor.move_up, self.obraz.gura, 3, 0)
+        self._key_move(self.manipulaor.przesun_w_gore, self.obraz.gura, 3, 0)
 
     def _key_left(self):
         '''
         metoda wyolujaca metode _key_move z parametrami do przemiczenia w lewo
         '''
-        self._key_move(self.manipulaor.move_left, self.obraz.lewo, 2, 1)
+        self._key_move(self.manipulaor.przesun_w_lewo, self.obraz.lewo, 2, 1)
 
     def _key_right(self):
         '''
         metoda wyolujaca metode _key_move z parametrami do przemiczenia w prawo
         '''
-        self._key_move(self.manipulaor.move_right, self.obraz.prawo, 1, 2)
+        self._key_move(self.manipulaor.przesun_w_prawo, self.obraz.prawo, 1, 2)
    
     def _key_dwn(self):
         '''
@@ -328,7 +328,8 @@ class MainWindow(QMainWindow):
         '''
         Prywatna metoda wpisujaca odczytane nowe pozycje manipulatora
         '''
-        [label.setText(str(position)) for label, position in zip(self.position_labele,self.manipulaor.get_axes_positions())]
+        [label.setText(str(position)) for label, position in zip(self.position_labele,
+                                                                 self.manipulaor.pobierz_pozycje_osi())]
 
 ######################################################################################
 ##########################multipurpus buttons#########################################
@@ -512,7 +513,7 @@ class MainWindow(QMainWindow):
         '''
         Metoda doajaca slider osi Z
         '''
-        x = self.manipulaor.get_axes_positions('x')[0]
+        x = self.manipulaor.pobierz_pozycje_osi('x')[0]
         self.slide = Slider(self, x - 5, x + 5, x, Qt.Horizontal)
 
         self._sliderleyout.addWidget(self.slide)
