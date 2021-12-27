@@ -317,12 +317,12 @@ class ROI_maping(QLabel):
         :return: obiekt klasy roi stworzony na podstawie zapisanych dancyh
         '''
         #ponisienie nr defaltowej nazwy
-        self.main_window.last_name += 1
+        self.main_window.ostatnia_nazwa += 1
         
         ROI = Obszarzaznaczony(self, self.x1, self.y1, self.x2, self.y2, self.klatka, self.ofsetx, self.ofsety,
-                                  self.main_window.last_name, self.skal)
+                               self.main_window.ostatnia_nazwa, self.skal)
         #zapisanei ROI dao tablicy
-        self.main_window.add_ROI(ROI)
+        self.main_window.dodaj_ROI(ROI)
         return ROI
     
     def rmv_rectagle(self, roi):
@@ -336,7 +336,7 @@ class ROI_maping(QLabel):
             self.main_window.ROI.remove(roi)
 
         #wywolanei metody sprotajacej po ROI w mainwidow
-        self.main_window.remove_some_ROI(roi)
+        self.main_window.usun_wybrany_ROI(roi)
 
         #podniesienie odpoiwedniej flagi
         self.co_narysowac = 'all_rectagls'

@@ -228,19 +228,19 @@ class ROI_maping(QLabel):
 
     def rectaglecreate(self):
         
-        self.main_window.last_name += 1
+        self.main_window.ostatnia_nazwa += 1
         
         ROI = oC.Obszarzaznaczony(self, self.x1, self.y1, self.x2, self.y2, cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB),
-                                  self.ofsetx, self.ofsety, self.scall, self.main_window.last_name)
-        self.main_window.add_ROI(ROI)
+                                  self.ofsetx, self.ofsety, self.scall, self.main_window.ostatnia_nazwa)
+        self.main_window.dodaj_ROI(ROI)
         return ROI
     
     def rmv_rectagle(self, ROI):
         
         if ROI in  self.main_window.rectangles:
             self.main_window.rectangles.remove(ROI)
-        
-        self.main_window.remove_some_ROI(ROI)
+
+        self.main_window.usun_wybrany_ROI(ROI)
             
         self.whot_to_drow = 'all_rectagls'
         

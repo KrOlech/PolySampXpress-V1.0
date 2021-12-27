@@ -19,7 +19,7 @@ class MainWindow(QMainWindow):
     map = None
     
     #ostatni numer nadany ROI'owi
-    last_name = 0
+    ostatnia_nazwa = 0
 
     def __init__(self, manipulator, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
@@ -43,29 +43,28 @@ class MainWindow(QMainWindow):
         #stworzenie podglondu prubki i umiescenie go w leyaucie
         self.obraz = Obraz_z_kamery(self)
 
-        # linking to manipulator for movment
+        # połoczenie z manipulatorem
         self.manipulaor = manipulator
         self.manipulaor.main_window(self)
 
-        #creating leyaut conteeiners for Gui formation
-        self._createleyouts()
+        #stworzenie leyouw
+        self._stwurz_leyouty()
 
         #stworzenie przycisków do przemiesczania podglondu
-        self._direction_buttons()
-        
-        #X axis slieder
-        self._slider_create()
+        self._Przyciski_kierunkowe()
+
+        self._stwurz_slider()
 
         #stworzenie i dodanie przycisków do wszelkich zastosowan
-        self._multipurpos_butons()
+        self._przyciski_wielozadaniowe()
 
         #stworzenie i dodanie obszaru skrolowania
         self._Scroll_arrea()
 
         #połoczenie leyoutów
-        self._layout_marging()
+        self._polacz_leyouty()
 
-        self._set_central_widget()
+        self._ustaw_centralny_widget()
 
         self._toolbars()
 
@@ -88,7 +87,7 @@ class MainWindow(QMainWindow):
         
         
         if reply == QMessageBox.Yes:
-            #self.manipulaor.close_connection()
+
             del self.manipulaor
             event.accept()
             
@@ -118,11 +117,10 @@ class MainWindow(QMainWindow):
         toolbar.addAction(action_7)
 
         #ywołanei okna akcji
-        seting_window = self._qactiontoolbar("Ustawienia osi", self._setings_for_axis)
+        seting_window = self._qactiontoolbar("Ustawienia osi", self._ustawienia_osi)
         toolbar.addAction(seting_window)
 
-    def _qactiontoolbar(self,nazwa, funkcja):
-
+    def _qactiontoolbar(self, nazwa, funkcja):
         '''
         metoda prywatna tworzoca Qaction z podanej fukcji o ponanej nazwie
         '''
@@ -134,19 +132,19 @@ class MainWindow(QMainWindow):
 
         return Button 
  
-    def _setings_for_axis(self):
+    def _ustawienia_osi(self):
         '''
         metoda prywatna tworzaca i otwierajaca okno ustawien
         '''
 
-        self.axissetings = axissetingwindow(self)
-        self.axissetings.show()
+        self.ustawienia_osi = axissetingwindow(self)
+        self.ustawienia_osi.show()
         
 ######################################################################################
 ##################################Leyout and widget###################################
 ######################################################################################
 
-    def _createleyouts(self):
+    def _stwurz_leyouty(self):
         '''
         Prywatna metoda tworzoca leyouty GUI
         '''
@@ -165,7 +163,7 @@ class MainWindow(QMainWindow):
         self._sliderlegendsleyout = QVBoxLayout()
         self._sliderleyout = QHBoxLayout()
 
-    def _layout_marging(self):
+    def _polacz_leyouty(self):
         '''
         Prywatna metoda łączoca leyouty GUI
         '''
@@ -178,7 +176,7 @@ class MainWindow(QMainWindow):
         self._secendarylayout.addLayout(self._przyciskilayout)
         self._mainlayout.addLayout(self._secendarylayout)
 
-    def _set_central_widget(self):
+    def _ustaw_centralny_widget(self):
         '''
         Prywatna metoda Wstawiajacca glówny leyout jako glówny widget
         '''
@@ -190,14 +188,14 @@ class MainWindow(QMainWindow):
 ############################Direction buttons#########################################
 ######################################################################################
 
-    def _name_direction_buttons(self):
+    def _nazwij_przyciski_kierunkowe(self):
         '''
         Prywatna metoda nadajaca nazwy przyciska kierunkowym
         '''
         nazwy = ['/\\', "<", ">", '\/']
         [swich.setText(name) for name, swich in zip(nazwy, self._kierunkowe)]
 
-    def _conect_function_to_butons(self):
+    def _podepnij_fukcje_do_przyciskow(self):
         '''
         prywatna metoda przypisujaca fukcje i skruty klawiszowe do przycisków kierunkowych
         '''
@@ -224,7 +222,7 @@ class MainWindow(QMainWindow):
         test = menu.addMenu("directions")
         [test.addAction(f) for f in self.actions]
 
-    def _add_buton_to_leyout(self):
+    def _dodaj_przyciski_do_leyout(self):
         '''
         Prywatna metoda doajaca przyciski kierunkowe do leyoutu
         '''
@@ -232,7 +230,7 @@ class MainWindow(QMainWindow):
         jt = [2, 3, 3, 4]
         [self._kierunkowelayout.addWidget(value, j, i) for j, i, value in zip(jt, it, self._kierunkowe)]
 
-    def _add_position_label_to_layout(self):
+    def _dodaj_legende_pozycji_do_layout(self):
         '''
         Prywatna metoda tworzoca opisy pozycji manipulatora
         '''
@@ -242,7 +240,7 @@ class MainWindow(QMainWindow):
         labelexyz = [QLabel("X"), QLabel("Y"), QLabel("Z")]
         [self._kierunkowelayout.addWidget(value, 7, i) for i, value in zip(range(2, 5, 1), self.position_labele)]
 
-    def _direction_buttons(self):#Przyciski _kierunkowe
+    def _Przyciski_kierunkowe(self):
         '''
         Prywatna metoda tworzoca przyciski kierunkowe przypisuajca in fukcje
         '''
@@ -255,16 +253,16 @@ class MainWindow(QMainWindow):
         [button.setMaximumWidth(50) for button in self._kierunkowe]
 
         #nadanie nazw przyciska
-        self._name_direction_buttons()
+        self._nazwij_przyciski_kierunkowe()
 
         # przypiecie fukcji do przycisków
-        self._conect_function_to_butons()
+        self._podepnij_fukcje_do_przyciskow()
 
         #dodanie do leyatów przyciskó kierunkowych
-        self._add_buton_to_leyout()
+        self._dodaj_przyciski_do_leyout()
 
         #ddoanie i stworzenie odczytu pozycji manipulatora
-        self._add_position_label_to_layout()
+        self._dodaj_legende_pozycji_do_layout()
   
     def _key_up(self):
         '''
@@ -335,7 +333,7 @@ class MainWindow(QMainWindow):
 ##########################multipurpus buttons#########################################
 ######################################################################################
 
-    def _conect_function_to_multipurpos_butons(self):
+    def _podlacz_functie_do_przyciskow_wielozadaniowych(self):
 
         '''
         Prywatna metoda przypinajaca fukcje do przycisków wielozadaniowych
@@ -343,24 +341,24 @@ class MainWindow(QMainWindow):
 
         self.przyciski[0].clicked.connect(self.obraz.nastempny)
 
-        self.przyciski[1].clicked.connect(self.remove_ROI)
+        self.przyciski[1].clicked.connect(self.usun_ROI)
 
         self.przyciski[2].clicked.connect(self.obraz.narysujcaloscs)
 
         self.przyciski[3].clicked.connect(self.obraz.poprzedni)
 
-        self.przyciski[4].clicked.connect(self.show_map)
+        self.przyciski[4].clicked.connect(self.pokaz_mape)
 
         self.przyciski[5].clicked.connect(self.obraz.schowajcalosc)
 
         self.przyciski[6].setCheckable(True)
-        self.przyciski[6].clicked.connect(self.togle_move_on_pres)
+        self.przyciski[6].clicked.connect(self.przelacz_tryb_move_on_pres)
 
         self.przyciski[7].clicked.connect(self.manipulaor.simple_stop)
 
         self.przyciski[8].clicked.connect(self.obraz.reset_map)
 
-    def _name_multiporpos_buttons(self):
+    def _nazwij_przyciski_wielozadaniowe(self):
         '''
         Przypisanie nazw do wielozadaniowych przycisków
         '''
@@ -369,7 +367,7 @@ class MainWindow(QMainWindow):
 
         [switch.setText(name) for name, switch in zip(nazwy, self.przyciski)]
 
-    def _add_direction_buton_to_leyout(self):
+    def _dodaj_przyciski_wielozadaniowe_do_leyout(self):
         '''
         Prywatna metoda doajaca przyciski wielozadaniowe do leyoutu
         '''
@@ -377,7 +375,7 @@ class MainWindow(QMainWindow):
         jt = [5, 5, 5, 6, 6, 6, 7, 7, 7]
         [self._przyciskilayout.addWidget(w, j, i) for w, i, j in zip(self.przyciski, it, jt)]
 
-    def _multipurpos_butons(self):
+    def _przyciski_wielozadaniowe(self):
         '''
         Prywatna metoda tworzoca i organizujaca przyciski wielozadaniowe
         '''
@@ -386,14 +384,14 @@ class MainWindow(QMainWindow):
 
         [button.setMaximumWidth(100) for button in self.przyciski]
 
-        self._name_multiporpos_buttons()
+        self._nazwij_przyciski_wielozadaniowe()
 
-        self._conect_function_to_multipurpos_butons()
+        self._podlacz_functie_do_przyciskow_wielozadaniowych()
 
         #dodanie przycisków
-        self._add_direction_buton_to_leyout()
+        self._dodaj_przyciski_wielozadaniowe_do_leyout()
 
-    def show_map(self):
+    def pokaz_mape(self):
         '''
         Wyswietlenie mapy prybki i ewentualne stworzenie jej jesli jesce nie została stworzona
         '''
@@ -405,7 +403,7 @@ class MainWindow(QMainWindow):
             self.map.new_image(self.obraz.ponbierz_map())
             self.map.show()
 
-    def togle_move_on_pres(self):
+    def przelacz_tryb_move_on_pres(self):
 
         '''
         Metoda obslugujaca centrowanie podglondu na wybranym fragmecei
@@ -453,7 +451,7 @@ class MainWindow(QMainWindow):
 ##########################ROI Menagment###############################################
 ######################################################################################
 
-    def add_ROI(self, ROI):
+    def dodaj_ROI(self, ROI):
         '''
         Metoda obslugujaca dodawnie nowego obsaru zaintesowania
         :param ROI: Obniekt ROI
@@ -473,7 +471,7 @@ class MainWindow(QMainWindow):
         #dodanie ROia do listy ROI
         self.ROI.append(ROI)
 
-    def remove_ROI(self):
+    def usun_ROI(self):
         '''
         Metoda usuwajaca wsystkie oznaczone obszary
         '''
@@ -486,7 +484,7 @@ class MainWindow(QMainWindow):
             while self.ROI != []:
                 [r.__del__() for r in self.ROI]
 
-    def remove_some_ROI(self, ROI):
+    def usun_wybrany_ROI(self, ROI):
         '''
         metoda usuwajaca podany ROI
         :param ROI: obiekt klasy ROI
@@ -509,7 +507,7 @@ class MainWindow(QMainWindow):
 ##########################Slider menagment############################################
 ######################################################################################
 
-    def _slider_create(self):
+    def _stwurz_slider(self):
         '''
         Metoda doajaca slider osi Z
         '''
@@ -518,7 +516,7 @@ class MainWindow(QMainWindow):
 
         self._sliderleyout.addWidget(self.slide)
 
-    def setkrok(self,value):
+    def ustaw_krok(self, value):
         '''
         Metoda ustrawiajaca krok dla manipulatora
         :param value: wartosc liczbowa

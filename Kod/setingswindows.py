@@ -40,7 +40,7 @@ class axissetingwindow(QWidget):
         metoda wyolywana po nacisnieciu przycisku przekazujaca odpowiedzi do odpowiednich obiektow
         '''
         self.glowneokno.slide.ustaw_min_max(int(self.options[0].text()), int(self.options[1].text()))
-        self.glowneokno.setkrok(int(self.options[2].text()))
+        self.glowneokno.ustaw_krok(int(self.options[2].text()))
         self.hide()
     
     def _stwurz_opcje(self, tekst, pozycja, wartosc):
