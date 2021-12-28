@@ -5,7 +5,8 @@ from Viue_label import Obraz_z_kamery
 from Map import Map_window
 from slider import Slider
 from setingswindows import axissetingwindow
-
+from time import sleep
+from engineclass import manipulator
 
 class MainWindow(QMainWindow):
 
@@ -21,7 +22,7 @@ class MainWindow(QMainWindow):
     #ostatni numer nadany ROI'owi
     ostatnia_nazwa = 0
 
-    def __init__(self, manipulator, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         '''
         Konstruktor glónego okna programu. Tworzy głowne okno nawiozuje poloczenie z kamera i manipulatorem.
@@ -44,7 +45,7 @@ class MainWindow(QMainWindow):
         self.obraz = Obraz_z_kamery(self)
 
         # połoczenie z manipulatorem
-        self.manipulaor = manipulator
+        self.manipulaor = manipulator()
         self.manipulaor.main_window(self)
 
         #stworzenie leyouw
@@ -96,6 +97,9 @@ class MainWindow(QMainWindow):
             
         else:
             event.ignore()
+    
+    def pobierz_manipulator(self):
+        return self.manipulaor
 
 ######################################################################################
 ##################################Toolbars############################################
@@ -490,9 +494,12 @@ class MainWindow(QMainWindow):
         :param ROI: obiekt klasy ROI
         :return:
         '''
-
-        #usuniecie podglondu
-        self.vbox.removeWidget(ROI.pobierz_podglond())
+        
+        try:
+            #usuniecie podglondu
+            self.vbox.removeWidget(ROI.pobierz_podglond())
+        except AttributeError:
+            pass
 
         #usuniecie ROI'a z listy
         if ROI in self.ROI:
