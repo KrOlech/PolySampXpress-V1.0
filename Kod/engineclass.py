@@ -13,6 +13,7 @@ class manipulator:
     def __init__(self):
 
         self.c848 = self.zaladuj_sterowniki()
+        print(self.c848)
 
         self.controller_id = self.podloczenie_controller()
 
@@ -23,6 +24,8 @@ class manipulator:
             self.ustaw_abs_positions_z_file()
         except Exception:
             self.center()
+        
+        self.wytpisz_aktualna_pozycje_manipulatora()
 
         #odczytanie pozycji manipulatora i zapisanie go
         self.x, self.y, self.z = self.pobierz_pozycje_osi('xyz')
@@ -168,7 +171,7 @@ class manipulator:
         :param filename: nazwa pliku biblioteki
         :return: status
         '''
-        return ctypes.CDLL(r'C:\Users\external\PycharmProjects\Inzynierka\silniki_sterowanie\C848_DLL.dll')
+        return ctypes.CDLL(r"C:\Users\external\Desktop\silniki_sterowanie\C848_DLL.dll")
 
     def podloczenie_controller(self):
         '''
@@ -304,6 +307,7 @@ class manipulator:
         if self.c848.C848_qPOS(c_id, sz_axes, c_double_array):
             return c_double_array[:len(axes)]
         else:
+            print('something went terribly wrong while reading position')
             return False
 
     def wytpisz_aktualna_pozycje_manipulatora(self):
@@ -331,7 +335,9 @@ class manipulator:
             check = self.c848.C848_qONT(c_id, axis, bool_array)
             
             if check != 1:
-                QMessageBox.warning(self.main, '', 'something went terribly wrong', QMessageBox.Ok)
+                #r = QMessageBox.warning(self.main, '',
+                #'something went terribly wrong during reaching destination', QMessageBox.Ok)
+                #if r == QMessageBox.Ok:
                 return {'':False}
             
             status[c] = bool_array[0]
