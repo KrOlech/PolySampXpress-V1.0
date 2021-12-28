@@ -84,13 +84,13 @@ class Prsty_Podglond(QLabel):
         qp = QPainter(self)
 
         # rysowanie obrazu
-        qp.drawPixmap(self._prostkat, self._obraz)
+        qp.drawPixmap(self.rect(), self._obraz)
 
         # stworzenie i wgranie stylu prostokata
         qp.setBrush(QBrush(QColor(200, 10, 10, 200)))
 
         # rysowanie prostokątu
-        qp.drawRect(self.rectangle)
+        qp.drawRect(self._prostkat)
 
     def nowy_podglond(self, obraz, wspulrzedne):
 
@@ -154,12 +154,19 @@ class Podglond_ROI(QWidget):
         '''
         dekonstruktor klasy usuwa on oznaczony obiekt oznaczony
         '''
-        self.obiekt_oznaczony.__del__()
-        self.obiekt_oznaczony = 0
+        try:
+            self.obiekt_oznaczony.usun()
+            self.obiekt_oznaczony = 0
+        except AttributeError:
+            pass
 
     def _usun(self):
         ''' Metoda umozliwiajaca usuniecie obiektu uzywajac przycisku'''
-        del self
+        try:
+            self.obiekt_oznaczony.usun()
+            self.obiekt_oznaczony = 0
+        except AttributeError:
+            pass
 
     def _stworzenie_layoutow(self):
         '''
