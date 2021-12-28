@@ -9,6 +9,7 @@ from roi_create import ROI_maping
 from Map import Map_window
 
 
+
 class Obraz_z_kamery(ROI_maping):
     '''
     Klaza Obraz_z_kamery dziedziczy z ROI_maping,
@@ -37,6 +38,12 @@ class Obraz_z_kamery(ROI_maping):
     map = np.zeros(100)
     map.shape = (10, 10, 1)
     
+    # skala mapy
+    skala_mapy = 32
+    
+    # skala mapy
+    skala = 1
+    
     # construvtor
     def __init__(self, main_window, *args, **kwargs):
         super(Obraz_z_kamery, self).__init__(main_window, *args, **kwargs)
@@ -44,6 +51,10 @@ class Obraz_z_kamery(ROI_maping):
         self._inicializacja_kamery()
         
         self.h_cam.put_AutoExpoEnable(False)
+        
+        self.odczytaj_klatke()
+
+
 
 ###############################camera read##########################################
 
@@ -62,9 +73,10 @@ class Obraz_z_kamery(ROI_maping):
         nastempnie wywolujaca metode roszerzajaca mape
         :return:
         '''
-
+        
         # sprawdzamy komunikacje z kamera
         if self.h_cam is not None:
+
 
             #definiujemy rozmiar buforu na obraz
             w, h = self.h_cam.get_Size()
@@ -75,14 +87,16 @@ class Obraz_z_kamery(ROI_maping):
             self.h_cam.PullStillImageV2(still_img_buf, 24, None)
 
             #konwertujemy obraz z buforu do obrazu opencv
-            img = self.obraz_bitowy_do_obrazu_opencv(still_img_buf)
+            obraz = self.obraz_bitowy_do_obrazu_opencv(still_img_buf)
 
             #zapisujemy odczytany obraz
-            self.klatka_2 = cv2.resize(img, self.rozmiar)
-            self.image_opencv  = img
+            self.klatka_2 = obraz.copy()
 
+            self.image_opencv = obraz.copy()
+            
             #rozszerezamy mape
             self.zapisz_aktualny_podglond()
+            self.zaladuj_obraz(True, False)
 
     @staticmethod
     def metoda_wywolwana_przez_kamere(nevent, ctx):
@@ -122,8 +136,8 @@ class Obraz_z_kamery(ROI_maping):
                 self.image_opencv = self.obraz_bitowy_do_obrazu_opencv(self.buf)
 
                 #załadowanie obrazu
-                self.update()
-                #self.loadImage(True, False)
+                self.zaladuj_obraz(True, False)
+         
 
     def obraz_bitowy_do_obrazu_opencv(self, still_img_buf, dtype=np.uint8):
         '''
@@ -152,7 +166,7 @@ class Obraz_z_kamery(ROI_maping):
             self.nazwa_kamery = a[0].displayname
 
             # stworzenie i podloczenie kustomowych pyqt5 signa
-            self.nowy_obraz_z_kamery.connect(self.eventimagesignal)
+            self.nowy_obraz_z_kamery.connect(self.nowy_obraz_z_kamery_sygnal)
             self.nowy_wymuszony_obraz_z_kamery.connect(self.nowy_wymuszony_obraz_z_kamery_sygnal)
 
             # otwarcie komunikacji z kamera
@@ -185,12 +199,12 @@ class Obraz_z_kamery(ROI_maping):
         Metoda przeciozajace paintEvent z ROI_maping dodajaca obsluge dodatkowych tryby rysowania
         jest wywolywana automatycznie za kazdym razem kiedy obiekt jest odswierzany
         '''
-
+       
         # inicializacja qpintera
         qp = QPainter(self)
 
         # rysowanie obrazu
-        qp.drawPixmap(self.rect(), self._pixmapdromframe)
+        qp.drawPixmap(self.rect(), self._obraz_z_klatki)
 
         # wgranie ustawien koloru i wypelnienia ROI
         qp.setBrush(QBrush(QColor(200, 20, 20, 255), Qt.CrossPattern))
@@ -199,19 +213,19 @@ class Obraz_z_kamery(ROI_maping):
         tym = True
         num = False
 
-        if self.whot_to_drow == 'all_rectagls':  # pokazuje wsystkie prostkoaty
+        if self.co_narysowac == 'all_rectagls':  # pokazuje wsystkie prostkoaty
             self.wsystkie_prostokaty(qp)
 
-        elif self.whot_to_drow == 'no_rectagle':  # howa wszystkie prostokaty
+        elif self.co_narysowac == 'no_rectagle':  # chowa wszystkie prostokaty
             tym = False
 
-        elif self.whot_to_drow =='One_rectagle':  # rysuje wybrany prostokat
+        elif self.co_narysowac =='One_rectagle':  # rysuje wybrany prostokat
 
             self._wybrany_prostokat(qp)
             tym = False
             num = True
 
-        elif self.whot_to_drow == 'viue_muve': # rysuje wsystkie prostkoaty i obsluguje odswiezenie podglondu.
+        elif self.co_narysowac == 'viue_muve': # rysuje wsystkie prostkoaty i obsluguje odswiezenie podglondu.
 
             self.wsystkie_prostokaty(qp)
 
@@ -239,7 +253,7 @@ class Obraz_z_kamery(ROI_maping):
         podniesienie flagi odpowiedzialnej za narysowanie wsytkich prostokatów
         '''
 
-        self.whot_to_drow = 'all_rectagls'
+        self.co_narysowac = 'all_rectagls'
     
     def schowajcalosc(self):
         '''
@@ -247,7 +261,7 @@ class Obraz_z_kamery(ROI_maping):
         :return:
         '''
 
-        self.whot_to_drow = 'no_rectagle'
+        self.co_narysowac = 'no_rectagle'
             
     def nastempny(self):
         '''
@@ -257,7 +271,7 @@ class Obraz_z_kamery(ROI_maping):
         
         if len(self.main_window.ROI) > 0:
         
-            self.whot_to_drow = 'One_rectagle'
+            self.co_narysowac = 'One_rectagle'
             
             if self.ktury < len(self.main_window.ROI)-1:
                 self.ktury += 1
@@ -273,7 +287,7 @@ class Obraz_z_kamery(ROI_maping):
         odpowiedzialnego za narysowanie poprzedniego prostokata
         '''
         if len(self.main_window.ROI) > 0:
-            self.whot_to_drow = 'One_rectagle'
+            self.co_narysowac = 'One_rectagle'
             self.iloscklikniec = True
             
             if self.ktury == 0:
@@ -325,7 +339,7 @@ class Obraz_z_kamery(ROI_maping):
             self.edited_roi.zakoncz_edit()
             self.edit_trybe = False
             
-        self.whot_to_drow = 'viue_muve'
+        self.co_narysowac = 'viue_muve'
         self.update()
 
     def odswierz_ofsets(self):
@@ -352,7 +366,7 @@ class Obraz_z_kamery(ROI_maping):
            self._stwurz_pojemnik_na_mape()
 
         # wykonanie fukcji wklejajacej aktualny podglond do mapy
-        self.extend_map_exeqiute()
+        self.wklejenie_klatki_do_mapy()
 
         if self.main_window.map is None:
             self.main_window.map = Map_window(self.map, self.main_window)
@@ -366,8 +380,8 @@ class Obraz_z_kamery(ROI_maping):
 
         x, y, z = self.klatka_2.shape
 
-        rozmiar_mapy = int((x + self.manipulator_max * self.delta_pixeli) / self.skala)  # x rozmiar
-        rozmiar_mapy *= int((y + self.manipulator_max * self.delta_pixeli) / self.skala)  # y rozmiar
+        rozmiar_mapy = int((x + self.manipulator_max * self.delta_pixeli) / self.skala_mapy)  # x rozmiar
+        rozmiar_mapy *= int((y + self.manipulator_max * self.delta_pixeli) / self.skala_mapy)  # y rozmiar
         rozmiar_mapy *= 3  # RGB kolory
 
         # stworzenie tablicy przechowujacej obraz mapy
@@ -375,8 +389,8 @@ class Obraz_z_kamery(ROI_maping):
         # print(self.map.shape,"przed reshapem")
 
         # okreslenei ksztaltu tej tabliczy
-        self.map.shape = (int((y + self.manipulator_max * self.delta_pixeli) / self.skala),
-                          int((x + self.manipulator_max * self.delta_pixeli) / self.skala), 3)
+        self.map.shape = (int((y + self.manipulator_max * self.delta_pixeli) / self.skala_mapy),
+                          int((x + self.manipulator_max * self.delta_pixeli) / self.skala_mapy), 3)
 
         # zapisanie ze mapa juz jest zainiciowana
         self.first = False
@@ -391,17 +405,17 @@ class Obraz_z_kamery(ROI_maping):
         xm, ym, zm, = self.main_window.manipulaor.pobierz_pozycje_osi()
         
         # przeliczenie milimetrow na pixele i odwrucenie osi
-        ym, zm = int((50-ym)*510/self.skala), int((50-zm)*510/self.skala)
+        ym, zm = int((50-ym)*510/self.skala_mapy), int((50-zm)*510/self.skala_mapy)
         
         #przeskalowanei podglondu
-        klatka = cv2.resize(self.klatka_2, (int(y / self.skala), int(x / self.skala)))
+        klatka = cv2.resize(self.klatka_2, (int(y / self.skala_mapy), int(x / self.skala_mapy)))
 
         #wklejenie podglondu we własciwe miejsce na mapie
         try:
-            self.map[zm:zm+int(x/self.skala), ym:ym+int(y/self.skala)] = klatka
+            self.map[zm:zm+int(x/self.skala_mapy), ym:ym+int(y/self.skala_mapy)] = klatka
         except Exception as e:
             print(e)
-            print(self.map[zm:zm+int(x/self.skala), ym:ym+int(y/self.skala)].shape)
+            print(self.map[zm:zm+int(x/self.skala_mapy), ym:ym+int(y/self.skala_mapy)].shape)
 
     def reset_map(self):
         '''
@@ -423,5 +437,5 @@ class Obraz_z_kamery(ROI_maping):
         return self.map
           
     def _mapupdate(self):
-        self.whot_to_drow = 'viue_muve'
+        self.co_narysowac = 'viue_muve'
         self.update()
