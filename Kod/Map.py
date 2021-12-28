@@ -13,19 +13,16 @@ class Map(ROI_maping):
     def __init__(self, obraz, main_window, *args, **kwargs):
         super(Map, self).__init__(main_window, *args, **kwargs)
 
-        #skala obrazu
-        self.skal = 1/self.skala
-
         #skalowanei nowego obrazu
         self.image_opencv = obraz
 
         #konwersja obrazu z openCV na Qimage
-        self.obraz = QImage(obraz, obraz.shape[1], obraz.shape[0], obraz.strides[0], QImage.Format_RGB888)
+        self._obraz_z_klatki = QImage(obraz, obraz.shape[1], obraz.shape[0], obraz.strides[0], QImage.Format_RGB888)
 
-        self.obraz = QPixmap.fromImage(self.obraz)
+        self._obraz_z_klatki = QPixmap.fromImage(self._obraz_z_klatki)
 
         #seting pixmap
-        self.setPixmap(self.obraz)
+        self.setPixmap(self._obraz_z_klatki)
         
 
     def new_image(self, img):
@@ -35,10 +32,10 @@ class Map(ROI_maping):
         '''
 
         #konwersja obrazu na Qimage
-        self.obraz = QImage(img, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGB888)
+        self._obraz_z_klatki = QImage(img, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGB888)
 
         #zapisanei obrazu
-        self.obraz = QPixmap.fromImage(self.obraz)
+        self._obraz_z_klatki = QPixmap.fromImage(self._obraz_z_klatki)
 
 
 class Map_window(QWidget):
@@ -46,7 +43,7 @@ class Map_window(QWidget):
     obiekt dziedzicacy z Qwidget sluzacy do wyswietlenia mapy
     '''
 
-    def __init__(self, map, main_window, ox, oy, *args, **kwargs):
+    def __init__(self, map, main_window, *args, **kwargs):
         super(Map_window, self).__init__(*args, **kwargs)
 
         self.setWindowTitle("Mapa Próbki")
