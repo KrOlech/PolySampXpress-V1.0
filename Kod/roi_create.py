@@ -65,6 +65,7 @@ class ROI_maping(QLabel):
     
     # skala mapy
     skala = 32
+    
         
     def __init__(self, main_window, *args, **kwargs):
         super(ROI_maping, self).__init__(*args, **kwargs)
@@ -113,16 +114,17 @@ class ROI_maping(QLabel):
             cv2.putText(klatka, str(self.main_window.ROI[self.ktury].pobierz_nazwe()), (rx, ry), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         
         # konwersja z open Cv obraz na QImage
-        self._obraz_z_klatki = QImage(klatka, klatka.shape[1], klatka.shape[0], klatka.strides[0], QImage.Format_RGB888)
+        obraz_z_klatki = QImage(klatka, klatka.shape[1], klatka.shape[0], klatka.strides[0], QImage.Format_RGB888)
 
         #konwersja obrazu z Qmage na pixmap
-        self._pixmapdromframe = QPixmap.fromImage(self._obraz_z_klatki)
+        self._obraz_z_klatki = QPixmap.fromImage(obraz_z_klatki)
         
         # wgranie obrazu
-        self.setPixmap(self._pixmapdromframe)
+        self.setPixmap(self._obraz_z_klatki)
 
         #zablokwnie rozmiaru
-        self.setMaximumSize(self._pixmapdromframe.width(), self._pixmapdromframe.height())
+        self.setMaximumSize(self._obraz_z_klatki.width(), self._obraz_z_klatki.height())
+        
 
 ###############################mous tracking##########################################
 
@@ -308,7 +310,7 @@ class ROI_maping(QLabel):
         :param prostokat: obiekt klasy ROI
         :return: obiekt klasy Qrectagle
         '''
-        x = prostokat.pobierz_prostokat(self.ofsetx, self.ofsety, self.skal)
+        x = prostokat.pobierz_prostokat(self.ofsetx, self.ofsety, 1/self.skala)
         return x
         
     def stwurz_prostokat(self):
@@ -320,7 +322,7 @@ class ROI_maping(QLabel):
         self.main_window.ostatnia_nazwa += 1
         
         ROI = Obszarzaznaczony(self, self.x1, self.y1, self.x2, self.y2, self.klatka, self.ofsetx, self.ofsety,
-                               self.main_window.ostatnia_nazwa, self.skal)
+                               self.main_window.ostatnia_nazwa, 1/self.skala)
         #zapisanei ROI dao tablicy
         self.main_window.dodaj_ROI(ROI)
         return ROI
@@ -354,7 +356,7 @@ class ROI_maping(QLabel):
         qp = QPainter(self)
 
         # wyrysowaneie obrazu z kamery
-        qp.drawPixmap(self.rect(), self._pixmapdromframe)
+        qp.drawPixmap(self.rect(), self._obraz_z_klatki)
 
         # wgranie stylu rysowania ROI'u
         qp.setBrush(QBrush(QColor(200, 10, 10, 200)))
