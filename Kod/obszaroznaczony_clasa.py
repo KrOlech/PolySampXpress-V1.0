@@ -63,9 +63,24 @@ class Obszarzaznaczony():
         '''
         dekonstruktor klasy obsluguje usuniecie podglondu i wyloczenie edycji
         '''
-        self.zakoncz_edit()
+       
         self.obraz_obiekt.rmv_rectagle(self)
-        del self.podglond
+        try:
+             self.zakoncz_edit()
+             del self.podglond
+        except AttributeError:
+            pass
+
+    def usun(self):
+        
+        self.obraz_obiekt.rmv_rectagle(self)
+        
+        try:
+             self.zakoncz_edit()
+             del self.podglond
+        except AttributeError:
+            pass
+       
 
     def pobierz_wzgledny_rectagle(self):
         '''
