@@ -6,7 +6,6 @@ from podglond_z_kamery import Obraz_z_kamery
 from Map import Map_window
 from slider import Slider
 from setingswindows import axissetingwindow
-from time import sleep
 from engineclass import manipulator
 
 class MainWindow(QMainWindow):
