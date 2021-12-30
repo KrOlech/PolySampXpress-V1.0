@@ -1,6 +1,7 @@
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QMainWindow, QMessageBox, QToolBar, QAction, \
+    QHBoxLayout, QVBoxLayout, QGridLayout, QWidget, QLabel, QPushButton, QScrollArea
 from podglond_z_kamery import Obraz_z_kamery
 from Map import Map_window
 from slider import Slider
