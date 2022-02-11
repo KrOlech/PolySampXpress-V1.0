@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QWidget
-from PyQt5.QtCore import QRect
+
 
 class Dock_in(QWidget):
 
@@ -13,8 +13,8 @@ class Dock_in(QWidget):
         self.setMinimumWidth(width)
         self.setMinimumHeight(height)
 
-
-
+    def dock(self):
+        pass
 
 
 if __name__ == '__main__':
