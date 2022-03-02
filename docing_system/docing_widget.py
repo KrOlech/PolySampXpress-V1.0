@@ -1,17 +1,37 @@
 from PyQt5.QtWidgets import QWidget
-
+from Title_bar.Bar import MyBar
+from PyQt5.QtCore import Qt
 
 class Dock_in(QWidget):
 
-    def __init__(self, width, height, *args, **kwargs):
+    def __init__(self, name, *args, **kwargs):
         super(Dock_in, self).__init__(*args, **kwargs)
 
+        self.setWindowTitle(name)
 
-        self.setMaximumWidth(width)
-        self.setMaximumHeight(height)
+        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
 
-        self.setMinimumWidth(width)
-        self.setMinimumHeight(height)
+        self.titleBar = MyBar(self)
+        self.titleBar.maxClicked()
+
+        self.titleBar.normalClicked()
+        self.setContentsMargins(0, self.titleBar.height(), 0, 0)
+
+        self.resize(640, self.titleBar.height() + 480)
+
+        palette = self.palette()
+        palette.setColor(palette.Window, Qt.black)
+        palette.setColor(palette.WindowText, Qt.white)
+        palette.setColor(palette.Background, Qt.black)
+        self.setPalette(palette)
+
+
+    def changeEvent(self, event):
+        if event.type() == event.WindowStateChange:
+            self.titleBar.windowStateChanged(self.windowState())
+
+    def resizeEvent(self, event):
+        self.titleBar.resize(self.width(), self.titleBar.height())
 
     def dock(self):
         pass
@@ -32,7 +52,10 @@ if __name__ == '__main__':
         # wyswietlenie glownego okna
         okno.show()
 
-        okno.setCentralWidget(Dock_in(100,100))
+        #okno.setCentralWidget()
+
+        w = Dock_in("Widget_testowy")
+        w.show()
 
         # wykonanie aplikacji
         app.exec_()
